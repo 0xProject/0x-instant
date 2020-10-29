@@ -1,14 +1,16 @@
 {
-    "extends": "../../tsconfig",
     "compilerOptions": {
         "outDir": "lib",
-        "rootDir": "src",
+        "lib": ["es2017", "dom", "esnext.asynciterable", "es2018.promise"],
+        "typeRoots": ["node_modules/@0x/typescript-typings/types", "node_modules/@types"],
         "jsx": "react",
+        "target": "es6",
+        "skipLibCheck": true,
         "noImplicitAny": true,
         "allowSyntheticDefaultImports": true,
         "declaration": false,
-        "declarationMap": false,
-        "composite": false
+        "moduleResolution": "node",
+        "declarationMap": false
     },
     "include": ["./src/**/*"]
 }
