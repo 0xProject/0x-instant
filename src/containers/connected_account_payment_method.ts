@@ -1,7 +1,7 @@
+import { ChainId } from '@0x/contract-addresses';
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
-
 import { PaymentMethod, PaymentMethodProps } from '../components/payment_method';
 import {
     COINBASE_WALLET_ANDROID_APP_STORE_URL,
@@ -12,7 +12,6 @@ import { Action, actions } from '../redux/actions';
 import { asyncData } from '../redux/async_data';
 import { State } from '../redux/reducer';
 import {
-    Network,
     Omit,
     OperatingSystem,
     ProviderState,
@@ -27,7 +26,7 @@ import { providerStateFactory } from '../util/provider_state_factory';
 export interface ConnectedAccountPaymentMethodProps {}
 
 interface ConnectedState {
-    network: Network;
+    network: ChainId;
     providerState: ProviderState;
     walletDisplayName?: string;
 }

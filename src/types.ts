@@ -1,4 +1,5 @@
 import { BigNumber, SwapQuoteConsumer, SwapQuoter } from '@0x/asset-swapper';
+import { ChainId } from '@0x/contract-addresses';
 import { AssetProxyId, ObjectMap, SignedOrder } from '@0x/types';
 import { Web3Wrapper } from '@0x/web3-wrapper';
 import { SupportedProvider, ZeroExProvider } from 'ethereum-types';
@@ -40,7 +41,10 @@ interface OrderStatePreTx {
     processState: OrderProcessState.None | OrderProcessState.Validating;
 }
 interface OrderStatePostTx {
-    processState: OrderProcessState.Processing | OrderProcessState.Success | OrderProcessState.Failure;
+    processState:
+        | OrderProcessState.Processing
+        | OrderProcessState.Success
+        | OrderProcessState.Failure;
     txHash: string;
     progress: SimulatedProgress;
 }
@@ -53,7 +57,9 @@ export enum DisplayStatus {
 
 export type FunctionType = (...args: any[]) => any;
 export type ActionCreatorsMapObject = ObjectMap<FunctionType>;
-export type ActionsUnion<A extends ActionCreatorsMapObject> = ReturnType<A[keyof A]>;
+export type ActionsUnion<A extends ActionCreatorsMapObject> = ReturnType<
+    A[keyof A]
+>;
 
 export interface ERC20AssetMetaData {
     assetProxyId: AssetProxyId.ERC20;
@@ -207,10 +213,11 @@ export interface ZeroExInstantOptionalBaseConfig {
     defaultAssetBuyAmount: number;
     defaultSelectedAssetData: string;
     additionalAssetMetaDataMap: ObjectMap<AssetMetaData>;
-    networkId: Network;
+    networkId: ChainId;
     affiliateInfo: AffiliateInfo;
     shouldDisableAnalyticsTracking: boolean;
     onSuccess?: (txHash: string) => void;
 }
 
-export type ZeroExInstantBaseConfig = ZeroExInstantRequiredBaseConfig & Partial<ZeroExInstantOptionalBaseConfig>;
+export type ZeroExInstantBaseConfig = ZeroExInstantRequiredBaseConfig &
+    Partial<ZeroExInstantOptionalBaseConfig>;

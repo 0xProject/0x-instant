@@ -2,7 +2,11 @@ import * as _ from 'lodash';
 import { transparentize } from 'polished';
 import * as React from 'react';
 
-import { ColorOption, completelyTransparent, ThemeConsumer } from '../../style/theme';
+import {
+    ColorOption,
+    completelyTransparent,
+    ThemeConsumer,
+} from '../../style/theme';
 import { zIndex } from '../../style/z_index';
 
 import { Container } from './container';
@@ -27,9 +31,12 @@ export interface DropdownState {
     isOpen: boolean;
 }
 
-export class Dropdown extends React.PureComponent<DropdownProps, DropdownState> {
+export class Dropdown extends React.PureComponent<
+    DropdownProps,
+    DropdownState
+> {
     public static defaultProps = {
-        items: [],
+        items: [] as DropdownItemConfig[],
     };
     public state: DropdownState = {
         isOpen: false,
@@ -60,18 +67,34 @@ export class Dropdown extends React.PureComponent<DropdownProps, DropdownState> 
                         padding="0.8em"
                     >
                         <Flex justify="space-between">
-                            <Text fontSize="16px" fontColor={ColorOption.darkGrey}>
+                            <Text
+                                fontSize="16px"
+                                fontColor={ColorOption.darkGrey}
+                            >
                                 {value}
                             </Text>
                             <Container>
                                 {label && (
-                                    <Text fontSize="16px" fontColor={ColorOption.lightGrey}>
+                                    <Text
+                                        fontSize="16px"
+                                        fontColor={ColorOption.lightGrey}
+                                    >
                                         {label}
                                     </Text>
                                 )}
                                 {hasItems && (
-                                    <Container marginLeft="5px" display="inline-block" position="relative" bottom="2px">
-                                        <Icon padding="3px" icon="chevron" width={12} stroke={ColorOption.grey} />
+                                    <Container
+                                        marginLeft="5px"
+                                        display="inline-block"
+                                        position="relative"
+                                        bottom="2px"
+                                    >
+                                        <Icon
+                                            padding="3px"
+                                            icon="chevron"
+                                            width={12}
+                                            stroke={ColorOption.grey}
+                                        />
                                     </Container>
                                 )}
                             </Container>
@@ -87,7 +110,11 @@ export class Dropdown extends React.PureComponent<DropdownProps, DropdownState> 
                             zIndex={zIndex.dropdownItems}
                         >
                             {_.map(items, (item, index) => (
-                                <DropdownItem key={item.text} {...item} isLast={index === items.length - 1} />
+                                <DropdownItem
+                                    key={item.text}
+                                    {...item}
+                                    isLast={index === items.length - 1}
+                                />
                             ))}
                         </Container>
                     )}
@@ -121,13 +148,20 @@ export interface DropdownItemProps extends DropdownItemConfig {
     isLast: boolean;
 }
 
-export const DropdownItem: React.StatelessComponent<DropdownItemProps> = ({ text, onClick, isLast }) => (
+export const DropdownItem: React.StatelessComponent<DropdownItemProps> = ({
+    text,
+    onClick,
+    isLast,
+}) => (
     <ThemeConsumer>
         {theme => (
             <Container
                 onClick={onClick}
                 cursor="pointer"
-                rawHoverColor={transparentize(0.9, theme[ColorOption.primaryColor])}
+                rawHoverColor={transparentize(
+                    0.9,
+                    theme[ColorOption.primaryColor],
+                )}
                 backgroundColor={ColorOption.white}
                 padding="0.8em"
                 borderTop="0"

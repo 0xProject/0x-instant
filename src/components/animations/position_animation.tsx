@@ -1,4 +1,4 @@
-import { InterpolationValue } from 'styled-components';
+import { SimpleInterpolation } from 'styled-components';
 
 import { media, OptionallyScreenSpecific, stylesForMedia } from '../../style/media';
 import { css, keyframes, styled } from '../../style/theme';
@@ -87,7 +87,7 @@ const defaultAnimation = (positionSettings: OptionallyScreenSpecific<PositionAni
 const animationForSize = (
     positionSettings: OptionallyScreenSpecific<PositionAnimationSettings>,
     sizeKey: 'sm' | 'md' | 'lg',
-    mediaFn: (...args: any[]) => InterpolationValue,
+    mediaFn: (...args: any[]) => SimpleInterpolation,
 ) => {
     // checking default makes sure we have a PositionAnimationSettings object
     // and then we check to see if we have a setting for the specific `sizeKey`

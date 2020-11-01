@@ -39,6 +39,7 @@ export interface ContainerProps {
     rawHoverColor?: string;
     boxShadowOnHover?: boolean;
     flexGrow?: string | number;
+    alignSelf?: string;
 }
 
 const getBackgroundColor = (theme: any, backgroundColor?: ColorOption, rawBackgroundColor?: string): string => {
@@ -83,7 +84,8 @@ export const Container = styled.div<ContainerProps>`
         ${props => props.height && stylesForMedia<string>('height', props.height)}
         ${props => props.borderRadius && stylesForMedia<string>('border-radius', props.borderRadius)}
         ${props => (props.isHidden ? 'visibility: hidden;' : '')}
-        background-color: ${props => getBackgroundColor(props.theme, props.backgroundColor, props.rawBackgroundColor)};
+        background-color: ${props =>
+            getBackgroundColor(props.theme, props.backgroundColor, props.rawBackgroundColor)};
         border-color: ${props => (props.borderColor ? props.theme[props.borderColor] : 'none')};
         &:hover {
             ${props => (props.rawHoverColor ? `background-color: ${props.rawHoverColor}` : '')}

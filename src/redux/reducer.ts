@@ -1,8 +1,8 @@
 import { MarketBuySwapQuote } from '@0x/asset-swapper';
+import { ChainId } from '@0x/contract-addresses';
 import { AssetProxyId, ObjectMap } from '@0x/types';
 import { BigNumber } from '@0x/utils';
 import { Web3Wrapper } from '@0x/web3-wrapper';
-import * as _ from 'lodash';
 
 import { LOADING_ACCOUNT, LOCKED_ACCOUNT, NO_ACCOUNT } from '../constants';
 import { assetMetaDataMap } from '../data/asset_meta_data_map';
@@ -16,7 +16,6 @@ import {
     AsyncProcessState,
     BaseCurrency,
     DisplayStatus,
-    Network,
     OrderProcessState,
     OrderState,
     ProviderState,
@@ -28,7 +27,7 @@ import { Action, ActionTypes } from './actions';
 
 // State that is required and we have defaults for, before props are passed in
 export interface DefaultState {
-    network: Network;
+    network: ChainId;
     assetMetaDataMap: ObjectMap<AssetMetaData>;
     swapOrderState: OrderState;
     latestErrorDisplayStatus: DisplayStatus;
@@ -58,7 +57,7 @@ interface OptionalState {
 export type State = DefaultState & PropsDerivedState & Partial<OptionalState>;
 
 export const DEFAULT_STATE: DefaultState = {
-    network: Network.Mainnet,
+    network: ChainId.Mainnet,
     assetMetaDataMap,
     swapOrderState: { processState: OrderProcessState.None },
     latestErrorDisplayStatus: DisplayStatus.Hidden,
@@ -86,7 +85,10 @@ export const createReducer = (initialState: State) => {
                     address,
                 };
                 const currentAccount = state.providerState.account;
-                if (currentAccount.state === AccountState.Ready && currentAccount.address === address) {
+                if (
+                    currentAccount.state === AccountState.Ready &&
+                    currentAccount.address === address
+                ) {
                     newAccount = {
                         ...newAccount,
                         ethBalanceInWei: currentAccount.ethBalanceInWei,
@@ -97,7 +99,10 @@ export const createReducer = (initialState: State) => {
             case ActionTypes.UpdateAccountEthBalance: {
                 const { address, ethBalanceInWei } = action.data;
                 const currentAccount = state.providerState.account;
-                if (currentAccount.state !== AccountState.Ready || currentAccount.address !== address) {
+                if (
+                    currentAccount.state !== AccountState.Ready ||
+                    currentAccount.address !== address
+                ) {
                     return state;
                 } else {
                     const newAccount: AccountReady = {
@@ -120,7 +125,8 @@ export const createReducer = (initialState: State) => {
             case ActionTypes.UpdateLatestSwapQuote:
                 const newSwapQuoteIfExists = action.data;
                 const shouldUpdate =
-                    newSwapQuoteIfExists === undefined || doesSwapQuoteMatchState(newSwapQuoteIfExists, state);
+                    newSwapQuoteIfExists === undefined ||
+                    doesSwapQuoteMatchState(newSwapQuoteIfExists, state);
                 if (shouldUpdate) {
                     return {
                         ...state,
@@ -150,7 +156,9 @@ export const createReducer = (initialState: State) => {
             case ActionTypes.SetSwapOrderStateValidating:
                 return {
                     ...state,
-                    swapOrderState: { processState: OrderProcessState.Validating },
+                    swapOrderState: {
+                        processState: OrderProcessState.Validating,
+                    },
                 };
             case ActionTypes.SetSwapOrderStateProcessing:
                 const processingData = action.data;
@@ -278,11 +286,17 @@ const reduceStateWithAccount = (state: State, account: Account) => {
     };
 };
 
-const doesSwapQuoteMatchState = (swapQuote: MarketBuySwapQuote, state: State): boolean => {
+const doesSwapQuoteMatchState = (
+    swapQuote: MarketBuySwapQuote,
+    state: State,
+): boolean => {
     const selectedAssetIfExists = state.selectedAsset;
     const selectedAssetUnitAmountIfExists = state.selectedAssetUnitAmount;
     // if no selectedAsset or selectedAssetAmount exists on the current state, return false
-    if (selectedAssetIfExists === undefined || selectedAssetUnitAmountIfExists === undefined) {
+    if (
+        selectedAssetIfExists === undefined ||
+        selectedAssetUnitAmountIfExists === undefined
+    ) {
         return false;
     }
     // if swapQuote's assetData does not match that of the current selected asset, return false
@@ -297,7 +311,9 @@ const doesSwapQuoteMatchState = (swapQuote: MarketBuySwapQuote, state: State): b
             selectedAssetUnitAmountIfExists,
             selectedAssetMetaData.decimals,
         );
-        const doesAssetAmountMatch = selectedAssetAmountBaseUnits.eq(swapQuote.makerAssetFillAmount);
+        const doesAssetAmountMatch = selectedAssetAmountBaseUnits.eq(
+            swapQuote.makerAssetFillAmount,
+        );
         return doesAssetAmountMatch;
     } else {
         return true;

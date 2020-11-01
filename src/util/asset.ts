@@ -1,4 +1,5 @@
 import { InsufficientAssetLiquidityError, SwapQuoterError } from '@0x/asset-swapper';
+import { ChainId } from '@0x/contract-addresses';
 import { AssetProxyId, ObjectMap } from '@0x/types';
 import { BigNumber } from '@0x/utils';
 import { Web3Wrapper } from '@0x/web3-wrapper';
@@ -12,7 +13,7 @@ export const assetUtils = {
     createAssetsFromAssetDatas: (
         assetDatas: string[],
         assetMetaDataMap: ObjectMap<AssetMetaData>,
-        network: Network,
+        network: ChainId,
     ): Asset[] => {
         const arrayOfAssetOrUndefined = _.map(assetDatas, assetData =>
             assetUtils.createAssetFromAssetDataIfExists(assetData, assetMetaDataMap, network),
@@ -22,7 +23,7 @@ export const assetUtils = {
     createAssetFromAssetDataIfExists: (
         assetData: string,
         assetMetaDataMap: ObjectMap<AssetMetaData>,
-        network: Network,
+        network: ChainId,
     ): Asset | undefined => {
         const metaData = assetUtils.getMetaDataIfExists(assetData, assetMetaDataMap, network);
         if (metaData === undefined) {
@@ -36,14 +37,14 @@ export const assetUtils = {
     createAssetFromAssetDataOrThrow: (
         assetData: string,
         assetMetaDataMap: ObjectMap<AssetMetaData>,
-        network: Network,
+        network: ChainId,
     ): Asset => {
         return {
             assetData: assetData.toLowerCase(),
             metaData: assetUtils.getMetaDataOrThrow(assetData, assetMetaDataMap, network),
         };
     },
-    getMetaDataOrThrow: (assetData: string, metaDataMap: ObjectMap<AssetMetaData>, network: Network): AssetMetaData => {
+    getMetaDataOrThrow: (assetData: string, metaDataMap: ObjectMap<AssetMetaData>, network: ChainId): AssetMetaData => {
         const metaDataIfExists = assetUtils.getMetaDataIfExists(assetData, metaDataMap, network);
         if (metaDataIfExists === undefined) {
             throw new Error(ZeroExInstantError.AssetMetaDataNotAvailable);
@@ -53,10 +54,10 @@ export const assetUtils = {
     getMetaDataIfExists: (
         assetData: string,
         metaDataMap: ObjectMap<AssetMetaData>,
-        network: Network,
+        network: ChainId,
     ): AssetMetaData | undefined => {
         let mainnetAssetData: string | undefined = assetData;
-        if (network !== Network.Mainnet) {
+        if (network !== ChainId.Mainnet) {
             const mainnetAssetDataIfExists = assetUtils.getAssociatedAssetDataIfExists(
                 assetData.toLowerCase(),
                 network,
@@ -96,7 +97,7 @@ export const assetUtils = {
         }
         return `${symbol.slice(0, 3)}…`;
     },
-    getAssociatedAssetDataIfExists: (assetData: string, network: Network): string | undefined => {
+    getAssociatedAssetDataIfExists: (assetData: string, network: ChainId): string | undefined => {
         const assetDataGroupIfExists = _.find(assetDataNetworkMapping, value => value[network] === assetData);
         if (assetDataGroupIfExists === undefined) {
             return;

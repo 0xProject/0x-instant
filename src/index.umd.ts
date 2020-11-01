@@ -1,7 +1,8 @@
 import { BigNumber, SwapQuoter } from '@0x/asset-swapper';
+import { ChainId } from '@0x/contract-addresses';
 import { AssetProxyId } from '@0x/types';
 import { providerUtils } from '@0x/utils';
-import { SupportedProvider, ZeroExProvider } from 'ethereum-types';
+import { SupportedProvider } from 'ethereum-types';
 import * as _ from 'lodash';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
@@ -15,7 +16,7 @@ import {
 } from './constants';
 import { assetMetaDataMap } from './data/asset_meta_data_map';
 import { ZeroExInstantOverlay, ZeroExInstantOverlayProps } from './index';
-import { Network, OrderSource } from './types';
+import { OrderSource } from './types';
 import { analytics } from './util/analytics';
 import { assert } from './util/assert';
 import { assetDataEncoder } from './util/asset_data_encoder';
@@ -23,15 +24,25 @@ import { orderCoercionUtil } from './util/order_coercion';
 import { providerFactory } from './util/provider_factory';
 import { util } from './util/util';
 
-const isInstantRendered = (): boolean => !!document.getElementById(INJECTED_DIV_ID);
+const isInstantRendered = (): boolean =>
+    !!document.getElementById(INJECTED_DIV_ID);
 
-const validateInstantRenderConfig = (config: ZeroExInstantConfig, selector: string) => {
+const validateInstantRenderConfig = (
+    config: ZeroExInstantConfig,
+    selector: string,
+) => {
     assert.isValidOrderSource('orderSource', config.orderSource);
     if (config.defaultSelectedAssetData !== undefined) {
-        assert.isHexString('defaultSelectedAssetData', config.defaultSelectedAssetData);
+        assert.isHexString(
+            'defaultSelectedAssetData',
+            config.defaultSelectedAssetData,
+        );
     }
     if (config.additionalAssetMetaDataMap !== undefined) {
-        assert.isValidAssetMetaDataMap('additionalAssetMetaDataMap', config.additionalAssetMetaDataMap);
+        assert.isValidAssetMetaDataMap(
+            'additionalAssetMetaDataMap',
+            config.additionalAssetMetaDataMap,
+        );
     }
     if (config.defaultAssetBuyAmount !== undefined) {
         assert.isNumber('defaultAssetBuyAmount', config.defaultAssetBuyAmount);
@@ -40,7 +51,10 @@ const validateInstantRenderConfig = (config: ZeroExInstantConfig, selector: stri
         assert.isNumber('networkId', config.networkId);
     }
     if (config.availableAssetDatas !== undefined) {
-        assert.areValidAssetDatas('availableAssetDatas', config.availableAssetDatas);
+        assert.areValidAssetDatas(
+            'availableAssetDatas',
+            config.availableAssetDatas,
+        );
     }
     if (config.onClose !== undefined) {
         assert.isFunction('onClose', config.onClose);
@@ -58,10 +72,16 @@ const validateInstantRenderConfig = (config: ZeroExInstantConfig, selector: stri
         assert.isString('walletDisplayName', config.walletDisplayName);
     }
     if (config.shouldDisablePushToHistory !== undefined) {
-        assert.isBoolean('shouldDisablePushToHistory', config.shouldDisablePushToHistory);
+        assert.isBoolean(
+            'shouldDisablePushToHistory',
+            config.shouldDisablePushToHistory,
+        );
     }
     if (config.shouldDisableAnalyticsTracking !== undefined) {
-        assert.isBoolean('shouldDisableAnalyticsTracking', config.shouldDisableAnalyticsTracking);
+        assert.isBoolean(
+            'shouldDisableAnalyticsTracking',
+            config.shouldDisableAnalyticsTracking,
+        );
     }
     assert.isString('selector', selector);
 };
@@ -82,7 +102,10 @@ export const unrender = () => {
 // Render instant and return a callback that allows you to remove it from the DOM.
 const renderInstant = (config: ZeroExInstantConfig, selector: string) => {
     const appendToIfExists = document.querySelector(selector);
-    assert.assert(appendToIfExists !== null, `Could not find div with selector: ${selector}`);
+    assert.assert(
+        appendToIfExists !== null,
+        `Could not find div with selector: ${selector}`,
+    );
     parentElement = appendToIfExists as Element;
     injectedDiv = document.createElement('div');
     injectedDiv.setAttribute('id', INJECTED_DIV_ID);
@@ -98,9 +121,15 @@ const renderInstant = (config: ZeroExInstantConfig, selector: string) => {
     const instantOverlayProps = {
         ...config,
         // If we are using the history API, just go back to close
-        onClose: () => (config.shouldDisablePushToHistory ? closeInstant() : window.history.back()),
+        onClose: () =>
+            config.shouldDisablePushToHistory
+                ? closeInstant()
+                : window.history.back(),
     };
-    ReactDOM.render(React.createElement(ZeroExInstantOverlay, instantOverlayProps), injectedDiv);
+    ReactDOM.render(
+        React.createElement(ZeroExInstantOverlay, instantOverlayProps),
+        injectedDiv,
+    );
     return closeInstant;
 };
 
@@ -108,11 +137,16 @@ export interface ZeroExInstantConfig extends ZeroExInstantOverlayProps {
     shouldDisablePushToHistory?: boolean;
 }
 
-export const render = (config: ZeroExInstantConfig, selector: string = DEFAULT_ZERO_EX_CONTAINER_SELECTOR) => {
+export const render = (
+    config: ZeroExInstantConfig,
+    selector: string = DEFAULT_ZERO_EX_CONTAINER_SELECTOR,
+) => {
     // Coerces BigNumber provided in config to version utilized by 0x packages
     const coercedConfig = _.assign({}, config, {
         orderSource: _.isArray(config.orderSource)
-            ? orderCoercionUtil.coerceOrderArrayFieldsToBigNumber(config.orderSource)
+            ? orderCoercionUtil.coerceOrderArrayFieldsToBigNumber(
+                  config.orderSource,
+              )
             : config.orderSource,
     });
 
@@ -130,7 +164,9 @@ export const render = (config: ZeroExInstantConfig, selector: string = DEFAULT_Z
     // If the integrator defined a popstate handler, save it to __zeroExInstantIntegratorsPopStateHandler
     // unless we have already done so on a previous render.
     const anyWindow = window as any;
-    const popStateExistsAndNotSetPreviously = window.onpopstate && !anyWindow.__zeroExInstantIntegratorsPopStateHandler;
+    const popStateExistsAndNotSetPreviously =
+        window.onpopstate &&
+        !anyWindow.__zeroExInstantIntegratorsPopStateHandler;
     anyWindow.__zeroExInstantIntegratorsPopStateHandler = popStateExistsAndNotSetPreviously
         ? anyWindow.onpopstate.bind(window)
         : util.boundNoop;
@@ -158,12 +194,19 @@ export const ERC20_PROXY_ID = AssetProxyId.ERC20;
 
 export const assetDataForERC20TokenAddress = (tokenAddress: string): string => {
     assert.isETHAddressHex('tokenAddress', tokenAddress);
-    return assetDataEncoder.ERC20Token(tokenAddress).getABIEncodedTransactionData();
+    return assetDataEncoder
+        .ERC20Token(tokenAddress)
+        .getABIEncodedTransactionData();
 };
 
-export const assetDataForERC721TokenAddress = (tokenAddress: string, tokenId: string | number): string => {
+export const assetDataForERC721TokenAddress = (
+    tokenAddress: string,
+    tokenId: string | number,
+): string => {
     assert.isETHAddressHex('tokenAddress', tokenAddress);
-    return assetDataEncoder.ERC721Token(tokenAddress, new BigNumber(tokenId)).getABIEncodedTransactionData();
+    return assetDataEncoder
+        .ERC721Token(tokenAddress, new BigNumber(tokenId))
+        .getABIEncodedTransactionData();
 };
 
 export const hasMetaDataForAssetData = (assetData: string): boolean => {
@@ -174,7 +217,7 @@ export const hasMetaDataForAssetData = (assetData: string): boolean => {
 export const hasLiquidityForAssetDataAsync = async (
     takerAssetData: string,
     orderSource: OrderSource,
-    chainId: Network = Network.Mainnet,
+    chainId: ChainId = ChainId.Mainnet,
     supportedProvider?: SupportedProvider,
 ): Promise<boolean> => {
     assert.isHexString('takerAssetData', takerAssetData);
@@ -186,16 +229,33 @@ export const hasLiquidityForAssetDataAsync = async (
         provider = providerUtils.standardizeOrThrow(provider);
     }
 
-    const bestProvider: ZeroExProvider = provider || providerFactory.getFallbackNoSigningProvider(chainId);
+    const bestProvider: SupportedProvider =
+        provider ||
+        providerUtils.standardizeOrThrow(
+            providerFactory.getFallbackNoSigningProvider(
+                chainId,
+            ) as SupportedProvider,
+        );
 
     const swapQuoterOptions = { chainId };
 
     const swapQuoter = _.isString(orderSource)
-        ? SwapQuoter.getSwapQuoterForStandardRelayerAPIUrl(bestProvider, orderSource, swapQuoterOptions)
-        : SwapQuoter.getSwapQuoterForProvidedOrders(bestProvider, orderSource, swapQuoterOptions);
+        ? SwapQuoter.getSwapQuoterForStandardRelayerAPIUrl(
+              bestProvider,
+              orderSource,
+              swapQuoterOptions,
+          )
+        : SwapQuoter.getSwapQuoterForProvidedOrders(
+              bestProvider,
+              orderSource,
+              swapQuoterOptions,
+          );
 
     const wethAssetData = await swapQuoter.getEtherTokenAssetDataOrThrowAsync();
-    const liquidity = await swapQuoter.getLiquidityForMakerTakerAssetDataPairAsync(wethAssetData, takerAssetData);
+    const liquidity = await swapQuoter.getLiquidityForMakerTakerAssetDataPairAsync(
+        wethAssetData,
+        takerAssetData,
+    );
     return liquidity.makerAssetAvailableInBaseUnits.gt(new BigNumber(0));
 };
 

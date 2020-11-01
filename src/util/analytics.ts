@@ -1,13 +1,12 @@
 import { MarketBuySwapQuote } from '@0x/asset-swapper';
+import { ChainId } from '@0x/contract-addresses';
 import { BigNumber } from '@0x/utils';
-import * as _ from 'lodash';
 
 import { GIT_SHA, HEAP_ENABLED, INSTANT_DISCHARGE_TARGET, NODE_ENV, NPM_PACKAGE_VERSION } from '../constants';
 import {
     AffiliateInfo,
     Asset,
     BaseCurrency,
-    Network,
     OrderProcessState,
     OrderSource,
     ProviderState,
@@ -141,7 +140,7 @@ export const analytics = {
         });
     },
     generateEventProperties: (
-        network: Network,
+        network: ChainId,
         orderSource: OrderSource,
         providerState: ProviderState,
         window: Window,

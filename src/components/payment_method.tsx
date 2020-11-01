@@ -1,8 +1,9 @@
+import { ChainId } from '@0x/contract-addresses';
 import * as React from 'react';
 
 import PhoneIconSvg from '../assets/icons/phone.svg';
 import { ColorOption } from '../style/theme';
-import { Account, AccountState, Network, ProviderType } from '../types';
+import { Account, AccountState, ProviderType } from '../types';
 import { envUtil } from '../util/env';
 
 import { CoinbaseWalletLogo } from './coinbase_wallet_logo';
@@ -15,7 +16,7 @@ import { WalletPrompt } from './wallet_prompt';
 
 export interface PaymentMethodProps {
     account: Account;
-    network: Network;
+    network: ChainId;
     walletDisplayName: string;
     onInstallWalletClick: () => void;
     onUnlockWalletClick: (providerType: ProviderType) => void;

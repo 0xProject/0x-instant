@@ -4,25 +4,38 @@ import * as _ from 'lodash';
 import * as React from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
 
-import { ACCOUNT_UPDATE_INTERVAL_TIME_MS, SWAP_QUOTE_UPDATE_INTERVAL_TIME_MS } from '../constants';
+import {
+    ACCOUNT_UPDATE_INTERVAL_TIME_MS,
+    SWAP_QUOTE_UPDATE_INTERVAL_TIME_MS,
+} from '../constants';
 import { SelectedAssetThemeProvider } from '../containers/selected_asset_theme_provider';
 import { asyncData } from '../redux/async_data';
 import { DEFAULT_STATE, DefaultState, State } from '../redux/reducer';
 import { store, Store } from '../redux/store';
 import { fonts } from '../style/fonts';
-import { AccountState, Network, QuoteFetchOrigin, ZeroExInstantBaseConfig } from '../types';
+import {
+    AccountState,
+    Network,
+    QuoteFetchOrigin,
+    ZeroExInstantBaseConfig,
+} from '../types';
 import { analytics, disableAnalytics } from '../util/analytics';
 import { assetUtils } from '../util/asset';
 import { errorFlasher } from '../util/error_flasher';
 import { setupRollbar } from '../util/error_reporter';
 import { gasPriceEstimator } from '../util/gas_price_estimator';
 import { Heartbeater } from '../util/heartbeater';
-import { generateAccountHeartbeater, generateSwapQuoteHeartbeater } from '../util/heartbeater_factory';
+import {
+    generateAccountHeartbeater,
+    generateSwapQuoteHeartbeater,
+} from '../util/heartbeater_factory';
 import { providerStateFactory } from '../util/provider_state_factory';
 
 export type ZeroExInstantProviderProps = ZeroExInstantBaseConfig;
 
-export class ZeroExInstantProvider extends React.PureComponent<ZeroExInstantProviderProps> {
+export class ZeroExInstantProvider extends React.PureComponent<
+    ZeroExInstantProviderProps
+> {
     private readonly _store: Store;
     private _accountUpdateHeartbeat?: Heartbeater;
     private _swapQuoteHeartbeat?: Heartbeater;
@@ -44,7 +57,9 @@ export class ZeroExInstantProvider extends React.PureComponent<ZeroExInstantProv
         // merge the additional additionalAssetMetaDataMap with our default map
         const completeAssetMetaDataMap = {
             // Make sure the passed in assetDatas are lower case
-            ..._.mapKeys(props.additionalAssetMetaDataMap || {}, (value, key) => key.toLowerCase()),
+            ..._.mapKeys(props.additionalAssetMetaDataMap || {}, (value, key) =>
+                key.toLowerCase(),
+            ),
             ...defaultState.assetMetaDataMap,
         };
 
@@ -61,8 +76,12 @@ export class ZeroExInstantProvider extends React.PureComponent<ZeroExInstantProv
         if (selectedAsset !== undefined) {
             if (selectedAsset.metaData.assetProxyId === AssetProxyId.ERC20) {
                 selectedAssetUnitAmount =
-                    props.defaultAssetBuyAmount === undefined ? undefined : new BigNumber(props.defaultAssetBuyAmount);
-            } else if (selectedAsset.metaData.assetProxyId === AssetProxyId.ERC721) {
+                    props.defaultAssetBuyAmount === undefined
+                        ? undefined
+                        : new BigNumber(props.defaultAssetBuyAmount);
+            } else if (
+                selectedAsset.metaData.assetProxyId === AssetProxyId.ERC721
+            ) {
                 selectedAssetUnitAmount = new BigNumber(1);
             }
         }
@@ -93,7 +112,9 @@ export class ZeroExInstantProvider extends React.PureComponent<ZeroExInstantProv
         super(props);
         setupRollbar();
         fonts.include();
-        const initialAppState = ZeroExInstantProvider._mergeDefaultStateWithProps(this.props);
+        const initialAppState = ZeroExInstantProvider._mergeDefaultStateWithProps(
+            this.props,
+        );
         this._store = store.create(initialAppState);
     }
     public componentDidMount(): void {
@@ -104,7 +125,10 @@ export class ZeroExInstantProvider extends React.PureComponent<ZeroExInstantProv
         // fetch available assets if none are specified
         if (state.availableAssets === undefined) {
             // tslint:disable-next-line:no-floating-promises
-            asyncData.fetchAvailableAssetDatasAndDispatchToStore(state, dispatch);
+            asyncData.fetchAvailableAssetDatasAndDispatchToStore(
+                state,
+                dispatch,
+            );
         }
         if (state.providerState.account.state !== AccountState.None) {
             this._accountUpdateHeartbeat = generateAccountHeartbeater({
@@ -121,9 +145,14 @@ export class ZeroExInstantProvider extends React.PureComponent<ZeroExInstantProv
         this._swapQuoteHeartbeat.start(SWAP_QUOTE_UPDATE_INTERVAL_TIME_MS);
         // Trigger first buyquote fetch
         // tslint:disable-next-line:no-floating-promises
-        asyncData.fetchCurrentSwapQuoteAndDispatchToStore(state, dispatch, QuoteFetchOrigin.Manual, {
-            updateSilently: false,
-        });
+        asyncData.fetchCurrentSwapQuoteAndDispatchToStore(
+            state,
+            dispatch,
+            QuoteFetchOrigin.Manual,
+            {
+                updateSilently: false,
+            },
+        );
         // warm up the gas price estimator cache just in case we can't
         // grab the gas price estimate when submitting the transaction
         // tslint:disable-next-line:no-floating-promises
@@ -160,7 +189,9 @@ export class ZeroExInstantProvider extends React.PureComponent<ZeroExInstantProv
     public render(): React.ReactNode {
         return (
             <ReduxProvider store={this._store}>
-                <SelectedAssetThemeProvider>{this.props.children}</SelectedAssetThemeProvider>
+                <SelectedAssetThemeProvider>
+                    {this.props.children}
+                </SelectedAssetThemeProvider>
             </ReduxProvider>
         );
     }
@@ -172,7 +203,11 @@ export class ZeroExInstantProvider extends React.PureComponent<ZeroExInstantProv
         const networkOfProvider = await web3Wrapper.getNetworkIdAsync();
         if (network !== networkOfProvider) {
             const errorMessage = `Wrong network detected. Try switching to ${Network[network]}.`;
-            errorFlasher.flashNewErrorMessage(this._store.dispatch, errorMessage, msToShowError);
+            errorFlasher.flashNewErrorMessage(
+                this._store.dispatch,
+                errorMessage,
+                msToShowError,
+            );
         }
     };
 }

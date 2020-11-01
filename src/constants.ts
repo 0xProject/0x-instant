@@ -1,6 +1,12 @@
+import { ChainId } from '@0x/contract-addresses';
 import { BigNumber } from '@0x/utils';
 
-import { AccountNotReady, AccountState, AffiliateInfo, Network, ProviderType } from './types';
+import {
+    AccountNotReady,
+    AccountState,
+    AffiliateInfo,
+    ProviderType,
+} from './types';
 
 // TODO(dave4506) until we have /prices endpoint ready, we will use this whitelist for bridge order liquidity assets
 export const SUPPORTED_TOKEN_ASSET_DATA_WITH_BRIDGE_ORDERS = [
@@ -24,7 +30,8 @@ export const INJECTED_DIV_ID = 'zeroExInstant';
 export const OVERLAY_DIV_CLASS = 'zeroExInstantOverlay';
 export const OVERLAY_CLOSE_BUTTON_DIV_CLASS = 'zeroExInstantOverlayCloseButton';
 export const MAIN_CONTAINER_DIV_CLASS = 'zeroExInstantMainContainer';
-export const WEB_3_WRAPPER_TRANSACTION_FAILED_ERROR_MSG_PREFIX = 'Transaction failed';
+export const WEB_3_WRAPPER_TRANSACTION_FAILED_ERROR_MSG_PREFIX =
+    'Transaction failed';
 export const GWEI_IN_WEI = new BigNumber(1000000000);
 export const ONE_SECOND_MS = 1000;
 export const ONE_MINUTE_MS = ONE_SECOND_MS * 60;
@@ -58,17 +65,21 @@ export const INSTANT_DISCHARGE_TARGET = process.env.INSTANT_DISCHARGE_TARGET as
     | 'dogfood'
     | 'staging'
     | undefined;
-export const COINBASE_WALLET_IOS_APP_STORE_URL = 'https://itunes.apple.com/us/app/coinbase-wallet/id1278383455?mt=8';
-export const COINBASE_WALLET_ANDROID_APP_STORE_URL = 'https://play.google.com/store/apps/details?id=org.toshi&hl=en';
+export const COINBASE_WALLET_IOS_APP_STORE_URL =
+    'https://itunes.apple.com/us/app/coinbase-wallet/id1278383455?mt=8';
+export const COINBASE_WALLET_ANDROID_APP_STORE_URL =
+    'https://play.google.com/store/apps/details?id=org.toshi&hl=en';
 export const COINBASE_WALLET_SITE_URL = 'https://wallet.coinbase.com/';
-export const META_MASK_FIREFOX_STORE_URL = 'https://addons.mozilla.org/en-US/firefox/addon/ether-metamask/';
+export const META_MASK_FIREFOX_STORE_URL =
+    'https://addons.mozilla.org/en-US/firefox/addon/ether-metamask/';
 export const META_MASK_CHROME_STORE_URL =
     'https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn?hl=en';
-export const META_MASK_OPERA_STORE_URL = 'https://addons.opera.com/en/extensions/details/metamask/';
+export const META_MASK_OPERA_STORE_URL =
+    'https://addons.opera.com/en/extensions/details/metamask/';
 export const META_MASK_SITE_URL = 'https://metamask.io/';
-export const ETHEREUM_NODE_URL_BY_NETWORK = {
-    [Network.Mainnet]: `https://mainnet.infura.io/v3/${process.env.INSTANT_INFURA_PROJECT_ID}`,
-    [Network.Kovan]: `https://kovan.infura.io/v3/${process.env.INSTANT_INFURA_PROJECT_ID}`,
+export const ETHEREUM_NODE_URL_BY_NETWORK: { [key in ChainId]?: string } = {
+    [ChainId.Mainnet]: `https://mainnet.infura.io/v3/${process.env.INSTANT_INFURA_PROJECT_ID}`,
+    [ChainId.Kovan]: `https://kovan.infura.io/v3/${process.env.INSTANT_INFURA_PROJECT_ID}`,
 };
 export const ZERO_EX_SITE_URL = 'https://www.0x.org/';
 export const BLOCK_POLLING_INTERVAL_MS = 10000; // 10s
