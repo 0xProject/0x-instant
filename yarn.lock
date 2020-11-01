@@ -87,6 +87,10 @@
     uuid "^3.3.2"
     websocket "^1.0.26"
 
+"@0x/contract-addresses@^4.11.0":
+  version "4.12.0"
+  resolved "https://registry.yarnpkg.com/@0x/contract-addresses/-/contract-addresses-4.12.0.tgz#2adb0bcde763ad13437f782adf25c403107ff428"
+
 "@0x/contract-addresses@^5.0.1":
   version "5.0.1"
   resolved "https://registry.yarnpkg.com/@0x/contract-addresses/-/contract-addresses-5.0.1.tgz#e4e99580703dae91a2268529d7b160d09f4c1bed"

@@ -11,7 +11,7 @@
         "build": "NODE_ENV=production node --max_old_space_size=8192 webpack --mode production",
         "build:dev": "webpack --mode development",
         "build:ci": "yarn build",
-        "dev": "dotenv webpack-dev-server -- --mode development",
+        "dev": "NODE_OPTIONS=--max_old_space_size=8192 dotenv webpack-dev-server -- --mode development",
         "lint": "tslint --format stylish --project .",
         "fix": "tslint --fix --format stylish --project .",
         "test": "jest",
