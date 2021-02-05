@@ -5,17 +5,18 @@ import { connect } from 'react-redux';
 import { oc } from 'ts-optchain';
 
 import { State } from '../redux/reducer';
-import { Asset, AsyncProcessState, OrderState } from '../types';
+import {  AsyncProcessState, OrderState, TokenInfo } from '../types';
 
-import { InstantHeading } from '../components/instant_heading';
+import { InstantTokenHeading } from '../components/instant_token_heading';
 
 export interface InstantHeadingProps {
-    onSelectAssetClick?: (asset?: Asset) => void;
+    onSelectTokenClick?: (token?: TokenInfo) => void;
+    isIn: boolean;
 }
 
 interface ConnectedState {
-    selectedAsset?: Asset;
-    selectedAssetUnitAmount?: BigNumber;
+    selectedToken?: TokenInfo;
+    selectedTokenUnitAmount?: BigNumber;
     totalEthBaseUnitAmount?: BigNumber;
     ethUsdPrice?: BigNumber;
     quoteRequestState: AsyncProcessState;
@@ -23,14 +24,14 @@ interface ConnectedState {
 }
 
 const mapStateToProps = (state: State, _ownProps: InstantHeadingProps): ConnectedState => ({
-    selectedAsset: state.selectedAsset,
-    selectedAssetUnitAmount: state.selectedAssetUnitAmount,
-    totalEthBaseUnitAmount: oc(state).latestSwapQuote.worstCaseQuoteInfo.totalTakerAssetAmount(),
+    selectedToken: state.selectedToken,
+    selectedTokenUnitAmount: state.selectedTokenUnitAmount,
+    totalEthBaseUnitAmount: oc(state).latestApiSwapQuote.value(),
     ethUsdPrice: state.ethUsdPrice,
     quoteRequestState: state.quoteRequestState,
     swapOrderState: state.swapOrderState,
 });
 
-export const SelectedAssetInstantHeading: React.ComponentClass<InstantHeadingProps> = connect(mapStateToProps)(
-    InstantHeading,
+export const SelectedTokenInstantHeading: React.ComponentClass<InstantHeadingProps> = connect(mapStateToProps)(
+    InstantTokenHeading,
 );

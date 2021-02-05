@@ -4,15 +4,15 @@ import * as React from 'react';
 import PoweredByLogo from '../assets/powered_by_0x.svg';
 import { ZERO_EX_SITE_URL } from '../constants';
 import { AvailableERC20TokenSelector } from '../containers/available_erc20_token_selector';
-import { ConnectedBuyOrderProgressOrPaymentMethod } from '../containers/connected_buy_order_progress_or_payment_method';
+import { ConnectedSwapOrderProgressOrPaymentMethod } from '../containers/connected_swap_order_progress_or_payment_method';
 import { CurrentStandardSlidingPanel } from '../containers/current_standard_sliding_panel';
-import { LatestBuyQuoteOrderDetails } from '../containers/latest_buy_quote_order_details';
+import { LatestSwapQuoteOrderDetails } from '../containers/latest_swap_quote_order_details';
 import { LatestError } from '../containers/latest_error';
-import { SelectedAssetBuyOrderStateButtons } from '../containers/selected_asset_buy_order_state_buttons';
-import { SelectedAssetInstantHeading } from '../containers/selected_asset_instant_heading';
+import { SelectedTokenInstantHeading } from '../containers/selected_token_instant_heading';
+import { SelectedTokenSwapOrderStateButtons } from '../containers/selected_token_swap_order_state_buttons';
 import { ColorOption } from '../style/theme';
 import { zIndex } from '../style/z_index';
-import { Asset, SlideAnimationState } from '../types';
+import { SlideAnimationState, TokenInfo } from '../types';
 import { analytics, TokenSelectorClosedVia } from '../util/analytics';
 
 import { CSSReset } from './css_reset';
@@ -54,11 +54,13 @@ export class ZeroExInstantContainer extends React.PureComponent<
                         height="100%"
                     >
                         <Flex direction="column" justify="flex-start" height="100%">
-                            <SelectedAssetInstantHeading onSelectAssetClick={this._handleSymbolClick} />
-                            <ConnectedBuyOrderProgressOrPaymentMethod />
-                            <LatestBuyQuoteOrderDetails />
+                            {/*<ConnectedSwapOrderProgressOrPaymentMethod />*/}
+                            <SelectedTokenInstantHeading onSelectTokenClick={this._handleSymbolClick} isIn={true} />
+                            <SelectedTokenInstantHeading onSelectTokenClick={this._handleSymbolClick} isIn={false} />
+                            <ConnectedSwapOrderProgressOrPaymentMethod />
+                            <LatestSwapQuoteOrderDetails />
                             <Container padding="20px" width="100%">
-                                <SelectedAssetBuyOrderStateButtons />
+                                <SelectedTokenSwapOrderStateButtons />
                             </Container>
                         </Flex>
                         <SlidingPanel
@@ -85,14 +87,11 @@ export class ZeroExInstantContainer extends React.PureComponent<
             </React.Fragment>
         );
     }
-    private readonly _handleSymbolClick = (asset?: Asset): void => {
-        // TODO: If ERC721 link open sea or allow to choose another ERC721?
-        if (asset === undefined || asset.metaData.assetProxyId === AssetProxyId.ERC20) {
-            analytics.trackTokenSelectorOpened();
-            this.setState({
+    private readonly _handleSymbolClick = (token?: TokenInfo): void => {
+        analytics.trackTokenSelectorOpened();
+        this.setState({
                 tokenSelectionPanelAnimationState: 'slidIn',
-            });
-        }
+        });
     };
     private readonly _handlePanelCloseClickedX = (): void => {
         this._handlePanelClose(TokenSelectorClosedVia.ClickedX);

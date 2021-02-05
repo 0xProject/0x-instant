@@ -116,11 +116,8 @@ export interface ProviderState {
     name: string;
     displayName: string;
     provider: ZeroExProvider;
-    swapQuoter: SwapQuoter;
-    swapQuoteConsumer: SwapQuoteConsumer;
     web3Wrapper: Web3Wrapper;
     account: Account;
-    orderSource: OrderSource;
     isProviderInjected: boolean;
 }
 
@@ -212,12 +209,85 @@ export interface ZeroExInstantOptionalBaseConfig {
     availableAssetDatas: string[];
     defaultAssetBuyAmount: number;
     defaultSelectedAssetData: string;
+    defaultSelectedToken: string;
     additionalAssetMetaDataMap: ObjectMap<AssetMetaData>;
     networkId: ChainId;
     affiliateInfo: AffiliateInfo;
+    tokenList: string;
     shouldDisableAnalyticsTracking: boolean;
     onSuccess?: (txHash: string) => void;
 }
 
 export type ZeroExInstantBaseConfig = ZeroExInstantRequiredBaseConfig &
     Partial<ZeroExInstantOptionalBaseConfig>;
+
+
+export interface SwapQuoteResponse extends SwapQuoteResponsePartialTransaction, SwapQuoteResponsePrice {
+        gasPrice: BigNumber;
+        protocolFee: BigNumber;
+        minimumProtocolFee: BigNumber;
+        orders: SignedOrder[];
+        buyAmount: BigNumber;
+        sellAmount: BigNumber;
+        buyTokenAddress: string;
+        sellTokenAddress: string;
+        sources: GetSwapQuoteResponseLiquiditySource[];
+        from?: string;
+        gas: BigNumber;
+        estimatedGas: BigNumber;
+        estimatedGasTokenRefund: BigNumber;
+        allowanceTarget?: string;
+       // quoteReport?: QuoteReport;
+    }
+    
+export interface SwapQuoteResponsePartialTransaction {
+        to: string;
+        data: string;
+        value: BigNumber;
+        decodedUniqueId: string;
+}
+    
+export interface SwapQuoteResponsePrice {
+        price: BigNumber;
+        guaranteedPrice: BigNumber;
+}
+    
+export interface GetSwapQuoteResponseLiquiditySource {
+        name: string;
+        proportion: BigNumber;
+        intermediateToken?: string;
+        hops?: string[];
+}
+
+export interface TokenInfo {
+    readonly chainId: number;
+    readonly address: string;
+    readonly name: string;
+    readonly decimals: number;
+    readonly symbol: string;
+    readonly logoURI?: string;
+    readonly tags?: string[];
+  }
+  
+  export interface Version {
+    readonly major: number;
+    readonly minor: number;
+    readonly patch: number;
+  }
+  
+  export interface Tags {
+    readonly [tagId: string]: {
+      readonly name: string;
+      readonly description: string;
+    };
+  }
+  
+  export interface TokenList {
+    readonly name: string;
+    readonly timestamp: string;
+    readonly version: Version;
+    readonly tokens: TokenInfo[];
+    readonly keywords?: string[];
+    readonly tags?: Tags;
+    readonly logoURI?: string;
+  }

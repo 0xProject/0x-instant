@@ -2,9 +2,10 @@ import * as _ from 'lodash';
 import * as React from 'react';
 
 import { ColorOption } from '../style/theme';
-import { ERC20Asset } from '../types';
+import { ERC20Asset, TokenInfo } from '../types';
 import { analytics } from '../util/analytics';
 import { assetUtils } from '../util/asset';
+import { tokenUtils } from '../util/token';
 
 import { SearchInput } from './search_input';
 import { Circle } from './ui/circle';
@@ -13,8 +14,8 @@ import { Flex } from './ui/flex';
 import { Text } from './ui/text';
 
 export interface ERC20TokenSelectorProps {
-    tokens: ERC20Asset[];
-    onTokenSelect: (token: ERC20Asset) => void;
+    tokens: TokenInfo[];
+    onTokenSelect: (token: TokenInfo) => void;
 }
 
 export interface ERC20TokenSelectorState {
@@ -58,14 +59,14 @@ export class ERC20TokenSelector extends React.PureComponent<ERC20TokenSelectorPr
         });
         analytics.trackTokenSelectorSearched(searchQuery);
     };
-    private readonly _handleTokenClick = (token: ERC20Asset): void => {
+    private readonly _handleTokenClick = (token: TokenInfo): void => {
         this.props.onTokenSelect(token);
     };
 }
 
 interface TokenRowFilterProps {
-    tokens: ERC20Asset[];
-    onClick: (token: ERC20Asset) => void;
+    tokens: TokenInfo[];
+    onClick: (token: TokenInfo) => void;
     searchQuery: string;
 }
 
@@ -75,35 +76,35 @@ class TokenRowFilter extends React.Component<TokenRowFilterProps> {
             if (!this._isTokenQueryMatch(token)) {
                 return null;
             }
-            return <TokenSelectorRow key={token.assetData} token={token} onClick={this.props.onClick} />;
+            return <TokenSelectorRow key={token.address} token={token} onClick={this.props.onClick} />;
         });
     }
     public shouldComponentUpdate(nextProps: TokenRowFilterProps): boolean {
         const arePropsDeeplyEqual = _.isEqual(nextProps, this.props);
         return !arePropsDeeplyEqual;
     }
-    private readonly _isTokenQueryMatch = (token: ERC20Asset): boolean => {
+    private readonly _isTokenQueryMatch = (token: TokenInfo): boolean => {
         const { searchQuery } = this.props;
         const searchQueryLowerCase = searchQuery.toLowerCase().trim();
         if (searchQueryLowerCase === '') {
             return true;
         }
-        const tokenName = token.metaData.name.toLowerCase();
-        const tokenSymbol = token.metaData.symbol.toLowerCase();
+        const tokenName = token.name.toLowerCase();
+        const tokenSymbol = token.symbol.toLowerCase();
         return _.startsWith(tokenSymbol, searchQueryLowerCase) || _.startsWith(tokenName, searchQueryLowerCase);
     };
 }
 
 interface TokenSelectorRowProps {
-    token: ERC20Asset;
-    onClick: (token: ERC20Asset) => void;
+    token: TokenInfo;
+    onClick: (token: TokenInfo) => void;
 }
 
 class TokenSelectorRow extends React.PureComponent<TokenSelectorRowProps> {
     public render(): React.ReactNode {
         const { token } = this.props;
-        const circleColor = token.metaData.primaryColor || 'black';
-        const displaySymbol = assetUtils.bestNameForAsset(token);
+        const circleColor = 'black';
+        const displaySymbol = tokenUtils.bestNameForToken(token);
         return (
             <Container
                 padding="12px 0px"
@@ -120,7 +121,7 @@ class TokenSelectorRow extends React.PureComponent<TokenSelectorRowProps> {
                         <Container marginRight="10px">
                             <Circle diameter={26} rawColor={circleColor}>
                                 <Flex height="100%" width="100%">
-                                    <TokenSelectorRowIcon token={token} />
+                                   <TokenSelectorRowIcon token={token} />
                                 </Flex>
                             </Circle>
                         </Container>
@@ -130,7 +131,7 @@ class TokenSelectorRow extends React.PureComponent<TokenSelectorRowProps> {
                         <Container margin="0px 5px">
                             <Text fontSize="14px"> - </Text>
                         </Container>
-                        <Text fontSize="14px">{token.metaData.name}</Text>
+                        <Text fontSize="14px">{token.name}</Text>
                     </Flex>
                 </Container>
             </Container>
@@ -142,7 +143,7 @@ class TokenSelectorRow extends React.PureComponent<TokenSelectorRowProps> {
 }
 
 interface TokenSelectorRowIconProps {
-    token: ERC20Asset;
+    token: TokenInfo;
 }
 
 const getTokenIcon = (symbol: string): React.StatelessComponent | undefined => {
@@ -157,10 +158,10 @@ const getTokenIcon = (symbol: string): React.StatelessComponent | undefined => {
 class TokenSelectorRowIcon extends React.PureComponent<TokenSelectorRowIconProps> {
     public render(): React.ReactNode {
         const { token } = this.props;
-        const iconUrlIfExists = token.metaData.iconUrl;
+        const iconUrlIfExists = '';
 
-        const TokenIcon = getTokenIcon(token.metaData.symbol);
-        const displaySymbol = assetUtils.bestNameForAsset(token);
+        const TokenIcon = getTokenIcon(token.symbol);
+        const displaySymbol = tokenUtils.bestNameForToken(token);
         if (iconUrlIfExists !== undefined) {
             return <img src={iconUrlIfExists} />;
         } else if (TokenIcon !== undefined) {

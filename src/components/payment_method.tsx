@@ -45,7 +45,7 @@ export class PaymentMethod extends React.PureComponent<PaymentMethodProps> {
             case AccountState.None:
                 return 'connect your wallet';
             case AccountState.Ready:
-                return 'payment method';
+                return '';
         }
     };
     private readonly _renderMainContent = (): React.ReactNode => {

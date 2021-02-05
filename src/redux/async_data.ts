@@ -2,15 +2,15 @@ import { Web3Wrapper } from '@0x/web3-wrapper';
 import * as _ from 'lodash';
 import { Dispatch } from 'redux';
 
-import { BIG_NUMBER_ZERO, SUPPORTED_TOKEN_ASSET_DATA_WITH_BRIDGE_ORDERS } from '../constants';
-import { AccountState, BaseCurrency, OrderProcessState, ProviderState, QuoteFetchOrigin } from '../types';
+import { BIG_NUMBER_ZERO } from '../constants';
+import { defaultTokenList } from '../data/token_lists';
+import { AccountState, BaseCurrency, OrderProcessState, ProviderState, QuoteFetchOrigin, TokenList } from '../types';
 import { analytics } from '../util/analytics';
-import { assetUtils } from '../util/asset';
+import { apiQuoteUpdater } from '../util/api_quote_updater';
 import { coinbaseApi } from '../util/coinbase_api';
 import { errorFlasher } from '../util/error_flasher';
 import { errorReporter } from '../util/error_reporter';
 import { providerStateFactory } from '../util/provider_state_factory';
-import { swapQuoteUpdater } from '../util/swap_quote_updater';
 
 import { actions } from './actions';
 import { State } from './reducer';
@@ -29,7 +29,24 @@ export const asyncData = {
             analytics.trackUsdPriceFailed();
         }
     },
-    fetchAvailableAssetDatasAndDispatchToStore: async (state: State, dispatch: Dispatch) => {
+    fetchTokenListAndDispatchToStore: async (state: State, dispatch: Dispatch) => {
+  
+        try {
+            
+            const tokenList = await fetch(defaultTokenList).then(r => r.json()) as TokenList;
+            dispatch(actions.setAvailableTokens(tokenList.tokens));
+
+        } catch (e) {
+            const errorMessage = 'Could not find any tokens';
+            errorFlasher.flashNewErrorMessage(dispatch, errorMessage);
+            // On error, just specify that none are available
+            dispatch(actions.setAvailableTokens([]));
+            errorReporter.report(e);
+        }
+    },
+
+
+    /*fetchAvailableAssetDatasAndDispatchToStore: async (state: State, dispatch: Dispatch) => {
         const { providerState, assetMetaDataMap, network } = state;
         const swapQuoter = providerState.swapQuoter;
         try {
@@ -55,7 +72,7 @@ export const asyncData = {
             dispatch(actions.setAvailableAssets([]));
             errorReporter.report(e);
         }
-    },
+    },*/
     fetchAccountInfoAndDispatchToStore: async (
         providerState: ProviderState,
         dispatch: Dispatch,
@@ -85,9 +102,12 @@ export const asyncData = {
         } catch (e) {
             analytics.trackAccountUnlockDenied();
             if (e.message.includes('Fortmatic: User denied account access.')) {
+                const chainId = await providerState.web3Wrapper.getChainIdAsync();
+
                 // If Fortmatic is not used, revert to injected provider
-                const initialProviderState = providerStateFactory.getInitialProviderStateWithCurrentProviderState(
+                const initialProviderState = providerStateFactory.getInitialProviderStateWithCurrentProviderState(  
                     providerState,
+                    chainId,
                 );
                 dispatch(actions.setProviderState(initialProviderState));
             } else {
@@ -114,7 +134,35 @@ export const asyncData = {
             return;
         }
     },
-    fetchCurrentSwapQuoteAndDispatchToStore: async (
+    fetchCurrentApiSwapQuoteAndDispatchToStore: async (
+        state: State,
+        dispatch: Dispatch,
+        fetchOrigin: QuoteFetchOrigin,
+        options: { updateSilently: boolean },
+    ) => {
+        const { swapOrderState, providerState, selectedToken, selectedTokenUnitAmount } = state;
+        const takerAddress = providerState.account.state;
+       
+        if (
+            selectedTokenUnitAmount !== undefined &&
+            selectedToken !== undefined &&
+            selectedTokenUnitAmount.isGreaterThan(BIG_NUMBER_ZERO) &&
+            swapOrderState.processState === OrderProcessState.None
+        ) {
+            await apiQuoteUpdater.updateSwapQuoteAsync(
+                dispatch,
+                takerAddress,
+                selectedToken,
+                selectedTokenUnitAmount,
+                fetchOrigin,
+                {
+                    setPending: !options.updateSilently,
+                    dispatchErrors: !options.updateSilently,
+                },
+            );
+        }
+    }
+  /*  fetchCurrentSwapQuoteAndDispatchToStore: async (
         state: State,
         dispatch: Dispatch,
         fetchOrigin: QuoteFetchOrigin,
@@ -140,5 +188,5 @@ export const asyncData = {
                 },
             );
         }
-    },
+    },*/
 };

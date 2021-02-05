@@ -51,10 +51,11 @@ const mapDispatchToProps = (
     ownProps: ConnectedAccountPaymentMethodProps,
 ): ConnectedDispatch => ({
     openInstallWalletPanel: () => dispatch(actions.openStandardSlidingPanel(StandardSlidingPanelContent.InstallWallet)),
-    unlockWalletAndDispatchToStore: (providerState: ProviderState, providerType: ProviderType) => {
-        const newProviderState: ProviderState = providerStateFactory.getProviderStateBasedOnProviderType(
-            providerState,
+    unlockWalletAndDispatchToStore: async (providerState: ProviderState, providerType: ProviderType) => {
+        const chainId = await providerState.web3Wrapper.getChainIdAsync();
+        const newProviderState: ProviderState = providerStateFactory.getProviderStateBasedOnProviderType(     
             providerType,
+            chainId,
         );
         // Updates provider state
         dispatch(actions.setProviderState(newProviderState));

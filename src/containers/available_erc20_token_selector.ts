@@ -4,34 +4,33 @@ import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 
 import { State } from '../redux/reducer';
-import { ERC20Asset } from '../types';
-import { assetUtils } from '../util/asset';
+import { TokenInfo } from '../types';
 
 import { ERC20TokenSelector } from '../components/erc20_token_selector';
 import { Action, actions } from '../redux/actions';
 
 export interface AvailableERC20TokenSelectorProps {
-    onTokenSelect?: (token: ERC20Asset) => void;
+    onTokenSelect?: (token: TokenInfo) => void;
 }
 
 interface ConnectedState {
-    tokens: ERC20Asset[];
+    tokens: TokenInfo[];
 }
 
 interface ConnectedDispatch {
-    onTokenSelect: (token: ERC20Asset) => void;
+    onTokenSelect: (token: TokenInfo) => void;
 }
 
 const mapStateToProps = (state: State, _ownProps: AvailableERC20TokenSelectorProps): ConnectedState => ({
-    tokens: assetUtils.getERC20AssetsFromAssets(state.availableAssets || []),
+    tokens: state.availableTokens,
 });
 
 const mapDispatchToProps = (
     dispatch: Dispatch<Action>,
     ownProps: AvailableERC20TokenSelectorProps,
 ): ConnectedDispatch => ({
-    onTokenSelect: (token: ERC20Asset) => {
-        dispatch(actions.updateSelectedAsset(token));
+    onTokenSelect: (token: TokenInfo) => {
+        dispatch(actions.updateSelectedToken(token));
         dispatch(actions.resetAmount());
         if (ownProps.onTokenSelect) {
             ownProps.onTokenSelect(token);

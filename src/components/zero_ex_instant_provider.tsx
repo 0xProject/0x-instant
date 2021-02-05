@@ -49,7 +49,6 @@ export class ZeroExInstantProvider extends React.PureComponent<
         const networkId = props.networkId || defaultState.network;
         // construct the ProviderState
         const providerState = providerStateFactory.getInitialProviderState(
-            props.orderSource,
             networkId,
             props.provider,
             props.walletDisplayName,
@@ -123,13 +122,24 @@ export class ZeroExInstantProvider extends React.PureComponent<
         // tslint:disable-next-line:no-floating-promises
         asyncData.fetchEthPriceAndDispatchToStore(dispatch);
         // fetch available assets if none are specified
+        /* TODO: Remove after complete
+        
         if (state.availableAssets === undefined) {
             // tslint:disable-next-line:no-floating-promises
             asyncData.fetchAvailableAssetDatasAndDispatchToStore(
                 state,
                 dispatch,
             );
+        }*/
+        if (state.availableTokens === undefined) {
+            // tslint:disable-next-line:no-floating-promises
+            asyncData.fetchTokenListAndDispatchToStore(
+                state,
+                dispatch,
+            );
         }
+
+
         if (state.providerState.account.state !== AccountState.None) {
             this._accountUpdateHeartbeat = generateAccountHeartbeater({
                 store: this._store,
@@ -145,7 +155,7 @@ export class ZeroExInstantProvider extends React.PureComponent<
         this._swapQuoteHeartbeat.start(SWAP_QUOTE_UPDATE_INTERVAL_TIME_MS);
         // Trigger first buyquote fetch
         // tslint:disable-next-line:no-floating-promises
-        asyncData.fetchCurrentSwapQuoteAndDispatchToStore(
+        asyncData.fetchCurrentApiSwapQuoteAndDispatchToStore(
             state,
             dispatch,
             QuoteFetchOrigin.Manual,
@@ -182,9 +192,6 @@ export class ZeroExInstantProvider extends React.PureComponent<
         if (this._swapQuoteHeartbeat) {
             this._swapQuoteHeartbeat.stop();
         }
-        const state = this._store.getState();
-        // tslint:disable-next-line: no-floating-promises
-        state.providerState.swapQuoter.destroyAsync();
     }
     public render(): React.ReactNode {
         return (

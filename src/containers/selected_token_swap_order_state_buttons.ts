@@ -1,14 +1,14 @@
-import { MarketBuySwapQuote, SwapQuoteConsumer, SwapQuoteConsumerError, SwapQuoter } from '@0x/asset-swapper';
+import {  SwapQuoteConsumerError } from '@0x/asset-swapper';
 import { BigNumber } from '@0x/utils';
 import { Web3Wrapper } from '@0x/web3-wrapper';
 import * as _ from 'lodash';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 
-import { BuyOrderStateButtons } from '../components/buy_order_state_buttons';
+import { SwapOrderStateButtons } from '../components/swap_order_state_buttons';
 import { Action, actions } from '../redux/actions';
 import { State } from '../redux/reducer';
-import { AccountState, AffiliateInfo, Asset, OrderProcessState, ZeroExInstantError } from '../types';
+import { AccountState, AffiliateInfo, OrderProcessState, SwapQuoteResponse, TokenInfo, ZeroExInstantError } from '../types';
 import { analytics } from '../util/analytics';
 import { errorFlasher } from '../util/error_flasher';
 import { etherscanUtil } from '../util/etherscan';
@@ -16,55 +16,49 @@ import { etherscanUtil } from '../util/etherscan';
 interface ConnectedState {
     accountAddress?: string;
     accountEthBalanceInWei?: BigNumber;
-    swapQuote?: MarketBuySwapQuote;
+    swapQuote?: SwapQuoteResponse;
     swapOrderProcessingState: OrderProcessState;
-    swapQuoter: SwapQuoter;
-    swapQuoteConsumer: SwapQuoteConsumer;
     web3Wrapper: Web3Wrapper;
     affiliateInfo?: AffiliateInfo;
-    selectedAsset?: Asset;
+    selectedToken?: TokenInfo;
     onViewTransaction: () => void;
     onSuccess?: (txHash: string) => void;
 }
 
 // TODO(dave4506) expand errors and failures to be richer + other errors introducted in v3 of the protocol
 interface ConnectedDispatch {
-    onValidationPending: (swapQuote: MarketBuySwapQuote) => void;
-    onSignatureDenied: (swapQuote: MarketBuySwapQuote) => void;
-    onBuyProcessing: (
-        swapQuote: MarketBuySwapQuote,
+    onValidationPending: (swapQuote: SwapQuoteResponse) => void;
+    onSignatureDenied: (swapQuote: SwapQuoteResponse) => void;
+    onSwapProcessing: (
+        swapQuote: SwapQuoteResponse,
         txHash: string,
         startTimeUnix: number,
         expectedEndTimeUnix: number,
     ) => void;
-    onBuySuccess: (swapQuote: MarketBuySwapQuote, txHash: string) => void;
-    onBuyFailure: (swapQuote: MarketBuySwapQuote, txHash: string) => void;
+    onSwapSuccess: (swapQuote: SwapQuoteResponse, txHash: string) => void;
+    onSwapFailure: (swapQuote: SwapQuoteResponse, txHash: string) => void;
     onRetry: () => void;
     onValidationFail: (
-        swapQuote: MarketBuySwapQuote,
+        swapQuote: SwapQuoteResponse,
         errorMessage: SwapQuoteConsumerError | ZeroExInstantError,
     ) => void;
 }
-export interface SelectedAssetBuyOrderStateButtons {}
-const mapStateToProps = (state: State, _ownProps: SelectedAssetBuyOrderStateButtons): ConnectedState => {
-    const swapQuoter = state.providerState.swapQuoter;
-    const swapQuoteConsumer = state.providerState.swapQuoteConsumer;
-    const chainId = swapQuoteConsumer.chainId;
+export interface SelectedTokenSwapOrderStateButtons {}
+const mapStateToProps = (state: State, _ownProps: SelectedTokenSwapOrderStateButtons): ConnectedState => {
     const web3Wrapper = state.providerState.web3Wrapper;
+    const chainId = state.network;
     const account = state.providerState.account;
     const accountAddress = account.state === AccountState.Ready ? account.address : undefined;
     const accountEthBalanceInWei = account.state === AccountState.Ready ? account.ethBalanceInWei : undefined;
-    const selectedAsset = state.selectedAsset;
+    const selectedToken = state.selectedToken;
     return {
         accountAddress,
         accountEthBalanceInWei,
         swapOrderProcessingState: state.swapOrderState.processState,
-        swapQuoter,
-        swapQuoteConsumer,
         web3Wrapper,
-        swapQuote: state.latestSwapQuote,
+        swapQuote: state.latestApiSwapQuote,
         affiliateInfo: state.affiliateInfo,
-        selectedAsset,
+        selectedToken,
         onSuccess: state.onSuccess,
         onViewTransaction: () => {
             if (
@@ -86,21 +80,21 @@ const mapStateToProps = (state: State, _ownProps: SelectedAssetBuyOrderStateButt
 
 const mapDispatchToProps = (
     dispatch: Dispatch<Action>,
-    ownProps: SelectedAssetBuyOrderStateButtons,
+    ownProps: SelectedTokenSwapOrderStateButtons,
 ): ConnectedDispatch => ({
-    onValidationPending: (swapQuote: MarketBuySwapQuote) => {
+    onValidationPending: (swapQuote: SwapQuoteResponse) => {
         dispatch(actions.setSwapOrderStateValidating());
     },
-    onBuyProcessing: (
-        swapQuote: MarketBuySwapQuote,
+    onSwapProcessing: (
+        swapQuote: SwapQuoteResponse,
         txHash: string,
         startTimeUnix: number,
         expectedEndTimeUnix: number,
     ) => {
         dispatch(actions.setSwapOrderStateProcessing(txHash, startTimeUnix, expectedEndTimeUnix));
     },
-    onBuySuccess: (swapQuote: MarketBuySwapQuote, txHash: string) => dispatch(actions.setSwapOrderStateSuccess(txHash)),
-    onBuyFailure: (swapQuote: MarketBuySwapQuote, txHash: string) => dispatch(actions.setSwapOrderStateFailure(txHash)),
+    onSwapSuccess: (swapQuote: SwapQuoteResponse, txHash: string) => dispatch(actions.setSwapOrderStateSuccess(txHash)),
+    onSwapFailure: (swapQuote: SwapQuoteResponse, txHash: string) => dispatch(actions.setSwapOrderStateFailure(txHash)),
     onSignatureDenied: () => {
         dispatch(actions.resetAmount());
         const errorMessage = 'You denied this transaction';
@@ -126,14 +120,14 @@ const mapDispatchToProps = (
 const mergeProps = (
     connectedState: ConnectedState,
     connectedDispatch: ConnectedDispatch,
-    ownProps: SelectedAssetBuyOrderStateButtons,
+    ownProps: SelectedTokenSwapOrderStateButtons,
 ) => {
     return {
         ...ownProps,
         ...connectedState,
         ...connectedDispatch,
-        onBuySuccess: (swapQuote: MarketBuySwapQuote, txHash: string) => {
-            connectedDispatch.onBuySuccess(swapQuote, txHash);
+        onSwapSuccess: (swapQuote: SwapQuoteResponse, txHash: string) => {
+            connectedDispatch.onSwapSuccess(swapQuote, txHash);
             if (connectedState.onSuccess) {
                 connectedState.onSuccess(txHash);
             }
@@ -141,8 +135,8 @@ const mergeProps = (
     };
 };
 
-export const SelectedAssetBuyOrderStateButtons = connect(
+export const SelectedTokenSwapOrderStateButtons = connect(
     mapStateToProps,
     mapDispatchToProps,
     mergeProps,
-)(BuyOrderStateButtons);
+)(SwapOrderStateButtons);

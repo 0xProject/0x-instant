@@ -8,6 +8,8 @@ import {
     BaseCurrency,
     ProviderState,
     StandardSlidingPanelContent,
+    SwapQuoteResponse,
+    TokenInfo,
 } from '../types';
 
 export interface PlainAction<T extends string> {
@@ -40,10 +42,15 @@ export enum ActionTypes {
     SetSwapOrderStateFailure = 'SET_SWAP_ORDER_STATE_FAILURE',
     SetSwapOrderStateSuccess = 'SET_SWAP_ORDER_STATE_SUCCESS',
     UpdateLatestSwapQuote = 'UPDATE_LATEST_SWAP_QUOTE',
+    UpdateLatestApiSwapQuote = 'UPDATE_LATEST_API_SWAP_QUOTE',
     UpdateSelectedAsset = 'UPDATE_SELECTED_ASSET',
+    UpdateSelectedToken = 'UPDATE_SELECTED_TOKEN',
     SetAvailableAssets = 'SET_AVAILABLE_ASSETS',
+    SetAvailableTokens = 'SET_AVAILABLE_TOKENS',
     SetQuoteRequestStatePending = 'SET_QUOTE_REQUEST_STATE_PENDING',
     SetQuoteRequestStateFailure = 'SET_QUOTE_REQUEST_STATE_FAILURE',
+    SetApiQuoteRequestStatePending = 'SET_API_QUOTE_REQUEST_STATE_PENDING',
+    SetApiQuoteRequestStateFailure = 'SET_API_QUOTE_REQUEST_STATE_FAILURE',
     SetErrorMessage = 'SET_ERROR_MESSAGE',
     HideError = 'HIDE_ERROR',
     ClearError = 'CLEAR_ERROR',
@@ -71,10 +78,16 @@ export const actions = {
     setSwapOrderStateSuccess: (txHash: string) => createAction(ActionTypes.SetSwapOrderStateSuccess, txHash),
     updateLatestSwapQuote: (swapQuote?: MarketBuySwapQuote) =>
         createAction(ActionTypes.UpdateLatestSwapQuote, swapQuote),
+    updateLatestApiSwapQuote: (swapQuote?: SwapQuoteResponse) =>
+        createAction(ActionTypes.UpdateLatestApiSwapQuote, swapQuote),
     updateSelectedAsset: (asset: Asset) => createAction(ActionTypes.UpdateSelectedAsset, asset),
+    updateSelectedToken: (token: TokenInfo) => createAction(ActionTypes.UpdateSelectedToken, token),
     setAvailableAssets: (availableAssets: Asset[]) => createAction(ActionTypes.SetAvailableAssets, availableAssets),
+    setAvailableTokens: (availableTokens: TokenInfo[]) => createAction(ActionTypes.SetAvailableTokens, availableTokens),
     setQuoteRequestStatePending: () => createAction(ActionTypes.SetQuoteRequestStatePending),
     setQuoteRequestStateFailure: () => createAction(ActionTypes.SetQuoteRequestStateFailure),
+    setApiQuoteRequestStatePending: () => createAction(ActionTypes.SetApiQuoteRequestStatePending),
+    setApiQuoteRequestStateFailure: () => createAction(ActionTypes.SetApiQuoteRequestStateFailure),
     setErrorMessage: (errorMessage: string) => createAction(ActionTypes.SetErrorMessage, errorMessage),
     hideError: () => createAction(ActionTypes.HideError),
     clearError: () => createAction(ActionTypes.ClearError),

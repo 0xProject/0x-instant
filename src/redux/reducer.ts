@@ -21,6 +21,8 @@ import {
     ProviderState,
     StandardSlidingPanelContent,
     StandardSlidingPanelSettings,
+    SwapQuoteResponse,
+    TokenInfo,
 } from '../types';
 
 import { Action, ActionTypes } from './actions';
@@ -45,9 +47,18 @@ interface PropsDerivedState {
 interface OptionalState {
     selectedAsset: Asset;
     availableAssets: Asset[];
+    selectedToken: TokenInfo;
+    selectedInToken: TokenInfo;
+    selectedOutToken: TokenInfo;
+    availableTokens: TokenInfo[];
     selectedAssetUnitAmount: BigNumber;
+    selectedTokenUnitAmount: BigNumber;
+    selectedInTokenUnitAmount: BigNumber;
+    selectedOutTokenUnitAmount: BigNumber;
+    isIn: boolean;
     ethUsdPrice: BigNumber;
     latestSwapQuote: MarketBuySwapQuote;
+    latestApiSwapQuote: SwapQuoteResponse;
     latestErrorMessage: string;
     affiliateInfo: AffiliateInfo;
     walletDisplayName: string;
@@ -135,7 +146,7 @@ export const createReducer = (initialState: State) => {
                     };
                 } else {
                     return state;
-                }
+                };
             case ActionTypes.SetQuoteRequestStatePending:
                 return {
                     ...state,
@@ -146,6 +157,26 @@ export const createReducer = (initialState: State) => {
                 return {
                     ...state,
                     latestSwapQuote: undefined,
+                    quoteRequestState: AsyncProcessState.Failure,
+                };
+            case ActionTypes.UpdateLatestApiSwapQuote:
+                const newApiSwapQuoteIfExists = action.data;
+
+                return {
+                    ...state,
+                    latestApiSwapQuote: newApiSwapQuoteIfExists,
+                    quoteRequestState: AsyncProcessState.Success,
+                };
+            case ActionTypes.SetApiQuoteRequestStatePending:
+                return {
+                    ...state,
+                    latestApiSwapQuote: undefined,
+                    quoteRequestState: AsyncProcessState.Pending,
+                };
+            case ActionTypes.SetApiQuoteRequestStateFailure:
+                return {
+                    ...state,
+                    latestApiSwapQuote: undefined,
                     quoteRequestState: AsyncProcessState.Failure,
                 };
             case ActionTypes.SetSwapOrderStateNone:
@@ -240,6 +271,11 @@ export const createReducer = (initialState: State) => {
                 return {
                     ...state,
                     availableAssets: action.data,
+                };
+            case ActionTypes.SetAvailableTokens:
+                return {
+                    ...state,
+                    availableTokens: action.data,
                 };
             case ActionTypes.OpenStandardSlidingPanel:
                 return {

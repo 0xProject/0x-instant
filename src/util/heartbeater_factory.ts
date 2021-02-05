@@ -18,7 +18,7 @@ export const generateAccountHeartbeater = (options: HeartbeatFactoryOptions): He
 export const generateSwapQuoteHeartbeater = (options: HeartbeatFactoryOptions): Heartbeater => {
     const { store, shouldPerformImmediatelyOnStart } = options;
     return new Heartbeater(async () => {
-        await asyncData.fetchCurrentSwapQuoteAndDispatchToStore(
+        await asyncData.fetchCurrentApiSwapQuoteAndDispatchToStore(
             store.getState(),
             store.dispatch,
             QuoteFetchOrigin.Heartbeat,

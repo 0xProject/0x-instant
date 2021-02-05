@@ -1,0 +1,41 @@
+import * as _ from 'lodash';
+import * as React from 'react';
+import { connect } from 'react-redux';
+import { Dispatch } from 'redux';
+
+import { Action, actions } from '../redux/actions';
+import { State } from '../redux/reducer';
+
+import { OrderDetails, OrderDetailsProps } from '../components/order_details';
+import { AsyncProcessState, BaseCurrency, Omit } from '../types';
+import { OrderSwapDetailsProps } from '../components/order_swap_details';
+
+type DispatchProperties = 'onBaseCurrencySwitchEth' | 'onBaseCurrencySwitchUsd';
+
+interface ConnectedState extends Omit<OrderSwapDetailsProps, DispatchProperties> {}
+const mapStateToProps = (state: State, _ownProps: LatestSwapQuoteOrderDetailsProps): ConnectedState => ({
+    // use the worst case quote info
+    swapQuote: state.latestApiSwapQuote,
+    selectedTokenUnitAmount: state.selectedTokenUnitAmount,
+    ethUsdPrice: state.ethUsdPrice,
+    isLoading: state.quoteRequestState === AsyncProcessState.Pending,
+    tokenName: state.selectedToken === undefined ? undefined : state.selectedToken.name,
+    baseCurrency: state.baseCurrency,
+    account: state.providerState.account,
+});
+
+interface ConnectedDispatch extends Pick<OrderDetailsProps, DispatchProperties> {}
+const mapDispatchToProps = (dispatch: Dispatch<Action>): ConnectedDispatch => ({
+    onBaseCurrencySwitchEth: () => {
+        dispatch(actions.updateBaseCurrency(BaseCurrency.ETH));
+    },
+    onBaseCurrencySwitchUsd: () => {
+        dispatch(actions.updateBaseCurrency(BaseCurrency.USD));
+    },
+});
+
+export interface LatestSwapQuoteOrderDetailsProps {}
+export const LatestSwapQuoteOrderDetails: React.ComponentClass<LatestSwapQuoteOrderDetailsProps> = connect(
+    mapStateToProps,
+    mapDispatchToProps,
+)(OrderDetails);

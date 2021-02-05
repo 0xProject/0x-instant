@@ -2,28 +2,28 @@ import { AssetProxyId } from '@0x/types';
 import { BigNumber } from '@0x/utils';
 import * as _ from 'lodash';
 import * as React from 'react';
+import { SelectedERC20AmountInput } from '../containers/selected_erc20_amount_input';
 
-import { SelectedERC20AssetAmountInput } from '../containers/selected_erc20_asset_amount_input';
 import { ColorOption } from '../style/theme';
-import { Asset, AsyncProcessState, ERC20Asset, ERC721Asset, OrderProcessState, OrderState } from '../types';
+import {  AsyncProcessState,  OrderProcessState, OrderState, TokenInfo } from '../types';
 import { format } from '../util/format';
 
 import { AmountPlaceholder } from './amount_placeholder';
 import { Container } from './ui/container';
 import { Flex } from './ui/flex';
 import { Icon } from './ui/icon';
-import { Image } from './ui/image';
 import { Spinner } from './ui/spinner';
 import { Text } from './ui/text';
 
-export interface InstantHeadingProps {
-    selectedAsset?: Asset;
-    selectedAssetUnitAmount?: BigNumber;
+export interface InstantTokenHeadingProps {
+    selectedToken?: TokenInfo;
+    selectedTokenUnitAmount?: BigNumber;
     totalEthBaseUnitAmount?: BigNumber;
     ethUsdPrice?: BigNumber;
     quoteRequestState: AsyncProcessState;
     swapOrderState: OrderState;
-    onSelectAssetClick?: (asset?: ERC20Asset) => void;
+    isIn: boolean;
+    onSelectTokenClick?: (token?: TokenInfo) => void;
 }
 
 const PLACEHOLDER_COLOR = ColorOption.white;
@@ -31,55 +31,23 @@ const ICON_WIDTH = 34;
 const ICON_HEIGHT = 34;
 const ICON_COLOR = ColorOption.white;
 
-export class InstantHeading extends React.PureComponent<InstantHeadingProps, {}> {
+export class InstantTokenHeading extends React.PureComponent<InstantTokenHeadingProps, {}> {
     public render(): React.ReactNode {
-        return this._renderAssetHeadingContent();
+        return this._renderTokenHeadingContent();
     }
 
-    private _renderAssetHeadingContent(): React.ReactNode {
-        const { selectedAsset } = this.props;
-        if (selectedAsset === undefined) {
+    private _renderTokenHeadingContent(): React.ReactNode {
+        const { selectedToken } = this.props;
+        if (selectedToken === undefined) {
             // TODO: Only the ERC20 flow supports selecting assets.
             return this._renderERC20AssetHeading();
         }
-        if (selectedAsset.metaData.assetProxyId === AssetProxyId.ERC20) {
+        if (selectedToken) {
             return this._renderERC20AssetHeading();
-        } else if (selectedAsset.metaData.assetProxyId === AssetProxyId.ERC721) {
-            return this._renderERC721AssetHeading(selectedAsset as ERC721Asset);
-        }
+        } 
         return null;
     }
-    // tslint:disable-next-line:prefer-function-over-method
-    private _renderERC721AssetHeading(asset: ERC721Asset): React.ReactNode {
-        return (
-            <Container width="100%" padding="30px 0px 0px">
-                <Flex>
-                    <Text
-                        textTransform="uppercase"
-                        fontColor={ColorOption.primaryColor}
-                        fontWeight={700}
-                        fontSize="20px"
-                    >
-                        {asset.metaData.name}
-                    </Text>
-                </Flex>
-                <Flex>
-                    <Container
-                        marginTop="15px"
-                        width="200px"
-                        height="200px"
-                        position="relative"
-                        overflow="hidden"
-                        borderRadius="50%"
-                    >
-                        <Flex justify="center" align="center" height="100%">
-                            <Image src={asset.metaData.imageUrl} height="100%" objectFit="cover" />
-                        </Flex>
-                    </Container>
-                </Flex>
-            </Container>
-        );
-    }
+  
 
     private _renderERC20AssetHeading(): React.ReactNode {
         const iconOrAmounts = this._renderIcon() || this._renderAmountsSection();
@@ -99,9 +67,9 @@ export class InstantHeading extends React.PureComponent<InstantHeadingProps, {}>
                 </Container>
                 <Flex direction="row" justify="space-between">
                     <Flex height="60px">
-                        <SelectedERC20AssetAmountInput
+                        <SelectedERC20AmountInput
                             startingFontSizePx={38}
-                            onSelectAssetClick={this.props.onSelectAssetClick}
+                            onSelectTokenClick={this.props.onSelectTokenClick}
                         />
                     </Flex>
                     <Flex direction="column" justify="space-between">
@@ -150,15 +118,20 @@ export class InstantHeading extends React.PureComponent<InstantHeadingProps, {}>
         } else if (processState === OrderProcessState.Success) {
             return 'Tokens received!';
         }
+        if(this.props.isIn){
+            return 'You send';
+        }else{
+            return 'You receive';
+        }
 
-        return 'I want to buy';
+      
     }
 
     private _renderPlaceholderOrAmount(amountFunction: () => React.ReactNode): React.ReactNode {
         if (this.props.quoteRequestState === AsyncProcessState.Pending) {
             return <AmountPlaceholder isPulsating={true} color={PLACEHOLDER_COLOR} />;
         }
-        if (this.props.selectedAssetUnitAmount === undefined) {
+        if (this.props.selectedTokenUnitAmount === undefined) {
             return <AmountPlaceholder isPulsating={false} color={PLACEHOLDER_COLOR} />;
         }
         return amountFunction();

@@ -11,6 +11,7 @@ import {
     OrderSource,
     ProviderState,
     QuoteFetchOrigin,
+    SwapQuoteResponse,
     WalletSuggestion,
 } from '../types';
 
@@ -49,6 +50,14 @@ enum EventNames {
     BuyTxSubmitted = 'Buy - Tx Submitted',
     BuyTxSucceeded = 'Buy - Tx Succeeded',
     BuyTxFailed = 'Buy - Tx Failed',
+    SwapNotEnoughEth = 'Swap - Not Enough Eth',
+    SwapStarted = 'Swap - Started',
+    SwapSignatureDenied = 'Swap - Signature Denied',
+    SwapSimulationFailed = 'Swap - Simulation Failed',
+    SwapUnknownError = 'Swap - Unknown Error',
+    SwapTxSubmitted = 'Swap - Tx Submitted',
+    SwapTxSucceeded = 'Swap - Tx Succeeded',
+    SwapTxFailed = 'Swap - Tx Failed',
     UsdPriceFetchFailed = 'USD Price - Fetch Failed',
     InstallWalletClicked = 'Install Wallet - Clicked',
     InstallWalletModalOpened = 'Install Wallet - Modal - Opened',
@@ -81,6 +90,7 @@ function trackingEventFnWithPayload(eventName: EventNames): (eventProperties: Ev
     };
 }
 
+
 const swapQuoteEventProperties = (swapQuote: MarketBuySwapQuote) => {
     const makerAssetFillAmount = swapQuote.makerAssetFillAmount.toString();
     const assetEthAmount = swapQuote.worstCaseQuoteInfo.takerAssetAmount.toString();
@@ -89,6 +99,23 @@ const swapQuoteEventProperties = (swapQuote: MarketBuySwapQuote) => {
         .toString();
     const totalEthAmount = swapQuote.worstCaseQuoteInfo.totalTakerAssetAmount
         .plus(swapQuote.worstCaseQuoteInfo.protocolFeeInWeiAmount)
+        .toString();
+    return {
+        makerAssetFillAmount,
+        assetEthAmount,
+        feeEthAmount,
+        totalEthAmount,
+        gasPrice: swapQuote.gasPrice.toString(),
+    };
+};
+
+const swapApiQuoteEventProperties = (swapQuote: SwapQuoteResponse) => {
+    const makerAssetFillAmount = swapQuote.sellAmount.toString();
+    const assetEthAmount = swapQuote.buyAmount.toString();
+    const feeEthAmount = swapQuote.estimatedGas.toString()
+    
+    const totalEthAmount = swapQuote.sellAmount
+        .plus(swapQuote.protocolFee)
         .toString();
     return {
         makerAssetFillAmount,
@@ -184,17 +211,41 @@ export const analytics = {
     trackPaymentMethodCopiedAddress: trackingEventFnWithoutPayload(EventNames.PaymentMethodCopiedAddress),
     trackBuyNotEnoughEth: (swapQuote: MarketBuySwapQuote) =>
         trackingEventFnWithPayload(EventNames.BuyNotEnoughEth)(swapQuoteEventProperties(swapQuote)),
+    trackSwapNotEnoughEth: (swapQuote: SwapQuoteResponse) =>
+        trackingEventFnWithPayload(EventNames.SwapNotEnoughEth)(swapApiQuoteEventProperties(swapQuote)),
     trackBuyStarted: (swapQuote: MarketBuySwapQuote) =>
         trackingEventFnWithPayload(EventNames.BuyStarted)(swapQuoteEventProperties(swapQuote)),
+    trackSwapStarted: (swapQuote: SwapQuoteResponse) =>
+        trackingEventFnWithPayload(EventNames.SwapStarted)(swapApiQuoteEventProperties(swapQuote)),
     trackBuySignatureDenied: (swapQuote: MarketBuySwapQuote) =>
         trackingEventFnWithPayload(EventNames.BuySignatureDenied)(swapQuoteEventProperties(swapQuote)),
+    trackSwapSignatureDenied: (swapQuote: SwapQuoteResponse) =>
+        trackingEventFnWithPayload(EventNames.SwapSignatureDenied)(swapApiQuoteEventProperties(swapQuote)),
     trackBuySimulationFailed: (swapQuote: MarketBuySwapQuote) =>
         trackingEventFnWithPayload(EventNames.BuySimulationFailed)(swapQuoteEventProperties(swapQuote)),
+    trackSwapSimulationFailed: (swapQuote: SwapQuoteResponse) =>
+        trackingEventFnWithPayload(EventNames.SwapSimulationFailed)(swapApiQuoteEventProperties(swapQuote)),
     trackBuyUnknownError: (swapQuote: MarketBuySwapQuote, errorMessage: string) =>
         trackingEventFnWithPayload(EventNames.BuyUnknownError)({
             ...swapQuoteEventProperties(swapQuote),
             errorMessage,
         }),
+    trackSwapUnknownError: (swapQuote: SwapQuoteResponse, errorMessage: string) =>
+        trackingEventFnWithPayload(EventNames.BuyUnknownError)({
+            ...swapApiQuoteEventProperties(swapQuote),
+            errorMessage,
+        }),
+    trackSwapTxSubmitted: (
+            swapQuote: SwapQuoteResponse,
+            txHash: string,
+            startTimeUnix: number,
+            expectedEndTimeUnix: number,
+        ) =>
+            trackingEventFnWithPayload(EventNames.SwapTxSubmitted)({
+                ...swapApiQuoteEventProperties(swapQuote),
+                txHash,
+                expectedTxTimeMs: expectedEndTimeUnix - startTimeUnix,
+            }),
     trackBuyTxSubmitted: (
         swapQuote: MarketBuySwapQuote,
         txHash: string,
@@ -218,6 +269,18 @@ export const analytics = {
             expectedTxTimeMs: expectedEndTimeUnix - startTimeUnix,
             actualTxTimeMs: new Date().getTime() - startTimeUnix,
         }),
+    trackSwapTxSucceeded: (
+            swapQuote: SwapQuoteResponse,
+            txHash: string,
+            startTimeUnix: number,
+            expectedEndTimeUnix: number,
+        ) =>
+            trackingEventFnWithPayload(EventNames.SwapTxSucceeded)({
+                ...swapApiQuoteEventProperties(swapQuote),
+                txHash,
+                expectedTxTimeMs: expectedEndTimeUnix - startTimeUnix,
+                actualTxTimeMs: new Date().getTime() - startTimeUnix,
+            }),
     trackBuyTxFailed: (
         swapQuote: MarketBuySwapQuote,
         txHash: string,
@@ -230,6 +293,18 @@ export const analytics = {
             expectedTxTimeMs: expectedEndTimeUnix - startTimeUnix,
             actualTxTimeMs: new Date().getTime() - startTimeUnix,
         }),
+    trackSwapTxFailed: (
+            swapQuote: SwapQuoteResponse,
+            txHash: string,
+            startTimeUnix: number,
+            expectedEndTimeUnix: number,
+        ) =>
+            trackingEventFnWithPayload(EventNames.SwapTxFailed)({
+                ...swapApiQuoteEventProperties(swapQuote),
+                txHash,
+                expectedTxTimeMs: expectedEndTimeUnix - startTimeUnix,
+                actualTxTimeMs: new Date().getTime() - startTimeUnix,
+            }),
     trackInstallWalletClicked: (walletSuggestion: WalletSuggestion) =>
         trackingEventFnWithPayload(EventNames.InstallWalletClicked)({ walletSuggestion }),
     trackInstallWalletModalClickedExplanation: trackingEventFnWithoutPayload(
@@ -250,6 +325,11 @@ export const analytics = {
     trackQuoteFetched: (swapQuote: MarketBuySwapQuote, fetchOrigin: QuoteFetchOrigin) =>
         trackingEventFnWithPayload(EventNames.QuoteFetched)({
             ...swapQuoteEventProperties(swapQuote),
+            fetchOrigin,
+        }),
+    trackApiQuoteFetched: (swapQuote: SwapQuoteResponse, fetchOrigin: QuoteFetchOrigin) =>
+        trackingEventFnWithPayload(EventNames.QuoteFetched)({
+            ...swapApiQuoteEventProperties(swapQuote),
             fetchOrigin,
         }),
     trackQuoteError: (errorMessage: string, makerAssetFillAmount: BigNumber, fetchOrigin: QuoteFetchOrigin) => {

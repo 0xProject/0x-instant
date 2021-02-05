@@ -110,3 +110,5 @@ export const DEFAULT_AFFILIATE_INFO: AffiliateInfo = {
 };
 
 export const FORTMATIC_API_KEY = process.env.INSTANT_FORTMATIC_API_KEY;
+
+export const ZRX_API_URL = 'https://api.0x.org/swap/v1';
