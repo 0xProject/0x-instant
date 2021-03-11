@@ -10,7 +10,8 @@ import { ERC20TokenSelector } from '../components/erc20_token_selector';
 import { Action, actions } from '../redux/actions';
 
 export interface AvailableERC20TokenSelectorProps {
-    onTokenSelect?: (token: TokenInfo) => void;
+    onTokenSelect?: (token: TokenInfo, isIn: boolean) => void;
+    isIn: boolean;
 }
 
 interface ConnectedState {
@@ -18,7 +19,7 @@ interface ConnectedState {
 }
 
 interface ConnectedDispatch {
-    onTokenSelect: (token: TokenInfo) => void;
+    onTokenSelect: (token: TokenInfo, isIn: boolean) => void;
 }
 
 const mapStateToProps = (state: State, _ownProps: AvailableERC20TokenSelectorProps): ConnectedState => ({
@@ -29,11 +30,17 @@ const mapDispatchToProps = (
     dispatch: Dispatch<Action>,
     ownProps: AvailableERC20TokenSelectorProps,
 ): ConnectedDispatch => ({
-    onTokenSelect: (token: TokenInfo) => {
-        dispatch(actions.updateSelectedToken(token));
+    onTokenSelect: (token: TokenInfo, isIn: boolean) => {
+        if(isIn){
+            dispatch(actions.updateSelectedTokenIn(token));
+        }else{
+            dispatch(actions.updateSelectedTokenOut(token));
+        }
+
+    
         dispatch(actions.resetAmount());
         if (ownProps.onTokenSelect) {
-            ownProps.onTokenSelect(token);
+            ownProps.onTokenSelect(token, isIn);
         }
     },
 });

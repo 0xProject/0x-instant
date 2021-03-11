@@ -16,10 +16,10 @@ interface ConnectedState extends Omit<OrderSwapDetailsProps, DispatchProperties>
 const mapStateToProps = (state: State, _ownProps: LatestSwapQuoteOrderDetailsProps): ConnectedState => ({
     // use the worst case quote info
     swapQuote: state.latestApiSwapQuote,
-    selectedTokenUnitAmount: state.selectedTokenUnitAmount,
+    selectedTokenUnitAmount: state.selectedTokenAmountOut,
     ethUsdPrice: state.ethUsdPrice,
     isLoading: state.quoteRequestState === AsyncProcessState.Pending,
-    tokenName: state.selectedToken === undefined ? undefined : state.selectedToken.name,
+    tokenName: state.selectedTokenOut === undefined ? undefined : state.selectedTokenOut.name,
     baseCurrency: state.baseCurrency,
     account: state.providerState.account,
 });

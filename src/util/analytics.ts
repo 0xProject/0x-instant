@@ -114,7 +114,7 @@ const swapApiQuoteEventProperties = (swapQuote: SwapQuoteResponse) => {
     const assetEthAmount = swapQuote.buyAmount.toString();
     const feeEthAmount = swapQuote.estimatedGas.toString()
     
-    const totalEthAmount = swapQuote.sellAmount
+    const totalEthAmount = new BigNumber(swapQuote.sellAmount)
         .plus(swapQuote.protocolFee)
         .toString();
     return {

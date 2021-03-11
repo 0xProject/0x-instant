@@ -194,9 +194,6 @@ export enum ProviderType {
     Fallback = 'FALLBACK',
 }
 
-export interface ZeroExInstantRequiredBaseConfig {
-    orderSource: OrderSource;
-}
 
 export interface AffiliateInfo {
     feeRecipient: string;
@@ -206,20 +203,18 @@ export interface AffiliateInfo {
 export interface ZeroExInstantOptionalBaseConfig {
     provider: SupportedProvider;
     walletDisplayName: string;
-    availableAssetDatas: string[];
-    defaultAssetBuyAmount: number;
-    defaultSelectedAssetData: string;
-    defaultSelectedToken: string;
-    additionalAssetMetaDataMap: ObjectMap<AssetMetaData>;
-    networkId: ChainId;
+    defaultSelectedTokenIn: TokenInfo;
+    defaultSelectedTokenOut: TokenInfo;
+    defaultAmountTokenIn: number;
+    defaultAmountTokenOut: number;
+    chainId: ChainId;
     affiliateInfo: AffiliateInfo;
-    tokenList: string;
+    tokenList: string | TokenList;
     shouldDisableAnalyticsTracking: boolean;
     onSuccess?: (txHash: string) => void;
 }
 
-export type ZeroExInstantBaseConfig = ZeroExInstantRequiredBaseConfig &
-    Partial<ZeroExInstantOptionalBaseConfig>;
+export type ZeroExInstantBaseConfig = Partial<ZeroExInstantOptionalBaseConfig>;
 
 
 export interface SwapQuoteResponse extends SwapQuoteResponsePartialTransaction, SwapQuoteResponsePrice {

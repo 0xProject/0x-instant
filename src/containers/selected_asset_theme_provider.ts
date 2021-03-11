@@ -23,7 +23,7 @@ const getTheme = (asset?: Asset): Theme => {
 };
 
 const mapStateToProps = (state: State, _ownProps: SelectedAssetThemeProviderProps): ConnectedState => {
-    const theme = getTheme(state.selectedAsset);
+    const theme = getTheme();
     return { theme };
 };
 

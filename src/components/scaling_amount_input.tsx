@@ -42,7 +42,7 @@ export class ScalingAmountInput extends React.PureComponent<ScalingAmountInputPr
     public componentDidUpdate(): void {
         const parsedStateValue = stringToMaybeBigNumber(this.state.stringValue);
         const currentValue = this.props.value;
-
+        console.log(currentValue);
         if (!areMaybeBigNumbersEqual(parsedStateValue, currentValue)) {
             // we somehow got into the state in which the value passed in and the string value
             // in state have differed, reset state

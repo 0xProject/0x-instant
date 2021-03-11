@@ -31,10 +31,12 @@ export const asyncData = {
     },
     fetchTokenListAndDispatchToStore: async (state: State, dispatch: Dispatch) => {
   
-        try {
-            
+        try {      
             const tokenList = await fetch(defaultTokenList).then(r => r.json()) as TokenList;
             dispatch(actions.setAvailableTokens(tokenList.tokens));
+
+            dispatch(actions.updateSelectedTokenIn(tokenList.tokens[0]));
+            dispatch(actions.updateSelectedTokenOut(tokenList.tokens[1]));
 
         } catch (e) {
             const errorMessage = 'Could not find any tokens';
@@ -140,19 +142,23 @@ export const asyncData = {
         fetchOrigin: QuoteFetchOrigin,
         options: { updateSilently: boolean },
     ) => {
-        const { swapOrderState, providerState, selectedToken, selectedTokenUnitAmount } = state;
-        const takerAddress = providerState.account.state;
+        const { swapOrderState, providerState, selectedTokenIn, selectedTokenOut, selectedTokenAmountOut, selectedTokenAmountIn, isIn } = state;
+        const takerAddress = providerState.account.state === AccountState.Ready ? providerState.account.address : '';
+        const selectedTokenUnitAmount = isIn ? selectedTokenAmountIn : selectedTokenAmountOut;
        
         if (
             selectedTokenUnitAmount !== undefined &&
-            selectedToken !== undefined &&
+            selectedTokenIn !== undefined &&
+            selectedTokenOut !== undefined &&
             selectedTokenUnitAmount.isGreaterThan(BIG_NUMBER_ZERO) &&
             swapOrderState.processState === OrderProcessState.None
         ) {
             await apiQuoteUpdater.updateSwapQuoteAsync(
                 dispatch,
+                isIn,
                 takerAddress,
-                selectedToken,
+                selectedTokenIn,
+                selectedTokenOut,
                 selectedTokenUnitAmount,
                 fetchOrigin,
                 {

@@ -30,7 +30,6 @@ import { Action, ActionTypes } from './actions';
 // State that is required and we have defaults for, before props are passed in
 export interface DefaultState {
     network: ChainId;
-    assetMetaDataMap: ObjectMap<AssetMetaData>;
     swapOrderState: OrderState;
     latestErrorDisplayStatus: DisplayStatus;
     quoteRequestState: AsyncProcessState;
@@ -45,16 +44,11 @@ interface PropsDerivedState {
 
 // State that is optional
 interface OptionalState {
-    selectedAsset: Asset;
-    availableAssets: Asset[];
-    selectedToken: TokenInfo;
-    selectedInToken: TokenInfo;
-    selectedOutToken: TokenInfo;
+    selectedTokenIn: TokenInfo;
+    selectedTokenOut: TokenInfo;
     availableTokens: TokenInfo[];
-    selectedAssetUnitAmount: BigNumber;
-    selectedTokenUnitAmount: BigNumber;
-    selectedInTokenUnitAmount: BigNumber;
-    selectedOutTokenUnitAmount: BigNumber;
+    selectedTokenAmountIn: BigNumber;
+    selectedTokenAmountOut: BigNumber;
     isIn: boolean;
     ethUsdPrice: BigNumber;
     latestSwapQuote: MarketBuySwapQuote;
@@ -69,7 +63,6 @@ export type State = DefaultState & PropsDerivedState & Partial<OptionalState>;
 
 export const DEFAULT_STATE: DefaultState = {
     network: ChainId.Mainnet,
-    assetMetaDataMap,
     swapOrderState: { processState: OrderProcessState.None },
     latestErrorDisplayStatus: DisplayStatus.Hidden,
     quoteRequestState: AsyncProcessState.None,
@@ -123,30 +116,26 @@ export const createReducer = (initialState: State) => {
                     return reduceStateWithAccount(state, newAccount);
                 }
             }
+            case ActionTypes.SetIsIn:
+                return {
+                    ...state,
+                    isIn: action.data,
+                };
             case ActionTypes.UpdateEthUsdPrice:
                 return {
                     ...state,
                     ethUsdPrice: action.data,
                 };
-            case ActionTypes.UpdateSelectedAssetUnitAmount:
-                return {
-                    ...state,
-                    selectedAssetUnitAmount: action.data,
-                };
-            case ActionTypes.UpdateLatestSwapQuote:
-                const newSwapQuoteIfExists = action.data;
-                const shouldUpdate =
-                    newSwapQuoteIfExists === undefined ||
-                    doesSwapQuoteMatchState(newSwapQuoteIfExists, state);
-                if (shouldUpdate) {
+            case ActionTypes.UpdateSelectedTokenAmountOut:
                     return {
                         ...state,
-                        latestSwapQuote: newSwapQuoteIfExists,
-                        quoteRequestState: AsyncProcessState.Success,
+                        selectedTokenAmountOut: action.data,
                     };
-                } else {
-                    return state;
-                };
+            case ActionTypes.UpdateSelectedTokenAmountIn:
+                    return {
+                        ...state,
+                        selectedTokenAmountIn: action.data,
+                    };
             case ActionTypes.SetQuoteRequestStatePending:
                 return {
                     ...state,
@@ -254,10 +243,15 @@ export const createReducer = (initialState: State) => {
                     latestErrorMessage: undefined,
                     latestErrorDisplayStatus: DisplayStatus.Hidden,
                 };
-            case ActionTypes.UpdateSelectedAsset:
+            case ActionTypes.UpdateSelectedTokenIn:
                 return {
                     ...state,
-                    selectedAsset: action.data,
+                    selectedTokenIn: action.data,
+                };
+            case ActionTypes.UpdateSelectedTokenOut:
+                return {
+                    ...state,
+                    selectedTokenOut: action.data,
                 };
             case ActionTypes.ResetAmount:
                 return {
@@ -265,12 +259,8 @@ export const createReducer = (initialState: State) => {
                     latestSwapQuote: undefined,
                     quoteRequestState: AsyncProcessState.None,
                     swapOrderState: { processState: OrderProcessState.None },
-                    selectedAssetUnitAmount: undefined,
-                };
-            case ActionTypes.SetAvailableAssets:
-                return {
-                    ...state,
-                    availableAssets: action.data,
+                    selectedTokenAmountIn: undefined,
+                    selectedTokenAmountOut: undefined,
                 };
             case ActionTypes.SetAvailableTokens:
                 return {
@@ -323,35 +313,26 @@ const reduceStateWithAccount = (state: State, account: Account) => {
 };
 
 const doesSwapQuoteMatchState = (
-    swapQuote: MarketBuySwapQuote,
+    swapQuote: SwapQuoteResponse,
     state: State,
 ): boolean => {
-    const selectedAssetIfExists = state.selectedAsset;
-    const selectedAssetUnitAmountIfExists = state.selectedAssetUnitAmount;
+    const selectedTokenIn = state.selectedTokenIn;
+    const selectedTokenAmountIn = state.selectedTokenAmountIn;
+    const selectedTokenOut = state.selectedTokenOut;
+    const selectedTokenAmountOut = state.selectedTokenAmountOut;
     // if no selectedAsset or selectedAssetAmount exists on the current state, return false
     if (
-        selectedAssetIfExists === undefined ||
-        selectedAssetUnitAmountIfExists === undefined
+        selectedTokenIn === undefined ||
+        selectedTokenAmountIn === undefined ||
+        selectedTokenOut === undefined || 
+        selectedTokenAmountOut === undefined
     ) {
         return false;
     }
-    // if swapQuote's assetData does not match that of the current selected asset, return false
-    if (selectedAssetIfExists.assetData !== swapQuote.makerAssetData) {
-        return false;
+  
+    if(swapQuote === state.latestApiSwapQuote){
+        return true
     }
-    // if ERC20 and swapQuote's makerAssetFillAmount does not match selectedAssetAmount, return false
-    // if ERC721, return true
-    const selectedAssetMetaData = selectedAssetIfExists.metaData;
-    if (selectedAssetMetaData.assetProxyId === AssetProxyId.ERC20) {
-        const selectedAssetAmountBaseUnits = Web3Wrapper.toBaseUnitAmount(
-            selectedAssetUnitAmountIfExists,
-            selectedAssetMetaData.decimals,
-        );
-        const doesAssetAmountMatch = selectedAssetAmountBaseUnits.eq(
-            swapQuote.makerAssetFillAmount,
-        );
-        return doesAssetAmountMatch;
-    } else {
-        return true;
-    }
+  
+   
 };

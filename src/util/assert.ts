@@ -3,7 +3,7 @@ import { schemas } from '@0x/json-schemas';
 import { AssetProxyId, ObjectMap, SignedOrder } from '@0x/types';
 import * as _ from 'lodash';
 
-import { AffiliateInfo, AssetMetaData } from '../types';
+import { AffiliateInfo, AssetMetaData, TokenInfo } from '../types';
 
 import { decodeAssetProxyId } from './asset_data_encoder';
 
@@ -52,5 +52,15 @@ export const assert = {
             affiliateInfo.feePercentage >= 0 && affiliateInfo.feePercentage <= 0.05,
             `Expected ${variableName}.percentage to be between 0 and 0.05, but is ${affiliateInfo.feePercentage}`,
         );
+    },
+
+    isTokenInfo(variableName: string, token: TokenInfo): void {
+        assert.isETHAddressHex(`${variableName}.address`, token.address);
+        assert.isNumber(`${variableName}.decimals`, token.decimals);
+        assert.isNumber(`${variableName}.chainId`, token.chainId);
+        assert.isString(`${variableName}.name`, token.name);
+        assert.isString(`${variableName}.symbol`, token.symbol);
+        assert.isWebUri(`${variableName}.logoUri`, token.logoURI);
+          
     },
 };

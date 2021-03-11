@@ -18,9 +18,13 @@ import { Text } from './ui/text';
 // Asset amounts only apply to ERC20 assets
 export interface ERC20AmountInputProps {
     token?: TokenInfo;
-    value?: BigNumber;
-    onChange: (value?: BigNumber, token?: TokenInfo) => void;
-    onSelectTokenClick?: (token?: TokenInfo) => void;
+    tokenIn?: TokenInfo;
+    tokenOut?: TokenInfo;
+    valueIn?: BigNumber;
+    valueOut?: BigNumber;
+    isInInput?: boolean;
+    onChange: (value?: BigNumber, tokenIn?: TokenInfo, tokenOut?: TokenInfo, isIn?: boolean) => void;
+    onSelectTokenClick?: () => void;
     startingFontSizePx: number;
     fontColor?: ColorOption;
     isInputDisabled: boolean;
@@ -44,7 +48,9 @@ export class ERC20AmountInput extends React.PureComponent<ERC20AmountInputProps,
         };
     }
     public render(): React.ReactNode {
-        const { token } = this.props;
+        const { tokenOut, tokenIn, isInInput } = this.props;
+        console.log(isInInput);
+        const token = isInInput ? tokenIn : tokenOut;
         return (
             <Container whiteSpace="nowrap">
                 {token === undefined ? this._renderTokenSelectionContent() : this._renderContentForToken(token)}
@@ -60,6 +66,7 @@ export class ERC20AmountInput extends React.PureComponent<ERC20AmountInputProps,
                 <Container borderBottom={amountBorderBottom} display="inline-block">
                     <ScalingAmountInput
                         {...rest}
+                        value={this.props.isInInput ? this.props.valueIn : this.props.valueOut}
                         isDisabled={isInputDisabled}
                         textLengthThreshold={this._textLengthThresholdForToken(token)}
                         maxFontSizePx={this.props.startingFontSizePx}
@@ -123,8 +130,12 @@ export class ERC20AmountInput extends React.PureComponent<ERC20AmountInputProps,
             </Container>
         );
     };
+
     private readonly _handleChange = (value?: BigNumber): void => {
-        this.props.onChange(value, this.props.token);
+        this.props.onChange(value, 
+            this.props.tokenIn, 
+            this.props.tokenOut, 
+            this.props.isInInput);
     };
     private readonly _handleFontSizeChange = (fontSizePx: number): void => {
         this.setState({
@@ -148,6 +159,8 @@ export class ERC20AmountInput extends React.PureComponent<ERC20AmountInputProps,
         if (this.props.onSelectTokenClick) {
             this.props.onSelectTokenClick();
         }
+       // console.log(this.props.token, this.props.isInInput )
+      //  this.props.onUpdateSelectedToken(this.props.token, this.props.isInInput);
     };
     // For tokens with symbols of different length,
     // start scaling the input at different character lengths
@@ -155,7 +168,6 @@ export class ERC20AmountInput extends React.PureComponent<ERC20AmountInputProps,
         if (token === undefined) {
             return 3;
         }
-        console.log(token);
         const symbol = token.symbol;
         if (symbol.length <= 3) {
             return 5;

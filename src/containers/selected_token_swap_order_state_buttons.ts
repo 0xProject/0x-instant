@@ -50,7 +50,7 @@ const mapStateToProps = (state: State, _ownProps: SelectedTokenSwapOrderStateBut
     const account = state.providerState.account;
     const accountAddress = account.state === AccountState.Ready ? account.address : undefined;
     const accountEthBalanceInWei = account.state === AccountState.Ready ? account.ethBalanceInWei : undefined;
-    const selectedToken = state.selectedToken;
+    const selectedToken = state.selectedTokenIn;
     return {
         accountAddress,
         accountEthBalanceInWei,

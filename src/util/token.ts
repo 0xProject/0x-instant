@@ -1,7 +1,7 @@
 import { BigNumber, InsufficientAssetLiquidityError, SwapQuoterError } from '@0x/asset-swapper';
 import { Web3Wrapper } from '@0x/web3-wrapper';
 import * as _ from 'lodash';
-
+import createKeccakHash from 'keccak';
 import {  BIG_NUMBER_ZERO, DEFAULT_UNKOWN_ASSET_NAME } from '../constants';
 
 import {  TokenInfo } from '../types';
@@ -53,4 +53,22 @@ export const tokenUtils = {
 
         return undefined;
     },
+    // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-55.md
+    toChecksum: (address: string) => {
+        address = address.toLowerCase().replace('0x', '')
+        const hash = createKeccakHash('keccak256').update(address).digest('hex')
+        let ret = '0x';
+
+        for (let i = 0; i < address.length; i++) {
+            if (parseInt(hash[i], 16) >= 8) {
+            ret += address[i].toUpperCase();
+            } else {
+            ret += address[i];
+            }
+        }
+
+        return ret
+
+    }
+    
 };

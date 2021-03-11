@@ -31,31 +31,34 @@ const validateInstantRenderConfig = (
     config: ZeroExInstantConfig,
     selector: string,
 ) => {
-    assert.isValidOrderSource('orderSource', config.orderSource);
-    if (config.defaultSelectedAssetData !== undefined) {
-        assert.isHexString(
-            'defaultSelectedAssetData',
-            config.defaultSelectedAssetData,
+   
+    if (config.defaultSelectedTokenIn !== undefined) {
+        assert.isTokenInfo(
+            'defaultSelectedTokenIn',
+            config.defaultSelectedTokenIn,
         );
     }
-    if (config.additionalAssetMetaDataMap !== undefined) {
-        assert.isValidAssetMetaDataMap(
-            'additionalAssetMetaDataMap',
-            config.additionalAssetMetaDataMap,
+
+    if (config.defaultSelectedTokenOut !== undefined) {
+        assert.isTokenInfo(
+            'defaultSelectedTokenIn',
+            config.defaultSelectedTokenOut,
         );
     }
-    if (config.defaultAssetBuyAmount !== undefined) {
-        assert.isNumber('defaultAssetBuyAmount', config.defaultAssetBuyAmount);
+
+    if (config.defaultAmountTokenIn !== undefined) {
+        assert.isNumber('defaultAmountTokenIn', config.defaultAmountTokenIn);
     }
-    if (config.networkId !== undefined) {
-        assert.isNumber('networkId', config.networkId);
+
+    if (config.defaultAmountTokenOut !== undefined) {
+        assert.isNumber('defaultAmountTokenOut', config.defaultAmountTokenOut);
     }
-    if (config.availableAssetDatas !== undefined) {
-        assert.areValidAssetDatas(
-            'availableAssetDatas',
-            config.availableAssetDatas,
-        );
+
+
+    if (config.chainId !== undefined) {
+        assert.isNumber('chainId', config.chainId);
     }
+
     if (config.onClose !== undefined) {
         assert.isFunction('onClose', config.onClose);
     }
@@ -71,6 +74,12 @@ const validateInstantRenderConfig = (
     if (config.walletDisplayName !== undefined) {
         assert.isString('walletDisplayName', config.walletDisplayName);
     }
+
+    if (config.tokenList !== undefined) {
+        assert.isWebUri('tokenList', config.tokenList);
+    }
+
+
     if (config.shouldDisablePushToHistory !== undefined) {
         assert.isBoolean(
             'shouldDisablePushToHistory',
@@ -142,13 +151,7 @@ export const render = (
     selector: string = DEFAULT_ZERO_EX_CONTAINER_SELECTOR,
 ) => {
     // Coerces BigNumber provided in config to version utilized by 0x packages
-    const coercedConfig = _.assign({}, config, {
-        orderSource: _.isArray(config.orderSource)
-            ? orderCoercionUtil.coerceOrderArrayFieldsToBigNumber(
-                  config.orderSource,
-              )
-            : config.orderSource,
-    });
+    const coercedConfig = config;
 
     validateInstantRenderConfig(coercedConfig, selector);
 

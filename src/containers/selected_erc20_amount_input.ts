@@ -1,5 +1,6 @@
 import { SwapQuoter } from '@0x/asset-swapper';
 import { BigNumber } from '@0x/utils';
+import { Web3Wrapper } from '@0x/web3-wrapper';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { connect } from 'react-redux';
@@ -15,12 +16,15 @@ import { apiQuoteUpdater } from '../util/api_quote_updater';
 export interface SelectedERC20AmountInputProps {
     fontColor?: ColorOption;
     startingFontSizePx: number;
-    onSelectTokenClick?: (token?: TokenInfo) => void;
+    onSelectTokenClick?: () => void;
+    isInInput: boolean;
 }
 
 interface ConnectedState {
-    value?: BigNumber;
-    token?: TokenInfo;
+    valueIn?: BigNumber;
+    valueOut?: BigNumber;
+    tokenIn?: TokenInfo;
+    tokenOut?: TokenInfo;
     takerAddress?: string;
     isInputDisabled: boolean;
     numberOfTokensAvailable?: number;
@@ -28,18 +32,21 @@ interface ConnectedState {
 }
 
 interface ConnectedDispatch {
-    updateSwapQuote: (value?: BigNumber, token?: TokenInfo, takerAddress?: string) => void;
+    updateApiSwapQuote: (value?: BigNumber, tokenIn?: TokenInfo, tokenOut?: TokenInfo, isIn?: boolean, takerAddress?: string) => void;
 }
 
 type ConnectedProps = Omit<ERC20AmountInputProps, keyof SelectedERC20AmountInputProps>;
 
-type FinalProps = ConnectedProps & SelectedERC20AmountInputProps;
+type FinalProps = ConnectedState & ConnectedProps & SelectedERC20AmountInputProps;
 
 const mapStateToProps = (state: State, _ownProps: SelectedERC20AmountInputProps): ConnectedState => {
     const processState = state.swapOrderState.processState;
     const isInputEnabled = processState === OrderProcessState.None || processState === OrderProcessState.Failure;
     const isInputDisabled = !isInputEnabled;
-    const selectedToken = state.selectedToken;
+    const selectedTokenIn = state.selectedTokenIn;
+    const selectedTokenOut = state.selectedTokenOut;
+    const selectedTokenAmountIn = state.selectedTokenAmountIn;
+    const selectedTokenAmountOut = state.selectedTokenAmountOut;
     
     const numberOfTokensAvailable = state.availableTokens === undefined ? undefined : state.availableTokens.length;
     const canSelectOtherToken =
@@ -47,17 +54,27 @@ const mapStateToProps = (state: State, _ownProps: SelectedERC20AmountInputProps)
             ? isInputEnabled || processState === OrderProcessState.Success
             : false;
 
+    let valueIn;
+    if(selectedTokenIn && selectedTokenAmountIn){
+        valueIn = Web3Wrapper.toUnitAmount(selectedTokenAmountIn, selectedTokenIn.decimals).decimalPlaces(4).precision(4);
+    }
+    let valueOut;
+    if(selectedTokenOut && selectedTokenAmountOut){
+        valueOut = Web3Wrapper.toUnitAmount(selectedTokenAmountOut, selectedTokenOut.decimals).decimalPlaces(4).precision(4);
+    }
  
     return {
-        value: state.selectedTokenUnitAmount,
-        token: selectedToken,
+        valueIn,
+        valueOut,
+        tokenIn: selectedTokenIn,
+        tokenOut: selectedTokenOut,
         isInputDisabled,
         numberOfTokensAvailable,
         canSelectOtherToken,
     };
 };
 
-const debouncedUpdateSwapQuoteAsync = _.debounce(apiQuoteUpdater.updateSwapQuoteAsync.bind(apiQuoteUpdater), 200, {
+const debouncedUpdateSwapApiQuoteAsync = _.debounce(apiQuoteUpdater.updateSwapQuoteAsync.bind(apiQuoteUpdater), 200, {
     trailing: true,
 }) as typeof apiQuoteUpdater.updateSwapQuoteAsync;
 
@@ -65,24 +82,34 @@ const mapDispatchToProps = (
     dispatch: Dispatch<Action>,
     _ownProps: SelectedERC20AmountInputProps,
 ): ConnectedDispatch => ({
-    updateSwapQuote: (value, token, takerAddress) => {
+    updateApiSwapQuote: (value, tokenIn, tokenOut, isIn, takerAddress) => {
         // Update the input
-        dispatch(actions.updateSelectedAssetAmount(value));
+        let valueBase;
+        if(isIn){
+            valueBase = Web3Wrapper.toBaseUnitAmount(value, tokenIn.decimals);
+            dispatch(actions.updateSelectedTokenAmountIn(valueBase));
+        }else{
+            valueBase = Web3Wrapper.toBaseUnitAmount(value, tokenOut.decimals);
+            dispatch(actions.updateSelectedTokenAmountOut(valueBase));
+        }
+      
+        dispatch(actions.setIsIn(isIn));
+       
         // invalidate the last swap quote.
-        dispatch(actions.updateLatestSwapQuote(undefined));
+        dispatch(actions.updateLatestApiSwapQuote(undefined));
         // reset our swap state
         dispatch(actions.setSwapOrderStateNone());
 
-        if (value !== undefined && value.isGreaterThan(0) && token !== undefined) {
+        if (valueBase !== undefined && valueBase.isGreaterThan(0) && tokenIn !== undefined && tokenOut !== undefined) {
             // even if it's debounced, give them the illusion it's loading
             dispatch(actions.setQuoteRequestStatePending());
             // tslint:disable-next-line:no-floating-promises
-            debouncedUpdateSwapQuoteAsync( dispatch, takerAddress, token, value, QuoteFetchOrigin.Manual,  {
+            debouncedUpdateSwapApiQuoteAsync( dispatch, isIn, takerAddress, tokenIn, tokenOut, valueBase, QuoteFetchOrigin.Manual,  {
                 setPending: true,
                 dispatchErrors: true,
             });
         }
-    },
+    }
 });
 
 const mergeProps = (
@@ -92,10 +119,12 @@ const mergeProps = (
 ): FinalProps => {
     return {
         ...ownProps,
-        token: connectedState.token,
-        value: connectedState.value,
-        onChange: (value?: BigNumber, token?: TokenInfo, takerAddress?: string) => {
-            connectedDispatch.updateSwapQuote(value, token, takerAddress);
+        tokenIn: connectedState.tokenIn,
+        tokenOut: connectedState.tokenOut,
+        valueIn: connectedState.valueIn,
+        valueOut: connectedState.valueOut,
+        onChange: (value?: BigNumber, tokenIn?: TokenInfo, tokenOut?: TokenInfo, isIn?: boolean, takerAddress?: string) => {
+            connectedDispatch.updateApiSwapQuote(value, tokenIn, tokenOut, isIn, takerAddress);
         },
         isInputDisabled: connectedState.isInputDisabled,
         numberOfTokensAvailable: connectedState.numberOfTokensAvailable,

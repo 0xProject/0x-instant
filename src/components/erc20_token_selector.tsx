@@ -2,9 +2,8 @@ import * as _ from 'lodash';
 import * as React from 'react';
 
 import { ColorOption } from '../style/theme';
-import { ERC20Asset, TokenInfo } from '../types';
+import {  TokenInfo } from '../types';
 import { analytics } from '../util/analytics';
-import { assetUtils } from '../util/asset';
 import { tokenUtils } from '../util/token';
 
 import { SearchInput } from './search_input';
@@ -15,19 +14,25 @@ import { Text } from './ui/text';
 
 export interface ERC20TokenSelectorProps {
     tokens: TokenInfo[];
-    onTokenSelect: (token: TokenInfo) => void;
+    isIn: boolean;
+    onTokenSelect: (token: TokenInfo, isIn: boolean) => void;
 }
 
 export interface ERC20TokenSelectorState {
     searchQuery: string;
+    page: number;
+    perPage: number;
 }
 
 export class ERC20TokenSelector extends React.PureComponent<ERC20TokenSelectorProps> {
     public state: ERC20TokenSelectorState = {
         searchQuery: '',
+        page: 0,
+        perPage: 20,
     };
     public render(): React.ReactNode {
         const { tokens } = this.props;
+        const { page, perPage} = this.state;
         return (
             <Container height="100%">
                 <Container marginBottom="10px">
@@ -44,7 +49,7 @@ export class ERC20TokenSelector extends React.PureComponent<ERC20TokenSelectorPr
                 />
                 <Container overflow="scroll" height="calc(100% - 90px)" marginTop="10px">
                     <TokenRowFilter
-                        tokens={tokens}
+                        tokens={tokens.slice(0, perPage*(page+1))}
                         onClick={this._handleTokenClick}
                         searchQuery={this.state.searchQuery}
                     />
@@ -60,7 +65,7 @@ export class ERC20TokenSelector extends React.PureComponent<ERC20TokenSelectorPr
         analytics.trackTokenSelectorSearched(searchQuery);
     };
     private readonly _handleTokenClick = (token: TokenInfo): void => {
-        this.props.onTokenSelect(token);
+        this.props.onTokenSelect(token, this.props.isIn);
     };
 }
 
@@ -155,10 +160,20 @@ const getTokenIcon = (symbol: string): React.StatelessComponent | undefined => {
     }
 };
 
+const getTokenUrl = (address: string): string | undefined => {
+    try {
+        return `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/${address}/logo.png`;
+    } catch (e) {
+        // Can't find icon
+        return undefined;
+    }
+};
+
 class TokenSelectorRowIcon extends React.PureComponent<TokenSelectorRowIconProps> {
     public render(): React.ReactNode {
         const { token } = this.props;
-        const iconUrlIfExists = '';
+
+        const iconUrlIfExists = getTokenUrl(tokenUtils.toChecksum(token.address));
 
         const TokenIcon = getTokenIcon(token.symbol);
         const displaySymbol = tokenUtils.bestNameForToken(token);

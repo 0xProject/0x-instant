@@ -16,8 +16,10 @@ import { Spinner } from './ui/spinner';
 import { Text } from './ui/text';
 
 export interface InstantTokenHeadingProps {
-    selectedToken?: TokenInfo;
-    selectedTokenUnitAmount?: BigNumber;
+    selectedTokenIn?: TokenInfo;
+    selectedTokenOut?: TokenInfo;
+    selectedTokenUnitAmountIn?: BigNumber;
+    selectedTokenUnitAmountOut?: BigNumber;
     totalEthBaseUnitAmount?: BigNumber;
     ethUsdPrice?: BigNumber;
     quoteRequestState: AsyncProcessState;
@@ -37,7 +39,9 @@ export class InstantTokenHeading extends React.PureComponent<InstantTokenHeading
     }
 
     private _renderTokenHeadingContent(): React.ReactNode {
-        const { selectedToken } = this.props;
+        const { selectedTokenIn, selectedTokenOut, isIn } = this.props;
+        const selectedToken = isIn ? selectedTokenIn : selectedTokenOut;
+
         if (selectedToken === undefined) {
             // TODO: Only the ERC20 flow supports selecting assets.
             return this._renderERC20AssetHeading();
@@ -70,6 +74,7 @@ export class InstantTokenHeading extends React.PureComponent<InstantTokenHeading
                         <SelectedERC20AmountInput
                             startingFontSizePx={38}
                             onSelectTokenClick={this.props.onSelectTokenClick}
+                            isInInput={this.props.isIn}
                         />
                     </Flex>
                     <Flex direction="column" justify="space-between">
@@ -81,15 +86,19 @@ export class InstantTokenHeading extends React.PureComponent<InstantTokenHeading
     }
 
     private _renderAmountsSection(): React.ReactNode {
+        const { selectedTokenUnitAmountIn, selectedTokenUnitAmountOut, isIn } = this.props;
+        const amount = isIn ? selectedTokenUnitAmountIn : selectedTokenUnitAmountOut;
+
+
         if (
-            this.props.totalEthBaseUnitAmount === undefined &&
+            amount === undefined &&
             this.props.quoteRequestState !== AsyncProcessState.Pending
         ) {
             return null;
         } else {
             return (
                 <Container>
-                    <Container marginBottom="5px">{this._renderPlaceholderOrAmount(this._renderEthAmount)}</Container>
+                    <Container marginBottom="5px">{this._renderPlaceholderOrAmount(this._renderAmount)}</Container>
                     <Container opacity={0.7}>{this._renderPlaceholderOrAmount(this._renderDollarAmount)}</Container>
                 </Container>
             );
@@ -128,23 +137,35 @@ export class InstantTokenHeading extends React.PureComponent<InstantTokenHeading
     }
 
     private _renderPlaceholderOrAmount(amountFunction: () => React.ReactNode): React.ReactNode {
+        const { selectedTokenUnitAmountIn, selectedTokenUnitAmountOut, isIn } = this.props;
+        const amount = isIn ? selectedTokenUnitAmountIn : selectedTokenUnitAmountOut;
+
         if (this.props.quoteRequestState === AsyncProcessState.Pending) {
             return <AmountPlaceholder isPulsating={true} color={PLACEHOLDER_COLOR} />;
         }
-        if (this.props.selectedTokenUnitAmount === undefined) {
+        if (amount === undefined) {
             return <AmountPlaceholder isPulsating={false} color={PLACEHOLDER_COLOR} />;
         }
         return amountFunction();
     }
 
-    private readonly _renderEthAmount = (): React.ReactNode => {
-        const ethAmount = format.ethBaseUnitAmount(
-            this.props.totalEthBaseUnitAmount,
+    private readonly _renderAmount = (): React.ReactNode => {
+        const { selectedTokenUnitAmountIn, selectedTokenUnitAmountOut, isIn, selectedTokenIn, selectedTokenOut } = this.props;
+        const amount = isIn ? selectedTokenUnitAmountIn : selectedTokenUnitAmountOut;
+        const selectedToken = isIn ? selectedTokenIn : selectedTokenOut;
+        if(!selectedToken){
+            return null;
+        }
+
+        const tokenAmount = format.tokenBaseUnitAmount(
+            selectedToken.symbol,
+            selectedToken.decimals,
+            amount,
             4,
             <AmountPlaceholder isPulsating={false} color={PLACEHOLDER_COLOR} />,
         );
 
-        const fontSize = _.isString(ethAmount) && ethAmount.length >= 13 ? '14px' : '16px';
+        const fontSize = _.isString(tokenAmount) && tokenAmount.length >= 13 ? '14px' : '16px';
         return (
             <Text
                 fontSize={fontSize}
@@ -154,7 +175,7 @@ export class InstantTokenHeading extends React.PureComponent<InstantTokenHeading
                 fontWeight={500}
                 noWrap={true}
             >
-                {ethAmount}
+                {tokenAmount}
             </Text>
         );
     };

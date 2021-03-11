@@ -23,6 +23,7 @@ import { Flex } from './ui/flex';
 export interface ZeroExInstantContainerProps {}
 export interface ZeroExInstantContainerState {
     tokenSelectionPanelAnimationState: SlideAnimationState;
+    isIn: boolean;
 }
 
 export class ZeroExInstantContainer extends React.PureComponent<
@@ -31,6 +32,7 @@ export class ZeroExInstantContainer extends React.PureComponent<
 > {
     public state = {
         tokenSelectionPanelAnimationState: 'none' as SlideAnimationState,
+        isIn: false,
     };
     public render(): React.ReactNode {
         return (
@@ -55,10 +57,11 @@ export class ZeroExInstantContainer extends React.PureComponent<
                     >
                         <Flex direction="column" justify="flex-start" height="100%">
                             {/*<ConnectedSwapOrderProgressOrPaymentMethod />*/}
-                            <SelectedTokenInstantHeading onSelectTokenClick={this._handleSymbolClick} isIn={true} />
-                            <SelectedTokenInstantHeading onSelectTokenClick={this._handleSymbolClick} isIn={false} />
+                        
+                            <SelectedTokenInstantHeading onSelectTokenClick={this._handleSymbolClickIn} isIn={true} />
+                            <SelectedTokenInstantHeading onSelectTokenClick={this._handleSymbolClickOut} isIn={false} />
                             <ConnectedSwapOrderProgressOrPaymentMethod />
-                            <LatestSwapQuoteOrderDetails />
+                           {/*  <LatestSwapQuoteOrderDetails />*/}
                             <Container padding="20px" width="100%">
                                 <SelectedTokenSwapOrderStateButtons />
                             </Container>
@@ -68,7 +71,7 @@ export class ZeroExInstantContainer extends React.PureComponent<
                             onClose={this._handlePanelCloseClickedX}
                             onAnimationEnd={this._handleSlidingPanelAnimationEnd}
                         >
-                            <AvailableERC20TokenSelector onTokenSelect={this._handlePanelCloseAfterChose} />
+                            <AvailableERC20TokenSelector onTokenSelect={this._handlePanelCloseAfterChose} isIn={this.state.isIn} />
                         </SlidingPanel>
                         <CurrentStandardSlidingPanel />
                     </Container>
@@ -87,12 +90,22 @@ export class ZeroExInstantContainer extends React.PureComponent<
             </React.Fragment>
         );
     }
-    private readonly _handleSymbolClick = (token?: TokenInfo): void => {
+    private readonly _handleSymbolClickIn = (): void => {
         analytics.trackTokenSelectorOpened();
+        this.setState({isIn: true});
         this.setState({
                 tokenSelectionPanelAnimationState: 'slidIn',
         });
     };
+    private readonly _handleSymbolClickOut = (): void => {
+       
+        analytics.trackTokenSelectorOpened();
+        this.setState({isIn: false});
+        this.setState({
+                tokenSelectionPanelAnimationState: 'slidIn',
+        });
+    };
+
     private readonly _handlePanelCloseClickedX = (): void => {
         this._handlePanelClose(TokenSelectorClosedVia.ClickedX);
     };

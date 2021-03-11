@@ -46,7 +46,7 @@ export class ZeroExInstantProvider extends React.PureComponent<
         defaultState: DefaultState = DEFAULT_STATE,
     ): State {
         // use the networkId passed in with the props, otherwise default to that of the default state (1, mainnet)
-        const networkId = props.networkId || defaultState.network;
+        const networkId = props.chainId || defaultState.network;
         // construct the ProviderState
         const providerState = providerStateFactory.getInitialProviderState(
             networkId,
@@ -54,7 +54,7 @@ export class ZeroExInstantProvider extends React.PureComponent<
             props.walletDisplayName,
         );
         // merge the additional additionalAssetMetaDataMap with our default map
-        const completeAssetMetaDataMap = {
+      /*  const completeAssetMetaDataMap = {
             // Make sure the passed in assetDatas are lower case
             ..._.mapKeys(props.additionalAssetMetaDataMap || {}, (value, key) =>
                 key.toLowerCase(),
@@ -83,7 +83,7 @@ export class ZeroExInstantProvider extends React.PureComponent<
             ) {
                 selectedAssetUnitAmount = new BigNumber(1);
             }
-        }
+        }*/
 
         // construct the final state
         const storeStateFromProps: State = {
@@ -91,17 +91,6 @@ export class ZeroExInstantProvider extends React.PureComponent<
             providerState,
             network: networkId,
             walletDisplayName: props.walletDisplayName,
-            selectedAsset,
-            selectedAssetUnitAmount,
-            availableAssets:
-                props.availableAssetDatas === undefined
-                    ? undefined
-                    : assetUtils.createAssetsFromAssetDatas(
-                          props.availableAssetDatas,
-                          completeAssetMetaDataMap,
-                          networkId,
-                      ),
-            assetMetaDataMap: completeAssetMetaDataMap,
             onSuccess: props.onSuccess,
             affiliateInfo: props.affiliateInfo,
         };
@@ -172,7 +161,7 @@ export class ZeroExInstantProvider extends React.PureComponent<
 
         // Analytics
         disableAnalytics(this.props.shouldDisableAnalyticsTracking || false);
-        analytics.addEventProperties(
+        /*analytics.addEventProperties(
             analytics.generateEventProperties(
                 state.network,
                 this.props.orderSource,
@@ -182,7 +171,7 @@ export class ZeroExInstantProvider extends React.PureComponent<
                 this.props.affiliateInfo,
                 state.baseCurrency,
             ),
-        );
+        );*/
         analytics.trackInstantOpened();
     }
     public componentWillUnmount(): void {

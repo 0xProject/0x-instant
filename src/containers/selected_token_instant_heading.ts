@@ -15,8 +15,10 @@ export interface InstantHeadingProps {
 }
 
 interface ConnectedState {
-    selectedToken?: TokenInfo;
-    selectedTokenUnitAmount?: BigNumber;
+    selectedTokenIn?: TokenInfo;
+    selectedTokenAmountIn?: BigNumber;
+    selectedTokenOut?: TokenInfo;
+    selectedTokenAmountOut?: BigNumber;
     totalEthBaseUnitAmount?: BigNumber;
     ethUsdPrice?: BigNumber;
     quoteRequestState: AsyncProcessState;
@@ -24,9 +26,11 @@ interface ConnectedState {
 }
 
 const mapStateToProps = (state: State, _ownProps: InstantHeadingProps): ConnectedState => ({
-    selectedToken: state.selectedToken,
-    selectedTokenUnitAmount: state.selectedTokenUnitAmount,
-    totalEthBaseUnitAmount: oc(state).latestApiSwapQuote.value(),
+    selectedTokenIn: state.selectedTokenIn,
+    selectedTokenAmountIn: state.selectedTokenAmountIn,
+    selectedTokenOut: state.selectedTokenOut,
+    selectedTokenAmountOut: state.selectedTokenAmountOut,
+    totalEthBaseUnitAmount: new BigNumber(0),
     ethUsdPrice: state.ethUsdPrice,
     quoteRequestState: state.quoteRequestState,
     swapOrderState: state.swapOrderState,
