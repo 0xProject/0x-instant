@@ -22,6 +22,7 @@ import {
     StandardSlidingPanelContent,
     StandardSlidingPanelSettings,
     SwapQuoteResponse,
+    TokenBalance,
     TokenInfo,
 } from '../types';
 
@@ -47,6 +48,7 @@ interface OptionalState {
     selectedTokenIn: TokenInfo;
     selectedTokenOut: TokenInfo;
     availableTokens: TokenInfo[];
+    tokenBalances: TokenBalance[];
     selectedTokenAmountIn: BigNumber;
     selectedTokenAmountOut: BigNumber;
     isIn: boolean;
@@ -292,6 +294,11 @@ export const createReducer = (initialState: State) => {
                 return {
                     ...state,
                     providerState: action.data,
+                };
+            case ActionTypes.UpdateTokenBalances:
+                return {
+                    ...state,
+                    tokenBalances: action.data,
                 };
             default:
                 return state;

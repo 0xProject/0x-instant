@@ -94,8 +94,6 @@ export const apiQuoteUpdater = {
         // invalidate the last swap quote.
         dispatch(actions.updateLatestApiSwapQuote(undefined));
         if(isIn){
-            console.log('here')
-            console.log(newSwapQuote.buyAmount.toString());
             dispatch(actions.updateSelectedTokenAmountOut(newSwapQuote.buyAmount));
         }else{
             dispatch(actions.updateSelectedTokenAmountIn(newSwapQuote.sellAmount));

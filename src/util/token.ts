@@ -2,7 +2,7 @@ import { BigNumber, InsufficientAssetLiquidityError, SwapQuoterError } from '@0x
 import { Web3Wrapper } from '@0x/web3-wrapper';
 import * as _ from 'lodash';
 import createKeccakHash from 'keccak';
-import {  BIG_NUMBER_ZERO, DEFAULT_UNKOWN_ASSET_NAME } from '../constants';
+import {  BIG_NUMBER_ZERO, DEFAULT_UNKOWN_ASSET_NAME, ETH_ADDRESS } from '../constants';
 
 import {  TokenInfo } from '../types';
 
@@ -69,6 +69,11 @@ export const tokenUtils = {
 
         return ret
 
+    },
+
+    isETH: (token: TokenInfo) =>{
+        return token.address.toLowerCase() === ETH_ADDRESS ? true : false;
+        
     }
     
 };

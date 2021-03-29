@@ -4,12 +4,13 @@ import { Dispatch } from 'redux';
 
 import { BIG_NUMBER_ZERO } from '../constants';
 import { defaultTokenList } from '../data/token_lists';
-import { AccountState, BaseCurrency, OrderProcessState, ProviderState, QuoteFetchOrigin, TokenList } from '../types';
+import { AccountState, BaseCurrency, OrderProcessState, ProviderState, QuoteFetchOrigin, TokenInfo, TokenList } from '../types';
 import { analytics } from '../util/analytics';
 import { apiQuoteUpdater } from '../util/api_quote_updater';
 import { coinbaseApi } from '../util/coinbase_api';
 import { errorFlasher } from '../util/error_flasher';
 import { errorReporter } from '../util/error_reporter';
+import { MulticallUtils } from '../util/multicall';
 import { providerStateFactory } from '../util/provider_state_factory';
 
 import { actions } from './actions';
@@ -32,12 +33,17 @@ export const asyncData = {
     fetchTokenListAndDispatchToStore: async (state: State, dispatch: Dispatch) => {
   
         try {      
-            const tokenList = await fetch(defaultTokenList).then(r => r.json()) as TokenList;
-            dispatch(actions.setAvailableTokens(tokenList.tokens));
+            const response = await fetch(defaultTokenList);
+            if(response.ok && response.status  === 200){
+                const tokenList = await response.json() as TokenList;
+                dispatch(actions.setAvailableTokens(tokenList.tokens));
 
-            dispatch(actions.updateSelectedTokenIn(tokenList.tokens[0]));
-            dispatch(actions.updateSelectedTokenOut(tokenList.tokens[1]));
-
+                dispatch(actions.updateSelectedTokenIn(tokenList.tokens[0]));
+                dispatch(actions.updateSelectedTokenOut(tokenList.tokens[1]));
+            }else{
+                throw new Error('Error fetching token list')
+            }
+            
         } catch (e) {
             const errorMessage = 'Could not find any tokens';
             errorFlasher.flashNewErrorMessage(dispatch, errorMessage);
@@ -77,6 +83,7 @@ export const asyncData = {
     },*/
     fetchAccountInfoAndDispatchToStore: async (
         providerState: ProviderState,
+        tokens: TokenInfo[],
         dispatch: Dispatch,
         shouldAttemptUnlock: boolean = false,
     ) => {
@@ -121,15 +128,23 @@ export const asyncData = {
             const activeAddress = availableAddresses[0];
             dispatch(actions.setAccountStateReady(activeAddress));
             // tslint:disable-next-line:no-floating-promises
-            asyncData.fetchAccountBalanceAndDispatchToStore(activeAddress, providerState.web3Wrapper, dispatch);
+            asyncData.fetchAccountBalanceAndDispatchToStore(activeAddress, providerState.web3Wrapper, tokens, dispatch);
         } else if (providerState.account.state !== AccountState.Loading) {
             dispatch(actions.setAccountStateLocked());
         }
     },
-    fetchAccountBalanceAndDispatchToStore: async (address: string, web3Wrapper: Web3Wrapper, dispatch: Dispatch) => {
+    fetchAccountBalanceAndDispatchToStore: async (address: string, web3Wrapper: Web3Wrapper, tokens: TokenInfo[], dispatch: Dispatch) => {
         try {
             const ethBalanceInWei = await web3Wrapper.getBalanceInWeiAsync(address);
             dispatch(actions.updateAccountEthBalance({ address, ethBalanceInWei }));
+            if(tokens.length){
+                const chainId = await web3Wrapper.getChainIdAsync();
+                const tokenBalances = await MulticallUtils.getTokensBalancesAndAllowances(web3Wrapper.getProvider() as any, tokens, chainId, address);
+                dispatch(actions.updateTokenBalances(tokenBalances));
+
+            }
+
+
         } catch (e) {
             errorReporter.report(e);
             // leave balance as is

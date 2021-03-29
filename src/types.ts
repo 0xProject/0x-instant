@@ -263,6 +263,12 @@ export interface TokenInfo {
     readonly logoURI?: string;
     readonly tags?: string[];
   }
+export interface TokenBalance{
+    token: TokenInfo,
+    balance: BigNumber;
+    isUnlocked: boolean;
+}
+
   
   export interface Version {
     readonly major: number;

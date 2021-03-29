@@ -9,6 +9,7 @@ import {
     ProviderState,
     StandardSlidingPanelContent,
     SwapQuoteResponse,
+    TokenBalance,
     TokenInfo,
 } from '../types';
 
@@ -47,6 +48,7 @@ export enum ActionTypes {
     UpdateLatestApiSwapQuote = 'UPDATE_LATEST_API_SWAP_QUOTE',
     UpdateSelectedTokenIn = 'UPDATE_SELECTED_TOKEN_IN',
     UpdateSelectedTokenOut = 'UPDATE_SELECTED_TOKEN_OUT',
+    UpdateTokenBalances = 'UPDATE_TOKEN_BALANCES',
     SetAvailableTokens = 'SET_AVAILABLE_TOKENS',
     SetQuoteRequestStatePending = 'SET_QUOTE_REQUEST_STATE_PENDING',
     SetQuoteRequestStateFailure = 'SET_QUOTE_REQUEST_STATE_FAILURE',
@@ -97,4 +99,5 @@ export const actions = {
     closeStandardSlidingPanel: () => createAction(ActionTypes.CloseStandardSlidingPanel),
     updateBaseCurrency: (baseCurrency: BaseCurrency) => createAction(ActionTypes.UpdateBaseCurrency, baseCurrency),
     setProviderState: (providerState: ProviderState) => createAction(ActionTypes.SetProviderState, providerState),
+    updateTokenBalances: (tokenBalances: TokenBalance[]) => createAction(ActionTypes.UpdateTokenBalances, tokenBalances),
 };

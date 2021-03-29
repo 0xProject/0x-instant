@@ -6,7 +6,19 @@ import {
     AccountState,
     AffiliateInfo,
     ProviderType,
+    TokenInfo,
 } from './types';
+
+export const ETH_ADDRESS =  '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+
+export const ETH_TOKEN: TokenInfo = {
+    chainId: 1,
+    address: ETH_ADDRESS,
+    name: 'Ethereum',
+    decimals: 18,
+    symbol: 'ETH'
+}
+
 
 // TODO(dave4506) until we have /prices endpoint ready, we will use this whitelist for bridge order liquidity assets
 export const SUPPORTED_TOKEN_ASSET_DATA_WITH_BRIDGE_ORDERS = [
