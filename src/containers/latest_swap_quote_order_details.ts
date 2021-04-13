@@ -8,7 +8,7 @@ import { State } from '../redux/reducer';
 
 import { OrderDetails, OrderDetailsProps } from '../components/order_details';
 import { AsyncProcessState, BaseCurrency, Omit } from '../types';
-import { OrderSwapDetailsProps } from '../components/order_swap_details';
+import { OrderSwapDetails, OrderSwapDetailsProps } from '../components/order_swap_details';
 
 type DispatchProperties = 'onBaseCurrencySwitchEth' | 'onBaseCurrencySwitchUsd';
 
@@ -18,6 +18,8 @@ const mapStateToProps = (state: State, _ownProps: LatestSwapQuoteOrderDetailsPro
     swapQuote: state.latestApiSwapQuote,
     selectedTokenUnitAmount: state.selectedTokenAmountOut,
     ethUsdPrice: state.ethUsdPrice,
+    tokenIn: state.selectedTokenIn,
+    tokenOut: state.selectedTokenOut,
     isLoading: state.quoteRequestState === AsyncProcessState.Pending,
     tokenName: state.selectedTokenOut === undefined ? undefined : state.selectedTokenOut.name,
     baseCurrency: state.baseCurrency,
@@ -38,4 +40,4 @@ export interface LatestSwapQuoteOrderDetailsProps {}
 export const LatestSwapQuoteOrderDetails: React.ComponentClass<LatestSwapQuoteOrderDetailsProps> = connect(
     mapStateToProps,
     mapDispatchToProps,
-)(OrderDetails);
+)(OrderSwapDetails);

@@ -83,9 +83,10 @@ export const asyncData = {
     },*/
     fetchAccountInfoAndDispatchToStore: async (
         providerState: ProviderState,
-        tokens: TokenInfo[],
         dispatch: Dispatch,
         shouldAttemptUnlock: boolean = false,
+        tokenIn?: TokenInfo,
+        tokenOut?: TokenInfo,
     ) => {
         const web3Wrapper = providerState.web3Wrapper;
         const provider = providerState.provider;
@@ -128,19 +129,35 @@ export const asyncData = {
             const activeAddress = availableAddresses[0];
             dispatch(actions.setAccountStateReady(activeAddress));
             // tslint:disable-next-line:no-floating-promises
-            asyncData.fetchAccountBalanceAndDispatchToStore(activeAddress, providerState.web3Wrapper, tokens, dispatch);
+            asyncData.fetchAccountBalanceAndDispatchToStore(activeAddress, providerState.web3Wrapper, dispatch, tokenIn, tokenOut);
         } else if (providerState.account.state !== AccountState.Loading) {
             dispatch(actions.setAccountStateLocked());
         }
     },
-    fetchAccountBalanceAndDispatchToStore: async (address: string, web3Wrapper: Web3Wrapper, tokens: TokenInfo[], dispatch: Dispatch) => {
+    fetchAccountBalanceAndDispatchToStore: async (address: string, web3Wrapper: Web3Wrapper, dispatch: Dispatch, tokenIn?: TokenInfo, tokenOut?: TokenInfo) => {
         try {
             const ethBalanceInWei = await web3Wrapper.getBalanceInWeiAsync(address);
             dispatch(actions.updateAccountEthBalance({ address, ethBalanceInWei }));
-            if(tokens.length){
+            const tokenArray: TokenInfo[] = [];
+            if(tokenIn){
+                tokenArray.push(tokenIn);
+            }
+            if(tokenOut){
+                tokenArray.push(tokenOut);
+            }
+            if(tokenArray.length){
                 const chainId = await web3Wrapper.getChainIdAsync();
-                const tokenBalances = await MulticallUtils.getTokensBalancesAndAllowances(web3Wrapper.getProvider() as any, tokens, chainId, address);
-                dispatch(actions.updateTokenBalances(tokenBalances));
+                const tokenBalances = await MulticallUtils.getTokensBalancesAndAllowances(web3Wrapper.getProvider() as any, tokenArray, chainId, address);
+                if(tokenIn && tokenOut){
+                    dispatch(actions.updateSelectedTokenInBalance(tokenBalances[0]));
+                    dispatch(actions.updateSelectedTokenOutBalance(tokenBalances[1]));
+                }else if (tokenIn && !tokenOut) {
+                    dispatch(actions.updateSelectedTokenInBalance(tokenBalances[0]));
+                }else if(!tokenIn && tokenOut){
+                    dispatch(actions.updateSelectedTokenOutBalance(tokenBalances[0]));
+                }   
+               // @TODO: Check if it is necessary to fetch all token balances, this will slow down the whole application
+               // dispatch(actions.updateTokenBalances(tokenBalances));
 
             }
 

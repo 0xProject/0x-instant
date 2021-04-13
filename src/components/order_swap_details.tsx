@@ -1,4 +1,5 @@
 import { SwapQuoteInfo } from '@0x/asset-swapper';
+import { Token } from '@0x/types';
 import { BigNumber } from '@0x/utils';
 import * as _ from 'lodash';
 import * as React from 'react';
@@ -22,6 +23,8 @@ export interface OrderSwapDetailsProps {
     ethUsdPrice?: BigNumber;
     isLoading: boolean;
     tokenName?: string;
+    tokenIn?: Token;
+    tokenOut?: Token;
     baseCurrency: BaseCurrency;
     onBaseCurrencySwitchEth: () => void;
     onBaseCurrencySwitchUsd: () => void;
@@ -36,7 +39,6 @@ export class OrderSwapDetails extends React.PureComponent<OrderSwapDetailsProps>
         } else {
             return (
                 <Container width="100%" flexGrow={1} padding="20px 20px 0px 20px">
-                    <Container marginBottom="10px">{this._renderHeader()}</Container>
                     {shouldShowUsdError ? this._renderErrorFetchingUsdPrice() : this._renderRows()}
                 </Container>
             );
@@ -48,23 +50,8 @@ export class OrderSwapDetails extends React.PureComponent<OrderSwapDetailsProps>
         return (
             <React.Fragment>
                 <OrderDetailsRow
-                    labelText={this._assetAmountLabel()}
-                    primaryValue={this._displayAmountOrPlaceholder(swapQuote && swapQuote.buyAmount)}
-                />
-                <OrderDetailsRow
-                    labelText="Fee"
-                    primaryValue={this._displayAmountOrPlaceholder(
-                        swapQuote && swapQuote.protocolFee,
-                    )}
-                />
-                <OrderDetailsRow
-                    labelText="Total Cost"
-                    isLabelBold={true}
-                    primaryValue={this._displayAmountOrPlaceholder(
-                        swapQuote && swapQuote.sellAmount,
-                    )}
-                    isPrimaryValueBold={true}
-                    secondaryValue={this._totalCostSecondaryValue()}
+                    labelText="Price"
+                    primaryValue={this._displayPrice()}
                 />
             </React.Fragment>
         );
@@ -130,6 +117,15 @@ export class OrderSwapDetails extends React.PureComponent<OrderSwapDetailsProps>
         }
     }
 
+    private _displayPrice(): React.ReactNode {
+        const { swapQuote, tokenIn, tokenOut } = this.props;
+        if(swapQuote && tokenIn && tokenOut){
+            return `1 ${tokenIn.symbol.toUpperCase()} = ${swapQuote.price.toFixed(8)} ${tokenOut.symbol.toUpperCase()}`;
+        }else{
+            return '-'
+        }
+    }
+
     private _assetAmountLabel(): React.ReactNode {
         const { tokenName, baseCurrency } = this.props;
         const numTokens = this.props.selectedTokenUnitAmount;
@@ -164,14 +160,8 @@ export class OrderSwapDetails extends React.PureComponent<OrderSwapDetailsProps>
 
     private _pricePerTokenWei(): BigNumber | undefined {
         const swapQuoteAccessor = oc(this.props.swapQuote);
-        const assetTotalInWei = swapQuoteAccessor.buyAmount;
         const selectedTokenUnitAmount = this.props.selectedTokenUnitAmount;
         return selectedTokenUnitAmount;
-        /*return assetTotalInWei !== undefined &&
-            selectedTokenUnitAmount !== undefined &&
-            !selectedTokenUnitAmount.eq(BIG_NUMBER_ZERO)
-            ? assetTotalInWei.div(selectedTokenUnitAmount).integerValue(BigNumber.ROUND_CEIL)
-            : undefined;*/
     }
 
     private _baseCurrencyChoice(choice: BaseCurrency): React.ReactNode {
@@ -187,23 +177,6 @@ export class OrderSwapDetails extends React.PureComponent<OrderSwapDetailsProps>
             textStyle.fontColor = ColorOption.lightGrey;
         }
         return <Text {...textStyle}>{choice}</Text>;
-    }
-
-    private _renderHeader(): React.ReactNode {
-        return (
-            <Flex justify="space-between">
-                <SectionHeader>Order Details</SectionHeader>
-                <Container>
-                    {this._baseCurrencyChoice(BaseCurrency.ETH)}
-                    <Container marginLeft="5px" marginRight="5px" display="inline">
-                        <Text fontSize="12px" fontColor={ColorOption.feintGrey}>
-                            /
-                        </Text>
-                    </Container>
-                    {this._baseCurrencyChoice(BaseCurrency.USD)}
-                </Container>
-            </Flex>
-        );
     }
 }
 

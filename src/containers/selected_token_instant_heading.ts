@@ -2,10 +2,9 @@ import { BigNumber } from '@0x/utils';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { oc } from 'ts-optchain';
 
 import { State } from '../redux/reducer';
-import {  AsyncProcessState, OrderState, TokenInfo } from '../types';
+import {  AsyncProcessState, OrderState, TokenBalance, TokenInfo } from '../types';
 
 import { InstantTokenHeading } from '../components/instant_token_heading';
 
@@ -16,6 +15,8 @@ export interface InstantHeadingProps {
 
 interface ConnectedState {
     selectedTokenIn?: TokenInfo;
+    selectedTokenInBalance?: TokenBalance;
+    selectedTokenOutBalance?: TokenBalance;
     selectedTokenAmountIn?: BigNumber;
     selectedTokenOut?: TokenInfo;
     selectedTokenAmountOut?: BigNumber;
@@ -27,9 +28,11 @@ interface ConnectedState {
 
 const mapStateToProps = (state: State, _ownProps: InstantHeadingProps): ConnectedState => ({
     selectedTokenIn: state.selectedTokenIn,
+    selectedTokenInBalance: state.selectedTokenInBalance,
     selectedTokenAmountIn: state.selectedTokenAmountIn,
     selectedTokenOut: state.selectedTokenOut,
     selectedTokenAmountOut: state.selectedTokenAmountOut,
+    selectedTokenOutBalance: state.selectedTokenOutBalance,
     totalEthBaseUnitAmount: new BigNumber(0),
     ethUsdPrice: state.ethUsdPrice,
     quoteRequestState: state.quoteRequestState,

@@ -5,7 +5,7 @@ import * as React from 'react';
 import { SelectedERC20AmountInput } from '../containers/selected_erc20_amount_input';
 
 import { ColorOption } from '../style/theme';
-import {  AsyncProcessState,  OrderProcessState, OrderState, TokenInfo } from '../types';
+import {  AsyncProcessState,  OrderProcessState, OrderState, TokenBalance, TokenInfo } from '../types';
 import { format } from '../util/format';
 
 import { AmountPlaceholder } from './amount_placeholder';
@@ -18,6 +18,8 @@ import { Text } from './ui/text';
 export interface InstantTokenHeadingProps {
     selectedTokenIn?: TokenInfo;
     selectedTokenOut?: TokenInfo;
+    selectedTokenInBalance?: TokenBalance;
+    selectedTokenOutBalance?: TokenBalance;
     selectedTokenUnitAmountIn?: BigNumber;
     selectedTokenUnitAmountOut?: BigNumber;
     totalEthBaseUnitAmount?: BigNumber;
@@ -58,16 +60,28 @@ export class InstantTokenHeading extends React.PureComponent<InstantTokenHeading
         return (
             <Container backgroundColor={ColorOption.primaryColor} width="100%" padding="20px">
                 <Container marginBottom="5px">
-                    <Text
-                        letterSpacing="1px"
-                        fontColor={ColorOption.white}
-                        opacity={0.7}
-                        fontWeight={500}
-                        textTransform="uppercase"
-                        fontSize="12px"
-                    >
-                        {this._renderTopText()}
-                    </Text>
+                 <Flex direction="row" justify="space-between">
+                        <Text
+                            letterSpacing="1px"
+                            fontColor={ColorOption.white}
+                            opacity={0.7}
+                            fontWeight={500}
+                            textTransform="uppercase"
+                            fontSize="12px"
+                        >
+                            {this._renderTopText()}
+                        </Text>
+                        <Text
+                            letterSpacing="1px"
+                            fontColor={ColorOption.white}
+                            opacity={0.7}
+                            fontWeight={500}
+                            textTransform="uppercase"
+                            fontSize="12px"
+                        >
+                            {this._renderTokenBalance()}
+                        </Text>
+                    </Flex>
                 </Container>
                 <Flex direction="row" justify="space-between">
                     <Flex height="60px">
@@ -132,8 +146,30 @@ export class InstantTokenHeading extends React.PureComponent<InstantTokenHeading
         }else{
             return 'You receive';
         }
+    }
 
-      
+    private _renderTokenBalance(): React.ReactNode {
+        const {isIn, selectedTokenInBalance, selectedTokenOutBalance} = this.props;
+        if(isIn){
+
+            if(selectedTokenInBalance){
+                const token = selectedTokenInBalance.token;
+                const balance = selectedTokenInBalance.balance;
+                const formattedBalance = format.tokenBaseUnitAmount(token.symbol,token.decimals, balance, 4);
+                return `Balance: ${formattedBalance}`
+            }else{
+                return null;
+            }
+        }else{
+            if(selectedTokenOutBalance){
+                const token = selectedTokenOutBalance.token;
+                const balance = selectedTokenOutBalance.balance;
+                const formattedBalance = format.tokenBaseUnitAmount(token.symbol,token.decimals, balance, 4);
+                return `Balance: ${formattedBalance}`;
+            }else{
+                return null;
+            }
+        }
     }
 
     private _renderPlaceholderOrAmount(amountFunction: () => React.ReactNode): React.ReactNode {

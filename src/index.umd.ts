@@ -20,7 +20,6 @@ import { OrderSource } from './types';
 import { analytics } from './util/analytics';
 import { assert } from './util/assert';
 import { assetDataEncoder } from './util/asset_data_encoder';
-import { orderCoercionUtil } from './util/order_coercion';
 import { providerFactory } from './util/provider_factory';
 import { util } from './util/util';
 
@@ -41,7 +40,7 @@ const validateInstantRenderConfig = (
 
     if (config.defaultSelectedTokenOut !== undefined) {
         assert.isTokenInfo(
-            'defaultSelectedTokenIn',
+            'defaultSelectedTokenOut',
             config.defaultSelectedTokenOut,
         );
     }

@@ -49,7 +49,7 @@ export class ERC20TokenSelector extends React.PureComponent<ERC20TokenSelectorPr
                 />
                 <Container overflow="scroll" height="calc(100% - 90px)" marginTop="10px">
                     <TokenRowFilter
-                        tokens={tokens.slice(0, perPage*(page+1))}
+                        tokens={tokens.filter(t=> t.name.toLowerCase().indexOf(this.state.searchQuery.toLowerCase()) !== -1 || t.symbol.toLowerCase().indexOf(this.state.searchQuery.toLowerCase()) !== -1 ).slice(0, perPage*(page+1))}
                         onClick={this._handleTokenClick}
                         searchQuery={this.state.searchQuery}
                     />

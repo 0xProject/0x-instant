@@ -11,7 +11,7 @@ export interface HeartbeatFactoryOptions {
 export const generateAccountHeartbeater = (options: HeartbeatFactoryOptions): Heartbeater => {
     const { store, shouldPerformImmediatelyOnStart } = options;
     return new Heartbeater(async () => {
-        await asyncData.fetchAccountInfoAndDispatchToStore(store.getState().providerState, store.dispatch, false);
+        await asyncData.fetchAccountInfoAndDispatchToStore(store.getState().providerState, store.dispatch, false, store.getState().selectedTokenIn, store.getState().selectedTokenOut );
     }, shouldPerformImmediatelyOnStart);
 };
 

@@ -1,18 +1,17 @@
 import { MarketBuySwapQuote } from '@0x/asset-swapper';
 import { ChainId } from '@0x/contract-addresses';
-import { AssetProxyId, ObjectMap } from '@0x/types';
 import { BigNumber } from '@0x/utils';
-import { Web3Wrapper } from '@0x/web3-wrapper';
+
 
 import { LOADING_ACCOUNT, LOCKED_ACCOUNT, NO_ACCOUNT } from '../constants';
-import { assetMetaDataMap } from '../data/asset_meta_data_map';
+
 import {
     Account,
     AccountReady,
     AccountState,
     AffiliateInfo,
-    Asset,
-    AssetMetaData,
+    ApproveProcessState,
+    ApproveState,
     AsyncProcessState,
     BaseCurrency,
     DisplayStatus,
@@ -22,6 +21,7 @@ import {
     StandardSlidingPanelContent,
     StandardSlidingPanelSettings,
     SwapQuoteResponse,
+    SwapStep,
     TokenBalance,
     TokenInfo,
 } from '../types';
@@ -32,6 +32,7 @@ import { Action, ActionTypes } from './actions';
 export interface DefaultState {
     network: ChainId;
     swapOrderState: OrderState;
+    approveState: ApproveState;
     latestErrorDisplayStatus: DisplayStatus;
     quoteRequestState: AsyncProcessState;
     standardSlidingPanelSettings: StandardSlidingPanelSettings;
@@ -47,6 +48,8 @@ interface PropsDerivedState {
 interface OptionalState {
     selectedTokenIn: TokenInfo;
     selectedTokenOut: TokenInfo;
+    selectedTokenInBalance: TokenBalance;
+    selectedTokenOutBalance: TokenBalance;
     availableTokens: TokenInfo[];
     tokenBalances: TokenBalance[];
     selectedTokenAmountIn: BigNumber;
@@ -58,6 +61,7 @@ interface OptionalState {
     latestErrorMessage: string;
     affiliateInfo: AffiliateInfo;
     walletDisplayName: string;
+    swapStep: SwapStep;
     onSuccess: (txHash: string) => void;
 }
 
@@ -66,6 +70,7 @@ export type State = DefaultState & PropsDerivedState & Partial<OptionalState>;
 export const DEFAULT_STATE: DefaultState = {
     network: ChainId.Mainnet,
     swapOrderState: { processState: OrderProcessState.None },
+    approveState: { processState: ApproveProcessState.None },
     latestErrorDisplayStatus: DisplayStatus.Hidden,
     quoteRequestState: AsyncProcessState.None,
     standardSlidingPanelSettings: {
@@ -123,21 +128,26 @@ export const createReducer = (initialState: State) => {
                     ...state,
                     isIn: action.data,
                 };
+            case ActionTypes.SetUISwapStep:
+                return {
+                    ...state,
+                    swapStep: action.data,
+                };
             case ActionTypes.UpdateEthUsdPrice:
                 return {
                     ...state,
                     ethUsdPrice: action.data,
                 };
             case ActionTypes.UpdateSelectedTokenAmountOut:
-                    return {
-                        ...state,
-                        selectedTokenAmountOut: action.data,
-                    };
+                return {
+                    ...state,
+                    selectedTokenAmountOut: action.data,
+                };
             case ActionTypes.UpdateSelectedTokenAmountIn:
-                    return {
-                        ...state,
-                        selectedTokenAmountIn: action.data,
-                    };
+                return {
+                    ...state,
+                    selectedTokenAmountIn: action.data,
+                };
             case ActionTypes.SetQuoteRequestStatePending:
                 return {
                     ...state,
@@ -228,6 +238,64 @@ export const createReducer = (initialState: State) => {
                     }
                 }
                 return state;
+            case ActionTypes.SetApproveTokenStateNone:
+                return {
+                    ...state,
+                    approveState: { processState: ApproveProcessState.None },
+                };
+            case ActionTypes.SetApproveTokenStateValidating:
+                return {
+                    ...state,
+                    approveState: {
+                        processState: ApproveProcessState.Validating,
+                    },
+                };
+            case ActionTypes.SetApproveTokenStateProcessing:
+                return {
+                    ...state,
+                    approveState: {
+                        processState: ApproveProcessState.Processing,
+                        txHash: action.data.txHash,
+                        progress: {
+                            startTimeUnix: action.data.startTimeUnix,
+                            expectedEndTimeUnix: action.data.expectedEndTimeUnix,
+                        },
+                    },
+                };
+            case ActionTypes.SetApproveTokenStateFailure:
+                const failureApproveTxHash = action.data;
+                if ('txHash' in state.approveState) {
+                    if (state.approveState.txHash === failureApproveTxHash) {
+                        const { txHash, progress } = state.approveState;
+                        return {
+                            ...state,
+                            approveState: {
+                                processState: ApproveProcessState.Failure,
+                                txHash,
+                                progress,
+                            },
+                        };
+                    }
+                }
+                return state;
+            case ActionTypes.SetApproveTokenStateSuccess:
+                const successApproveTxHash = action.data;
+                if ('txHash' in state.approveState) {
+                    if (state.approveState.txHash === successApproveTxHash) {
+                        const { txHash, progress } = state.approveState;
+                        return {
+                            ...state,
+                            approveState: {
+                                processState: ApproveProcessState.Success,
+                                txHash,
+                                progress,
+                            },
+                        };
+                    }
+                }
+                return state;
+
+
             case ActionTypes.SetErrorMessage:
                 return {
                     ...state,
@@ -254,6 +322,16 @@ export const createReducer = (initialState: State) => {
                 return {
                     ...state,
                     selectedTokenOut: action.data,
+                };
+            case ActionTypes.UpdateSelectedTokenInBalance:
+                return {
+                    ...state,
+                    selectedTokenInBalance: action.data,
+                };
+            case ActionTypes.UpdateSelectedTokenOutBalance:
+                return {
+                    ...state,
+                    selectedTokenOutBalance: action.data,
                 };
             case ActionTypes.ResetAmount:
                 return {
@@ -331,15 +409,15 @@ const doesSwapQuoteMatchState = (
     if (
         selectedTokenIn === undefined ||
         selectedTokenAmountIn === undefined ||
-        selectedTokenOut === undefined || 
+        selectedTokenOut === undefined ||
         selectedTokenAmountOut === undefined
     ) {
         return false;
     }
-  
-    if(swapQuote === state.latestApiSwapQuote){
+
+    if (swapQuote === state.latestApiSwapQuote) {
         return true
     }
-  
-   
+
+
 };

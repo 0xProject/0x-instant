@@ -22,6 +22,15 @@ export enum OrderProcessState {
     Failure = 'FAILURE',
 }
 
+
+export enum ApproveProcessState {
+    None = 'NONE',
+    Validating = 'VALIDATING',
+    Processing = 'PROCESSING',
+    Success = 'SUCCESS',
+    Failure = 'FAILURE',
+}
+
 export enum QuoteFetchOrigin {
     Manual = 'Manual',
     Heartbeat = 'Heartbeat',
@@ -30,6 +39,12 @@ export enum QuoteFetchOrigin {
 export enum BaseCurrency {
     USD = 'USD', // tslint:disable-line:enum-naming
     ETH = 'ETH', // tslint:disable-line:enum-naming
+}
+
+export enum SwapStep {
+    ReviewOrder = 'ReviewOrder',
+    Approve = 'Approve',
+    Swap = 'Swap'
 }
 
 export interface SimulatedProgress {
@@ -48,7 +63,21 @@ interface OrderStatePostTx {
     txHash: string;
     progress: SimulatedProgress;
 }
+
+interface ApproveStatePreTx {
+    processState: ApproveProcessState.None | ApproveProcessState.Validating;
+}
+interface ApproveStatePostTx {
+    processState:
+        | ApproveProcessState.Processing
+        | ApproveProcessState.Success
+        | ApproveProcessState.Failure;
+    txHash: string;
+    progress: SimulatedProgress;
+}
 export type OrderState = OrderStatePreTx | OrderStatePostTx;
+
+export type ApproveState = ApproveStatePreTx | ApproveStatePostTx;
 
 export enum DisplayStatus {
     Present,

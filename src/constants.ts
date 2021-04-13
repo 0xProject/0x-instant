@@ -18,7 +18,7 @@ export const ETH_TOKEN: TokenInfo = {
     decimals: 18,
     symbol: 'ETH'
 }
-
+export const UNLIMITED_ALLOWANCE_IN_BASE_UNITS = new BigNumber(2).pow(256).minus(1);
 
 // TODO(dave4506) until we have /prices endpoint ready, we will use this whitelist for bridge order liquidity assets
 export const SUPPORTED_TOKEN_ASSET_DATA_WITH_BRIDGE_ORDERS = [

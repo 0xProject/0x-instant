@@ -1,5 +1,5 @@
-import { AssetProxyId } from '@0x/types';
 import * as React from 'react';
+import { connect } from 'react-redux';
 
 import PoweredByLogo from '../assets/powered_by_0x.svg';
 import { ZERO_EX_SITE_URL } from '../constants';
@@ -12,7 +12,7 @@ import { SelectedTokenInstantHeading } from '../containers/selected_token_instan
 import { SelectedTokenSwapOrderStateButtons } from '../containers/selected_token_swap_order_state_buttons';
 import { ColorOption } from '../style/theme';
 import { zIndex } from '../style/z_index';
-import { SlideAnimationState, TokenInfo } from '../types';
+import { SlideAnimationState, SwapStep } from '../types';
 import { analytics, TokenSelectorClosedVia } from '../util/analytics';
 
 import { CSSReset } from './css_reset';
@@ -20,21 +20,37 @@ import { SlidingPanel } from './sliding_panel';
 import { Container } from './ui/container';
 import { Flex } from './ui/flex';
 
-export interface ZeroExInstantContainerProps {}
+import { State } from '../redux/reducer';
+import { ReviewSwapStepContainer } from '../containers/review_swap_step';
+import { ApproveSwapStepContainer } from '../containers/approve_swap_step';
+import { ApproveTokenProgressContainer } from '../containers/approve_token_progress';
+import { Dispatch } from 'redux';
+import { Action, actions } from '../redux/actions';
+import { SwapProgressContainer } from '../containers/swap_progress';
+
+export interface ZeroExInstantContainerProps {
+    swapStep: SwapStep;
+    onClosePanelStep: () => void;
+}
 export interface ZeroExInstantContainerState {
     tokenSelectionPanelAnimationState: SlideAnimationState;
+    stepPanelAnimationState: SlideAnimationState;
     isIn: boolean;
 }
 
-export class ZeroExInstantContainer extends React.PureComponent<
+class ZeroExInstantComponent extends React.PureComponent<
     ZeroExInstantContainerProps,
     ZeroExInstantContainerState
 > {
     public state = {
         tokenSelectionPanelAnimationState: 'none' as SlideAnimationState,
+        stepPanelAnimationState: 'none' as SlideAnimationState,
         isIn: false,
     };
     public render(): React.ReactNode {
+        const { swapStep } = this.props;
+
+
         return (
             <React.Fragment>
                 <CSSReset />
@@ -57,13 +73,13 @@ export class ZeroExInstantContainer extends React.PureComponent<
                     >
                         <Flex direction="column" justify="flex-start" height="100%">
                             {/*<ConnectedSwapOrderProgressOrPaymentMethod />*/}
-                        
+
                             <SelectedTokenInstantHeading onSelectTokenClick={this._handleSymbolClickIn} isIn={true} />
                             <SelectedTokenInstantHeading onSelectTokenClick={this._handleSymbolClickOut} isIn={false} />
                             <ConnectedSwapOrderProgressOrPaymentMethod />
-                           {/*  <LatestSwapQuoteOrderDetails />*/}
+                            <LatestSwapQuoteOrderDetails />
                             <Container padding="20px" width="100%">
-                                <SelectedTokenSwapOrderStateButtons />
+                                <SelectedTokenSwapOrderStateButtons onClosePanelStep={this._handleStepPanelClose} onShowPanelStep={this._handleStepPanelOpen} />
                             </Container>
                         </Flex>
                         <SlidingPanel
@@ -73,6 +89,24 @@ export class ZeroExInstantContainer extends React.PureComponent<
                         >
                             <AvailableERC20TokenSelector onTokenSelect={this._handlePanelCloseAfterChose} isIn={this.state.isIn} />
                         </SlidingPanel>
+
+                        <SlidingPanel
+                            animationState={this.state.stepPanelAnimationState}
+                            onClose={this._handleStepPanelCloseX}
+                            onAnimationEnd={this._handleStepSlidingPanelAnimationEnd}
+                        >
+
+                            <Flex direction="column" justify="flex-start" height="100%">
+                                <Container height="100%">
+                                    {this._getContentFromStep(swapStep)}
+                                </Container>
+                                <Container padding="20px" width="100%">
+                                    <SelectedTokenSwapOrderStateButtons onClosePanelStep={this._handleStepPanelClose} onShowPanelStep={this._handleStepPanelOpen} />
+                                </Container>
+                            </Flex>
+
+                        </SlidingPanel>
+
                         <CurrentStandardSlidingPanel />
                     </Container>
                     <Container
@@ -92,17 +126,17 @@ export class ZeroExInstantContainer extends React.PureComponent<
     }
     private readonly _handleSymbolClickIn = (): void => {
         analytics.trackTokenSelectorOpened();
-        this.setState({isIn: true});
+        this.setState({ isIn: true });
         this.setState({
-                tokenSelectionPanelAnimationState: 'slidIn',
+            tokenSelectionPanelAnimationState: 'slidIn',
         });
     };
     private readonly _handleSymbolClickOut = (): void => {
-       
+
         analytics.trackTokenSelectorOpened();
-        this.setState({isIn: false});
+        this.setState({ isIn: false });
         this.setState({
-                tokenSelectionPanelAnimationState: 'slidIn',
+            tokenSelectionPanelAnimationState: 'slidIn',
         });
     };
 
@@ -118,6 +152,24 @@ export class ZeroExInstantContainer extends React.PureComponent<
             tokenSelectionPanelAnimationState: 'slidOut',
         });
     };
+    private readonly _handleStepPanelCloseX = (): void => {
+        this.props.onClosePanelStep();
+        this.setState({
+            stepPanelAnimationState: 'slidOut',
+        });
+    };
+    private readonly _handleStepPanelClose = (step: SwapStep): void => {
+        this.setState({
+            stepPanelAnimationState: 'slidOut',
+        });
+    };
+    private readonly _handleStepPanelOpen = (step: SwapStep): void => {
+        this.setState({
+            stepPanelAnimationState: 'slidIn',
+        });
+    };
+
+
     private readonly _handleSlidingPanelAnimationEnd = (): void => {
         if (this.state.tokenSelectionPanelAnimationState === 'slidOut') {
             // When the slidOut animation completes, don't keep the panel mounted.
@@ -125,4 +177,54 @@ export class ZeroExInstantContainer extends React.PureComponent<
             this.setState({ tokenSelectionPanelAnimationState: 'none' });
         }
     };
+
+    private readonly _handleStepSlidingPanelAnimationEnd = (): void => {
+        if (this.state.stepPanelAnimationState === 'slidOut') {
+            // When the slidOut animation completes, don't keep the panel mounted.
+            // Performance optimization
+            this.setState({ stepPanelAnimationState: 'none' });
+        }
+    };
+
+    private readonly _getContentFromStep = (swapSteps: SwapStep): React.ReactNode => {
+        switch (swapSteps) {
+            case SwapStep.Approve:
+
+                return (
+                    <>
+                        <ApproveSwapStepContainer />
+                        <ApproveTokenProgressContainer />
+                    </>)
+            case SwapStep.ReviewOrder:
+                return (<>
+                    <ReviewSwapStepContainer />
+                    <SwapProgressContainer />
+                </>)
+            default:
+                return null;
+        }
+    }
+
 }
+
+interface ConnectedDispatch {
+    onClosePanelStep: () => void;
+}
+
+interface ConnectedState {
+    swapStep: SwapStep;
+}
+
+const mapDispatchToProps = (
+    dispatch: Dispatch<Action>,
+): ConnectedDispatch => ({
+    onClosePanelStep: () => {
+        dispatch(actions.setUISwapStep(SwapStep.Swap));
+    },
+});
+
+const mapStateToProps = (state: State): ConnectedState => ({
+    swapStep: state.swapStep || SwapStep.Swap,
+});
+
+export const ZeroExInstantContainer: React.ComponentClass = connect(mapStateToProps, mapDispatchToProps)(ZeroExInstantComponent);
