@@ -39,6 +39,6 @@ const mapStateToProps = (state: State, _ownProps: InstantHeadingProps): Connecte
     swapOrderState: state.swapOrderState,
 });
 
-export const SelectedTokenInstantHeading: React.ComponentClass<InstantHeadingProps> = connect(mapStateToProps)(
+export const SelectedTokenInstantHeading = connect(mapStateToProps)(
     InstantTokenHeading,
 );

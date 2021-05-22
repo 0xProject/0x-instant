@@ -132,7 +132,7 @@ const mergeProps = (
     };
 };
 
-export const SelectedERC20AmountInput: React.ComponentClass<SelectedERC20AmountInputProps> = connect(
+export const SelectedERC20AmountInput = connect(
     mapStateToProps,
     mapDispatchToProps,
     mergeProps,

@@ -1,35 +1,24 @@
 import * as React from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 
-import { State } from '../redux/reducer';
+import { getSwapOrderState } from '../redux/selectors';
 import { OrderProcessState } from '../types';
+import { PaymentMethodContainer } from './payment_method';
 
-import { ConnectedAccountPaymentMethod } from './connected_account_payment_method';
-import { SelectedTokenSwapOrderProgress } from './selected_token_swap_order_progress';
+import { SwapProgressContainer } from './swap_order_progress';
 
-interface SwapOrderProgressOrPaymentMethodProps {
-    orderProcessState: OrderProcessState;
-}
-export const SwapOrderProgressOrPaymentMethod = (props: SwapOrderProgressOrPaymentMethodProps) => {
-    const { orderProcessState } = props;
+
+
+export const SwapOrderProgressOrPaymentMethod = () => {
+    const  orderProcessState  = useSelector(getSwapOrderState).processState;
     if (
         orderProcessState === OrderProcessState.Processing ||
         orderProcessState === OrderProcessState.Success ||
         orderProcessState === OrderProcessState.Failure
     ) {
-        return <SelectedTokenSwapOrderProgress />;
+        return <SwapProgressContainer />;
     } else {
-        return <ConnectedAccountPaymentMethod />;
+        return <PaymentMethodContainer />;
     }
     return null;
 };
-
-interface ConnectedState extends SwapOrderProgressOrPaymentMethodProps {}
-
-export interface ConnectedSwapOrderProgressOrPaymentMethodProps {}
-const mapStateToProps = (state: State, _ownProps: ConnectedSwapOrderProgressOrPaymentMethodProps): ConnectedState => ({
-    orderProcessState: state.swapOrderState.processState,
-});
-export const ConnectedSwapOrderProgressOrPaymentMethod: React.ComponentClass<
-    ConnectedSwapOrderProgressOrPaymentMethodProps
-> = connect(mapStateToProps)(SwapOrderProgressOrPaymentMethod);

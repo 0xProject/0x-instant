@@ -71,9 +71,26 @@ export const tokenUtils = {
 
     },
 
-    isETH: (token: TokenInfo) =>{
+    isETH: (token: TokenInfo) => {
         return token.address.toLowerCase() === ETH_ADDRESS ? true : false;
         
+    },
+
+    getIcon: (symbol: string) => {
+        try {
+            return require(`../assets/icons/${symbol}.svg`).default;
+        } catch (e) {
+            // Can't find icon
+            return undefined;
+        }
+    },
+
+    getIconUrl: (address: string): string | undefined => {
+        try {
+            return `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/${address}/logo.png`;
+        } catch (e) {
+            // Can't find icon
+            return undefined;
+        }
     }
-    
 };

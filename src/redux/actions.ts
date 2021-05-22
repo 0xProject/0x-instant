@@ -1,18 +1,23 @@
-import { MarketBuySwapQuote } from '@0x/asset-swapper';
 import { BigNumber } from '@0x/utils';
+
+import { Dispatch } from 'redux';
 
 import {
     ActionsUnion,
     AddressAndEthBalanceInWei,
-    Asset,
     BaseCurrency,
     ProviderState,
+    ProviderType,
     StandardSlidingPanelContent,
     SwapQuoteResponse,
     SwapStep,
     TokenBalance,
     TokenInfo,
 } from '../types';
+import { analytics } from '../util/analytics';
+import { providerStateFactory } from '../util/provider_state_factory';
+import { asyncData } from './async_data';
+import { State } from './reducer';
 
 export interface PlainAction<T extends string> {
     type: T;
@@ -119,3 +124,31 @@ export const actions = {
     setUISwapStep: (swapStep: SwapStep) => createAction(ActionTypes.SetUISwapStep, swapStep),
     updateTokenBalances: (tokenBalances: TokenBalance[]) => createAction(ActionTypes.UpdateTokenBalances, tokenBalances),
 };
+
+
+export const updateTokenSelect = (token: TokenInfo, isIn: boolean) => 
+    (dispatch: Dispatch<Action>) => {
+        if(isIn){
+            dispatch(actions.updateSelectedTokenIn(token));
+        }else{
+            dispatch(actions.updateSelectedTokenOut(token));
+        }
+
+        dispatch(actions.resetAmount());
+}
+
+export const unlockWalletAndDispatchToStore = (providerType: ProviderType) => 
+    async (dispatch: Dispatch<Action>, getState: any) => {
+        const state = getState() as State;
+        const chainId = await state.providerState.web3Wrapper.getChainIdAsync();
+        const newProviderState: ProviderState = providerStateFactory.getProviderStateBasedOnProviderType(     
+            providerType,
+            chainId,
+        );
+        // Updates provider state
+        dispatch(actions.setProviderState(newProviderState));
+        // Unlocks wallet
+        analytics.trackAccountUnlockRequested();
+        // tslint:disable-next-line:no-floating-promises
+        asyncData.fetchAccountInfoAndDispatchToStore(newProviderState, dispatch, true);
+}

@@ -1,18 +1,17 @@
 import * as React from 'react';
 
-import { TimedProgressBar } from './timed_progress_bar';
+import { TimedProgressBar } from '../components/timed_progress_bar';
 
-import { TimeCounter } from './time_counter';
-import { Container } from './ui/container';
-import { ApproveProcessState, ApproveState } from '../types';
+import { TimeCounter } from '../components/time_counter';
+import { Container } from '../components/ui/container';
+import { ApproveProcessState } from '../types';
+import { useSelector } from 'react-redux';
+import { getApproveState } from '../redux/selectors';
 
 
-export interface ApproveTokenProgressProps {
-    approveState: ApproveState;
-}
+export const ApproveTokenProgressContainer = () => {
+    const approveState = useSelector(getApproveState);
 
-export const ApproveTokenProgress: React.StatelessComponent<ApproveTokenProgressProps> = props => {
-    const { approveState } = props;
     if (
         approveState.processState === ApproveProcessState.Processing ||
         approveState.processState === ApproveProcessState.Success ||
@@ -33,4 +32,4 @@ export const ApproveTokenProgress: React.StatelessComponent<ApproveTokenProgress
     return null;
 };
 
-ApproveTokenProgress.displayName = 'ApproveTokenProgress';
+ApproveTokenProgressContainer.displayName = 'ApproveTokenProgress';

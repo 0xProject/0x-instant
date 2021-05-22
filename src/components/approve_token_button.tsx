@@ -6,13 +6,13 @@ import { Button } from './ui/button';
 import { Container } from './ui/container';
 import { Spinner } from './ui/spinner';
 
-export const ApproveTokenButton: React.StatelessComponent<{}> = props => (
+export const ApproveTokenButton = () => 
     <Button isDisabled={true} width="100%" fontColor={ColorOption.white}>
         <Container display="inline-block" position="relative" top="3px" marginRight="8px">
             <Spinner widthPx={16} heightPx={16} />
         </Container>
         Approving Token for Swap
     </Button>
-);
+
 
 ApproveTokenButton.displayName = 'ApproveTokenButton';

@@ -3,41 +3,57 @@ import * as React from 'react';
 
 import PhoneIconSvg from '../assets/icons/phone.svg';
 import { ColorOption } from '../style/theme';
-import { Account, AccountState, ProviderType } from '../types';
+import { Account, AccountState, OperatingSystem, ProviderType, StandardSlidingPanelContent, WalletSuggestion } from '../types';
 import { envUtil } from '../util/env';
 
-import { CoinbaseWalletLogo } from './coinbase_wallet_logo';
-import { MetaMaskLogo } from './meta_mask_logo';
-import { PaymentMethodDropdown } from './payment_method_dropdown';
-import { SectionHeader } from './section_header';
-import { Container } from './ui/container';
-import { Flex } from './ui/flex';
-import { WalletPrompt } from './wallet_prompt';
+import { CoinbaseWalletLogo } from '../components/coinbase_wallet_logo';
+import { MetaMaskLogo } from '../components/meta_mask_logo';
+import { PaymentMethodDropdown } from '../components/payment_method_dropdown';
+import { SectionHeader } from '../components/section_header';
+import { Container } from '../components/ui/container';
+import { Flex } from '../components/ui/flex';
+import { WalletPrompt } from '../components/wallet_prompt';
+import { getAccount, getChainId, getWalletDisplayName } from '../redux/selectors';
+import { useDispatch, useSelector } from 'react-redux';
+import { COINBASE_WALLET_SITE_URL, COINBASE_WALLET_ANDROID_APP_STORE_URL, COINBASE_WALLET_IOS_APP_STORE_URL } from '../constants';
+import { analytics } from '../util/analytics';
+import { actions, unlockWalletAndDispatchToStore } from '../redux/actions';
 
-export interface PaymentMethodProps {
-    account: Account;
-    network: ChainId;
-    walletDisplayName: string;
-    onInstallWalletClick: () => void;
-    onUnlockWalletClick: (providerType: ProviderType) => void;
-}
 
-export class PaymentMethod extends React.PureComponent<PaymentMethodProps> {
-    public render(): React.ReactNode {
-        const marginBottom = this.props.account.state !== AccountState.Ready ? '77px' : null;
-        return (
-            <Container width="100%" height="100%" padding="20px 20px 0px 20px" marginBottom={marginBottom}>
-                <Container marginBottom="12px">
-                    <Flex justify="space-between">
-                        <SectionHeader>{this._renderTitleText()}</SectionHeader>
-                    </Flex>
-                </Container>
-                <Container>{this._renderMainContent()}</Container>
-            </Container>
-        );
+export const PaymentMethodContainer = () =>  {
+    const account  = useSelector(getAccount);
+    const network  = useSelector(getChainId);
+    const walletDisplayName = useSelector(getWalletDisplayName);
+    const dispatch = useDispatch();
+    const onInstallWalletClick = () => {
+        const isMobile = envUtil.isMobileOperatingSystem();
+        const walletSuggestion: WalletSuggestion = isMobile
+            ? WalletSuggestion.CoinbaseWallet
+            : WalletSuggestion.MetaMask;
+
+        analytics.trackInstallWalletClicked(walletSuggestion);
+        if (walletSuggestion === WalletSuggestion.MetaMask) {
+            dispatch(actions.openStandardSlidingPanel(StandardSlidingPanelContent.InstallWallet))
+        } else {
+            const operatingSystem = envUtil.getOperatingSystem();
+            let url = COINBASE_WALLET_SITE_URL;
+            switch (operatingSystem) {
+                case OperatingSystem.Android:
+                    url = COINBASE_WALLET_ANDROID_APP_STORE_URL;
+                    break;
+                case OperatingSystem.iOS:
+                    url = COINBASE_WALLET_IOS_APP_STORE_URL;
+                    break;
+                default:
+                    break;
+            }
+            window.open(url, '_blank');
+        }
     }
-    private readonly _renderTitleText = (): string => {
-        const { account } = this.props;
+
+
+
+    const renderTitleText = (): string => {
         switch (account.state) {
             case AccountState.Loading:
                 return 'loading...';
@@ -48,8 +64,7 @@ export class PaymentMethod extends React.PureComponent<PaymentMethodProps> {
                 return '';
         }
     };
-    private readonly _renderMainContent = (): React.ReactNode => {
-        const { account, network } = this.props;
+    const renderMainContent = () => {
         const isMobile = envUtil.isMobileOperatingSystem();
         const metamaskLogo = <MetaMaskLogo width={23} height={22} />;
         const logo = isMobile ? <CoinbaseWalletLogo width={22} height={22} /> : metamaskLogo;
@@ -57,9 +72,9 @@ export class PaymentMethod extends React.PureComponent<PaymentMethodProps> {
         const secondaryColor = ColorOption.whiteBackground;
         const colors = { primaryColor, secondaryColor };
         const onUnlockGenericWallet = () => {
-            this.props.onUnlockWalletClick(ProviderType.MetaMask);
+           dispatch(unlockWalletAndDispatchToStore(ProviderType.MetaMask))
         };
-        const onUnlockFormatic = () => this.props.onUnlockWalletClick(ProviderType.Fortmatic);
+        const onUnlockFormatic = () => dispatch(unlockWalletAndDispatchToStore(ProviderType.Fortmatic));
         switch (account.state) {
             case AccountState.Loading:
                 return null;
@@ -104,7 +119,7 @@ export class PaymentMethod extends React.PureComponent<PaymentMethodProps> {
                 return (
                     <Flex direction="column" justify="space-between" height="100%">
                         <WalletPrompt
-                            onClick={this.props.onInstallWalletClick}
+                            onClick={onInstallWalletClick}
                             image={logo}
                             {...colors}
                             fontWeight="normal"
@@ -141,4 +156,17 @@ export class PaymentMethod extends React.PureComponent<PaymentMethodProps> {
                 );
         }
     };
+
+
+    const marginBottom = account.state !== AccountState.Ready ? '77px' : null;
+        return (
+            <Container width="100%" height="100%" padding="20px 20px 0px 20px" marginBottom={marginBottom}>
+                <Container marginBottom="12px">
+                    <Flex justify="space-between">
+                        <SectionHeader>{renderTitleText()}</SectionHeader>
+                    </Flex>
+                </Container>
+                <Container>{renderMainContent()}</Container>
+            </Container>
+        );
 }

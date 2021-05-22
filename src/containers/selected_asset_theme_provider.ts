@@ -27,6 +27,6 @@ const mapStateToProps = (state: State, _ownProps: SelectedAssetThemeProviderProp
     return { theme };
 };
 
-export const SelectedAssetThemeProvider: React.ComponentClass<SelectedAssetThemeProviderProps> = connect(
+export const SelectedAssetThemeProvider = connect(
     mapStateToProps,
 )(ThemeProvider);

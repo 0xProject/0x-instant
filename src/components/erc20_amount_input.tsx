@@ -49,7 +49,6 @@ export class ERC20AmountInput extends React.PureComponent<ERC20AmountInputProps,
     }
     public render(): React.ReactNode {
         const { tokenOut, tokenIn, isInInput } = this.props;
-        console.log(isInInput);
         const token = isInInput ? tokenIn : tokenOut;
         return (
             <Container whiteSpace="nowrap">

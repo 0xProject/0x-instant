@@ -5,7 +5,7 @@ export interface CoinbaseWalletLogoProps {
     height?: number;
 }
 
-export const CoinbaseWalletLogo: React.StatelessComponent<CoinbaseWalletLogoProps> = ({ width, height }) => (
+export const CoinbaseWalletLogo = ({ width = 164, height = 164 }: CoinbaseWalletLogoProps) => (
     <svg width={width} height={height} viewBox="0 0 51 51" fill="none" xmlns="http://www.w3.org/2000/svg">
         <circle cx="25.5" cy="25.5" r="25.5" fill="#3263E9" />
         <path
@@ -19,7 +19,4 @@ export const CoinbaseWalletLogo: React.StatelessComponent<CoinbaseWalletLogoProp
 
 CoinbaseWalletLogo.displayName = 'CoinbaseWalletLogo';
 
-CoinbaseWalletLogo.defaultProps = {
-    width: 164,
-    height: 164,
-};
+

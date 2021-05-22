@@ -1,5 +1,3 @@
-import { AssetProxyId } from '@0x/types';
-import { BigNumber } from '@0x/utils';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
@@ -20,7 +18,6 @@ import {
     ZeroExInstantBaseConfig,
 } from '../types';
 import { analytics, disableAnalytics } from '../util/analytics';
-import { assetUtils } from '../util/asset';
 import { errorFlasher } from '../util/error_flasher';
 import { setupRollbar } from '../util/error_reporter';
 import { gasPriceEstimator } from '../util/gas_price_estimator';
@@ -186,7 +183,7 @@ export class ZeroExInstantProvider extends React.PureComponent<
         return (
             <ReduxProvider store={this._store}>
                 <SelectedAssetThemeProvider>
-                    {this.props.children}
+                    {this.props.children as React.ReactChild}
                 </SelectedAssetThemeProvider>
             </ReduxProvider>
         );
