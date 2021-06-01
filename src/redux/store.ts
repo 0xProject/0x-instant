@@ -11,6 +11,6 @@ export type Store = ReduxStore<State>;
 export const store = {
     create: (initialState: State): Store => {
         const reducer = createReducer(initialState);
-        return createStore(reducer, initialState, composeWithDevTools(applyMiddleware(analyticsMiddleware), applyMiddleware(thunk) ));
+        return createStore(reducer, initialState, composeWithDevTools(applyMiddleware(thunk), applyMiddleware(analyticsMiddleware)));
     },
 };

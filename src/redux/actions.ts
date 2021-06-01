@@ -127,7 +127,7 @@ export const actions = {
 
 
 export const updateTokenSelect = (token: TokenInfo, isIn: boolean) => 
-    (dispatch: Dispatch<Action>) => {
+   (dispatch: Dispatch<Action>) => {
         if(isIn){
             dispatch(actions.updateSelectedTokenIn(token));
         }else{
