@@ -18,12 +18,9 @@ import { Button } from './ui/button';
 
 export interface InstallWalletPanelContentProps {}
 
-export class InstallWalletPanelContent extends React.PureComponent<InstallWalletPanelContentProps> {
-    public render(): React.ReactNode {
-        const panelProps = this._getStandardPanelContentProps();
-        return <StandardPanelContent {...panelProps} />;
-    }
-    private readonly _getStandardPanelContentProps = (): StandardPanelContentProps => {
+export const InstallWalletPanelContent = () => {
+
+    const getStandardPanelContentProps = (): StandardPanelContentProps => {
         const browser = envUtil.getBrowser();
         let description = 'Please install the MetaMask wallet browser extension.';
         let actionText = 'Learn More';
@@ -51,6 +48,7 @@ export class InstallWalletPanelContent extends React.PureComponent<InstallWallet
             analytics.trackInstallWalletModalClickedGet();
             util.createOpenUrlInNewWindow(actionUrl)();
         };
+        
         return {
             image: <MetaMaskLogo width={85} height={80} />,
             title: 'Install MetaMask',
@@ -70,6 +68,14 @@ export class InstallWalletPanelContent extends React.PureComponent<InstallWallet
                     {actionText}
                 </Button>
             ),
-        };
-    };
+         }
+        }
+
+
+ 
+        const panelProps = getStandardPanelContentProps();
+        return <StandardPanelContent {...panelProps} />;
+
+   
+
 }

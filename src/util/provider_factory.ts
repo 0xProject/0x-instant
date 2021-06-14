@@ -19,15 +19,6 @@ export const providerFactory = {
             );
             return provider;
         }
-        const injectedWeb3IfExists = (window as any).web3;
-        if (
-            injectedWeb3IfExists !== undefined &&
-            injectedWeb3IfExists.currentProvider !== undefined
-        ) {
-            const currentProvider = injectedWeb3IfExists.currentProvider;
-            const provider = providerUtils.standardizeOrThrow(currentProvider);
-            return provider;
-        }
         return undefined;
     },
     getFallbackNoSigningProvider: (chainId: ChainId): Web3ProviderEngine => {

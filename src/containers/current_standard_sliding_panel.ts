@@ -25,7 +25,7 @@ const mapDispatchToProps = (
     onClose: () => dispatch(actions.closeStandardSlidingPanel()),
 });
 
-export const CurrentStandardSlidingPanel: React.ComponentClass<CurrentStandardSlidingPanelProps> = connect(
+export const CurrentStandardSlidingPanel = connect(
     mapStateToProps,
     mapDispatchToProps,
 )(StandardSlidingPanel);

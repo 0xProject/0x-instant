@@ -6,7 +6,19 @@ import {
     AccountState,
     AffiliateInfo,
     ProviderType,
+    TokenInfo,
 } from './types';
+
+export const ETH_ADDRESS =  '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+
+export const ETH_TOKEN: TokenInfo = {
+    chainId: 1,
+    address: ETH_ADDRESS,
+    name: 'Ethereum',
+    decimals: 18,
+    symbol: 'ETH'
+}
+export const UNLIMITED_ALLOWANCE_IN_BASE_UNITS = new BigNumber(2).pow(256).minus(1);
 
 // TODO(dave4506) until we have /prices endpoint ready, we will use this whitelist for bridge order liquidity assets
 export const SUPPORTED_TOKEN_ASSET_DATA_WITH_BRIDGE_ORDERS = [
@@ -110,3 +122,5 @@ export const DEFAULT_AFFILIATE_INFO: AffiliateInfo = {
 };
 
 export const FORTMATIC_API_KEY = process.env.INSTANT_FORTMATIC_API_KEY;
+
+export const ZRX_API_URL = 'https://api.0x.org/swap/v1';

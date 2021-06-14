@@ -1,17 +1,17 @@
 import * as React from 'react';
+import { useSelector } from 'react-redux';
 
 import { TimedProgressBar } from '../components/timed_progress_bar';
 
 import { TimeCounter } from '../components/time_counter';
 import { Container } from '../components/ui/container';
-import { OrderProcessState, OrderState } from '../types';
+import { getSwapOrderState } from '../redux/selectors';
+import { OrderProcessState } from '../types';
 
-export interface BuyOrderProgressProps {
-    swapOrderState: OrderState;
-}
 
-export const BuyOrderProgress: React.StatelessComponent<BuyOrderProgressProps> = props => {
-    const { swapOrderState } = props;
+export const SwapProgressContainer = () => {
+    const swapOrderState = useSelector(getSwapOrderState);
+
     if (
         swapOrderState.processState === OrderProcessState.Processing ||
         swapOrderState.processState === OrderProcessState.Success ||
@@ -32,4 +32,3 @@ export const BuyOrderProgress: React.StatelessComponent<BuyOrderProgressProps> =
     return null;
 };
 
-BuyOrderProgress.displayName = 'BuyOrderProgress';

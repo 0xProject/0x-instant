@@ -2,15 +2,16 @@ import { Web3Wrapper } from '@0x/web3-wrapper';
 import * as _ from 'lodash';
 import { Dispatch } from 'redux';
 
-import { BIG_NUMBER_ZERO, SUPPORTED_TOKEN_ASSET_DATA_WITH_BRIDGE_ORDERS } from '../constants';
-import { AccountState, BaseCurrency, OrderProcessState, ProviderState, QuoteFetchOrigin } from '../types';
+import { BIG_NUMBER_ZERO } from '../constants';
+import { defaultTokenList } from '../data/token_lists';
+import { AccountState, BaseCurrency, OrderProcessState, ProviderState, QuoteFetchOrigin, TokenInfo, TokenList } from '../types';
 import { analytics } from '../util/analytics';
-import { assetUtils } from '../util/asset';
+import { apiQuoteUpdater } from '../util/api_quote_updater';
 import { coinbaseApi } from '../util/coinbase_api';
 import { errorFlasher } from '../util/error_flasher';
 import { errorReporter } from '../util/error_reporter';
+import { MulticallUtils } from '../util/multicall';
 import { providerStateFactory } from '../util/provider_state_factory';
-import { swapQuoteUpdater } from '../util/swap_quote_updater';
 
 import { actions } from './actions';
 import { State } from './reducer';
@@ -29,7 +30,31 @@ export const asyncData = {
             analytics.trackUsdPriceFailed();
         }
     },
-    fetchAvailableAssetDatasAndDispatchToStore: async (state: State, dispatch: Dispatch) => {
+    fetchTokenListAndDispatchToStore: async (state: State, dispatch: Dispatch) => {
+  
+        try {      
+            const response = await fetch(defaultTokenList);
+            if(response.ok && response.status  === 200){
+                const tokenList = await response.json() as TokenList;
+                dispatch(actions.setAvailableTokens(tokenList.tokens));
+
+                dispatch(actions.updateSelectedTokenIn(tokenList.tokens[0]));
+                dispatch(actions.updateSelectedTokenOut(tokenList.tokens[1]));
+            }else{
+                throw new Error('Error fetching token list')
+            }
+            
+        } catch (e) {
+            const errorMessage = 'Could not find any tokens';
+            errorFlasher.flashNewErrorMessage(dispatch, errorMessage);
+            // On error, just specify that none are available
+            dispatch(actions.setAvailableTokens([]));
+            errorReporter.report(e);
+        }
+    },
+
+
+    /*fetchAvailableAssetDatasAndDispatchToStore: async (state: State, dispatch: Dispatch) => {
         const { providerState, assetMetaDataMap, network } = state;
         const swapQuoter = providerState.swapQuoter;
         try {
@@ -55,11 +80,13 @@ export const asyncData = {
             dispatch(actions.setAvailableAssets([]));
             errorReporter.report(e);
         }
-    },
+    },*/
     fetchAccountInfoAndDispatchToStore: async (
         providerState: ProviderState,
         dispatch: Dispatch,
         shouldAttemptUnlock: boolean = false,
+        tokenIn?: TokenInfo,
+        tokenOut?: TokenInfo,
     ) => {
         const web3Wrapper = providerState.web3Wrapper;
         const provider = providerState.provider;
@@ -85,9 +112,12 @@ export const asyncData = {
         } catch (e) {
             analytics.trackAccountUnlockDenied();
             if (e.message.includes('Fortmatic: User denied account access.')) {
+                const chainId = await providerState.web3Wrapper.getChainIdAsync();
+
                 // If Fortmatic is not used, revert to injected provider
-                const initialProviderState = providerStateFactory.getInitialProviderStateWithCurrentProviderState(
+                const initialProviderState = providerStateFactory.getInitialProviderStateWithCurrentProviderState(  
                     providerState,
+                    chainId,
                 );
                 dispatch(actions.setProviderState(initialProviderState));
             } else {
@@ -99,22 +129,78 @@ export const asyncData = {
             const activeAddress = availableAddresses[0];
             dispatch(actions.setAccountStateReady(activeAddress));
             // tslint:disable-next-line:no-floating-promises
-            asyncData.fetchAccountBalanceAndDispatchToStore(activeAddress, providerState.web3Wrapper, dispatch);
+            asyncData.fetchAccountBalanceAndDispatchToStore(activeAddress, providerState.web3Wrapper, dispatch, tokenIn, tokenOut);
         } else if (providerState.account.state !== AccountState.Loading) {
             dispatch(actions.setAccountStateLocked());
         }
     },
-    fetchAccountBalanceAndDispatchToStore: async (address: string, web3Wrapper: Web3Wrapper, dispatch: Dispatch) => {
+    fetchAccountBalanceAndDispatchToStore: async (address: string, web3Wrapper: Web3Wrapper, dispatch: Dispatch, tokenIn?: TokenInfo, tokenOut?: TokenInfo) => {
         try {
             const ethBalanceInWei = await web3Wrapper.getBalanceInWeiAsync(address);
             dispatch(actions.updateAccountEthBalance({ address, ethBalanceInWei }));
+            const tokenArray: TokenInfo[] = [];
+            if(tokenIn){
+                tokenArray.push(tokenIn);
+            }
+            if(tokenOut){
+                tokenArray.push(tokenOut);
+            }
+            if(tokenArray.length){
+                const chainId = await web3Wrapper.getChainIdAsync();
+                const tokenBalances = await MulticallUtils.getTokensBalancesAndAllowances(web3Wrapper.getProvider() as any, tokenArray, chainId, address);
+                if(tokenIn && tokenOut){
+                    dispatch(actions.updateSelectedTokenInBalance(tokenBalances[0]));
+                    dispatch(actions.updateSelectedTokenOutBalance(tokenBalances[1]));
+                }else if (tokenIn && !tokenOut) {
+                    dispatch(actions.updateSelectedTokenInBalance(tokenBalances[0]));
+                }else if(!tokenIn && tokenOut){
+                    dispatch(actions.updateSelectedTokenOutBalance(tokenBalances[0]));
+                }   
+               // @TODO: Check if it is necessary to fetch all token balances, this will slow down the whole application
+               // dispatch(actions.updateTokenBalances(tokenBalances));
+
+            }
+
+
         } catch (e) {
             errorReporter.report(e);
             // leave balance as is
             return;
         }
     },
-    fetchCurrentSwapQuoteAndDispatchToStore: async (
+    fetchCurrentApiSwapQuoteAndDispatchToStore: async (
+        state: State,
+        dispatch: Dispatch,
+        fetchOrigin: QuoteFetchOrigin,
+        options: { updateSilently: boolean },
+    ) => {
+        const { swapOrderState, providerState, selectedTokenIn, selectedTokenOut, selectedTokenAmountOut, selectedTokenAmountIn, isIn } = state;
+        const takerAddress = providerState.account.state === AccountState.Ready ? providerState.account.address : '';
+        const selectedTokenUnitAmount = isIn ? selectedTokenAmountIn : selectedTokenAmountOut;
+       
+        if (
+            selectedTokenUnitAmount !== undefined &&
+            selectedTokenIn !== undefined &&
+            selectedTokenOut !== undefined &&
+            selectedTokenUnitAmount.isGreaterThan(BIG_NUMBER_ZERO) &&
+            swapOrderState.processState === OrderProcessState.None
+        ) {
+            await apiQuoteUpdater.updateSwapQuoteAsync(
+                dispatch,
+                isIn,
+                takerAddress,
+                selectedTokenIn,
+                selectedTokenOut,
+                selectedTokenUnitAmount,
+                fetchOrigin,
+                {
+                    setPending: !options.updateSilently,
+                    dispatchErrors: !options.updateSilently,
+                },
+            );
+        }
+    }
+  /*  fetchCurrentSwapQuoteAndDispatchToStore: async (
         state: State,
         dispatch: Dispatch,
         fetchOrigin: QuoteFetchOrigin,
@@ -140,5 +226,5 @@ export const asyncData = {
                 },
             );
         }
-    },
+    },*/
 };

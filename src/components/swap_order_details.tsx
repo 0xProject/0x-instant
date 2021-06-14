@@ -6,7 +6,7 @@ import { oc } from 'ts-optchain';
 
 import { BIG_NUMBER_ZERO, DEFAULT_UNKOWN_ASSET_NAME } from '../constants';
 import { ColorOption } from '../style/theme';
-import { Account, AccountState, BaseCurrency } from '../types';
+import { Account, AccountState, BaseCurrency, SwapQuoteResponse } from '../types';
 import { format } from '../util/format';
 
 import { AmountPlaceholder } from './amount_placeholder';
@@ -16,18 +16,18 @@ import { Container } from './ui/container';
 import { Flex } from './ui/flex';
 import { Text, TextProps } from './ui/text';
 
-export interface OrderDetailsProps {
-    swapQuoteInfo?: SwapQuoteInfo;
-    selectedAssetUnitAmount?: BigNumber;
+export interface SwapOrderDetailsProps {
+    swapQuote?: SwapQuoteResponse;
+    selectedTokenUnitAmount?: BigNumber;
     ethUsdPrice?: BigNumber;
     isLoading: boolean;
-    assetName?: string;
+    tokenName?: string;
     baseCurrency: BaseCurrency;
     onBaseCurrencySwitchEth: () => void;
     onBaseCurrencySwitchUsd: () => void;
     account: Account;
 }
-export class OrderDetails extends React.PureComponent<OrderDetailsProps> {
+export class SwapOrderDetails extends React.PureComponent<SwapOrderDetailsProps> {
     public render(): React.ReactNode {
         const shouldShowUsdError = this.props.baseCurrency === BaseCurrency.USD && this._hadErrorFetchingUsdPrice();
         const { state } = this.props.account;
@@ -44,24 +44,24 @@ export class OrderDetails extends React.PureComponent<OrderDetailsProps> {
     }
 
     private _renderRows(): React.ReactNode {
-        const { swapQuoteInfo } = this.props;
+        const { swapQuote } = this.props;
         return (
             <React.Fragment>
                 <OrderDetailsRow
                     labelText={this._assetAmountLabel()}
-                    primaryValue={this._displayAmountOrPlaceholder(swapQuoteInfo && swapQuoteInfo.takerAssetAmount)}
+                    primaryValue={this._displayAmountOrPlaceholder(swapQuote.buyAmount)}
                 />
                 <OrderDetailsRow
                     labelText="Fee"
                     primaryValue={this._displayAmountOrPlaceholder(
-                        swapQuoteInfo && swapQuoteInfo.feeTakerAssetAmount.plus(swapQuoteInfo.protocolFeeInWeiAmount),
+                        swapQuote.protocolFee,
                     )}
                 />
                 <OrderDetailsRow
                     labelText="Total Cost"
                     isLabelBold={true}
                     primaryValue={this._displayAmountOrPlaceholder(
-                        swapQuoteInfo && swapQuoteInfo.totalTakerAssetAmount.plus(swapQuoteInfo.protocolFeeInWeiAmount),
+                        swapQuote.sellAmount,
                     )}
                     isPrimaryValueBold={true}
                     secondaryValue={this._totalCostSecondaryValue()}
@@ -97,10 +97,10 @@ export class OrderDetails extends React.PureComponent<OrderDetailsProps> {
             secondaryCurrency === BaseCurrency.ETH ||
             (secondaryCurrency === BaseCurrency.USD && this.props.ethUsdPrice && !this._hadErrorFetchingUsdPrice());
 
-        if (this.props.swapQuoteInfo && canDisplayCurrency) {
+        if (this.props.swapQuote && canDisplayCurrency) {
             return this._displayAmount(
                 secondaryCurrency,
-                this.props.swapQuoteInfo.totalTakerAssetAmount.plus(this.props.swapQuoteInfo.protocolFeeInWeiAmount),
+                this.props.swapQuote.buyAmount,
             );
         } else {
             return undefined;
@@ -131,18 +131,18 @@ export class OrderDetails extends React.PureComponent<OrderDetailsProps> {
     }
 
     private _assetAmountLabel(): React.ReactNode {
-        const { assetName, baseCurrency } = this.props;
-        const numTokens = this.props.selectedAssetUnitAmount;
+        const { tokenName, baseCurrency } = this.props;
+        const numTokens = this.props.selectedTokenUnitAmount;
 
         // Display as 0 if we have a selected asset
         const displayNumTokens =
-            assetName && assetName !== DEFAULT_UNKOWN_ASSET_NAME && numTokens === undefined
+        tokenName && tokenName !== DEFAULT_UNKOWN_ASSET_NAME && numTokens === undefined
                 ? new BigNumber(0)
                 : numTokens;
         if (displayNumTokens !== undefined) {
             let numTokensWithSymbol: React.ReactNode = displayNumTokens.toString();
-            if (assetName) {
-                numTokensWithSymbol += ` ${assetName}`;
+            if (tokenName) {
+                numTokensWithSymbol += ` ${tokenName}`;
             }
             const pricePerTokenWei = this._pricePerTokenWei();
             if (pricePerTokenWei) {
@@ -163,14 +163,15 @@ export class OrderDetails extends React.PureComponent<OrderDetailsProps> {
     }
 
     private _pricePerTokenWei(): BigNumber | undefined {
-        const swapQuoteAccessor = oc(this.props.swapQuoteInfo);
-        const assetTotalInWei = swapQuoteAccessor.totalTakerAssetAmount();
-        const selectedAssetUnitAmount = this.props.selectedAssetUnitAmount;
-        return assetTotalInWei !== undefined &&
-            selectedAssetUnitAmount !== undefined &&
-            !selectedAssetUnitAmount.eq(BIG_NUMBER_ZERO)
-            ? assetTotalInWei.div(selectedAssetUnitAmount).integerValue(BigNumber.ROUND_CEIL)
-            : undefined;
+        const swapQuoteAccessor = oc(this.props.swapQuote);
+        const assetTotalInWei = swapQuoteAccessor.buyAmount;
+        const selectedTokenUnitAmount = this.props.selectedTokenUnitAmount;
+        return selectedTokenUnitAmount;
+       /* return assetTotalInWei !== undefined &&
+            selectedTokenUnitAmount !== undefined &&
+            !selectedTokenUnitAmount.eq(BIG_NUMBER_ZERO)
+            ? assetTotalInWei.div(selectedTokenUnitAmount).integerValue(BigNumber.ROUND_CEIL)
+            : undefined;*/
     }
 
     private _baseCurrencyChoice(choice: BaseCurrency): React.ReactNode {
