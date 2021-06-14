@@ -61,159 +61,30 @@ export interface SwapButtonProps {
     onChangeStep: (step: SwapStep) => void;
 }
 
-export class SwapButton extends React.PureComponent<SwapButtonProps> {
-    public static defaultProps = {
-        onClick: util.boundNoop,
-        onBuySuccess: util.boundNoop,
-        onBuyFailure: util.boundNoop,
-    };
-    public render(): React.ReactNode {
-        const { swapQuote, accountAddress, step } = this.props;
-        const shouldDisableButton = swapQuote === undefined || accountAddress === undefined;
+/*public static defaultProps = {
+    onClick: util.boundNoop,
+    onBuySuccess: util.boundNoop,
+    onBuyFailure: util.boundNoop,
+};*/
 
-        return (
-            <Button
-                width="100%"
-                onClick={this._handleClick}
-                isDisabled={shouldDisableButton}
-                fontColor={ColorOption.white}
-            >
-                {this._renderButtonText()}
-            </Button>
-        );
-    }
-    private readonly _renderButtonText = () => {
-        const { step } = this.props;
-        switch (step) {
-            case SwapStep.Swap:
-             return 'Review Order';
-            case SwapStep.Approve:
-             return 'Approve';
-             case SwapStep.ReviewOrder:
-             return 'Swap';
-            default:
-             return 'Review Order';  
-        }     
-    }
+export const SwapButton = (props:SwapButtonProps) => {
+    const { swapQuote, accountAddress, step } = props;
+    const shouldDisableButton = swapQuote === undefined || accountAddress === undefined;
 
-
-
-    private readonly _handleClick = async () => {
-        const { step, tokenBalanceIn } = this.props;
-        if(step === SwapStep.Swap && tokenBalanceIn){
-            if(tokenBalanceIn.isUnlocked){
-                this.props.onChangeStep(SwapStep.ReviewOrder);
-            }else{
-                this.props.onChangeStep(SwapStep.Approve);
-            }
-            this.props.onShowPanelStep(step)
-        }
-
-        if(step === SwapStep.Approve){
-            this._handleApprove();
-        }
-        
-        if(step === SwapStep.ReviewOrder){
-            this._handleSwap();
-        }
-      
-    };
-
-    private _handleSwap = async () => {
-          // The button is disabled when there is no buy quote anyway.
-          const {
-            swapQuote,
-            accountAddress,
-            accountEthBalanceInWei,
-            web3Wrapper,
-        } = this.props;
-        if (swapQuote === undefined || accountAddress === undefined) {
-            return;
-        }
-
-
-        this.props.onValidationPending(swapQuote);
-
-        const ethNeededForBuy = swapQuote.value;
-        // if we don't have a balance for the user, let the transaction through, it will be handled by the wallet
-        const hasSufficientEth = accountEthBalanceInWei === undefined || accountEthBalanceInWei.gte(ethNeededForBuy);
-        if (!hasSufficientEth) {
-            analytics.trackSwapNotEnoughEth(swapQuote);
-            this.props.onValidationFail(swapQuote, ZeroExInstantError.InsufficientETH);
-            return;
-        }
-        let txHash: string | undefined;
-        const gasInfo = await gasPriceEstimator.getGasInfoAsync();
-        try {
-            analytics.trackSwapStarted(swapQuote);
-            txHash = await web3Wrapper.sendTransactionAsync(swapQuote as Required<SwapQuoteResponse>)
-        } catch (e) {
-            if (e instanceof Error) {
-                if (e.message === SwapQuoteConsumerError.TransactionValueTooLow) {
-                    analytics.trackSwapSimulationFailed(swapQuote);
-                    this.props.onValidationFail(swapQuote, SwapQuoteConsumerError.TransactionValueTooLow);
-                    return;
-                } else if (e.message === SwapQuoteConsumerError.SignatureRequestDenied) {
-                    analytics.trackSwapSignatureDenied(swapQuote);
-                    this.props.onSignatureDenied(swapQuote);
-                    return;
-                } else {
-                    errorReporter.report(e);
-                    analytics.trackSwapUnknownError(swapQuote, e.message);
-                    this.props.onValidationFail(swapQuote, ZeroExInstantError.CouldNotSubmitTransaction);
-                    return;
-                }
-            }
-            // HACK(dekz): Wrappers no longer include decorators which map errors
-            // like transaction deny
-            if (e.message && e.message.includes('User denied transaction signature')) {
-                analytics.trackSwapSignatureDenied(swapQuote);
-                this.props.onSignatureDenied(swapQuote);
-                return;
-            }
-            // Fortmatic specific error handling
-            if (e.message && e.message.includes('Fortmatic:')) {
-                if (e.message.includes('User denied transaction.')) {
-                    analytics.trackSwapSignatureDenied(swapQuote);
-                    this.props.onSignatureDenied(swapQuote);
-                    return;
-                }
-            }
-            throw e;
-        }
-        const startTimeUnix = new Date().getTime();
-        const expectedEndTimeUnix = startTimeUnix + gasInfo.estimatedTimeMs;
-        this.props.onSwapProcessing(swapQuote, txHash, startTimeUnix, expectedEndTimeUnix);
-        try {
-            analytics.trackSwapTxSubmitted(swapQuote, txHash, startTimeUnix, expectedEndTimeUnix);
-            await web3Wrapper.awaitTransactionSuccessAsync(txHash);
-        } catch (e) {
-            if (e instanceof Error && e.message.startsWith(WEB_3_WRAPPER_TRANSACTION_FAILED_ERROR_MSG_PREFIX)) {
-                analytics.trackSwapTxFailed(swapQuote, txHash, startTimeUnix, expectedEndTimeUnix);
-                this.props.onSwapFailure(swapQuote, txHash);
-                return;
-            }
-            throw e;
-        }
-        analytics.trackSwapTxSucceeded(swapQuote, txHash, startTimeUnix, expectedEndTimeUnix);
-        this.props.onSwapSuccess(swapQuote, txHash);
-        this.props.onClosePanelStep(this.props.step)
-    }
-    
-    private _handleApprove = async () => {
+    const _handleApprove = async () => {
         const {
             swapQuote,
             tokenBalanceIn,
             accountAddress,
             web3Wrapper,
-        } = this.props;
+        } = props;
 
         if (swapQuote === undefined || accountAddress === undefined || tokenBalanceIn === undefined) {
             return;
         }
         const tokenToApprove = tokenBalanceIn.token;
 
-        this.props.onApproveValidationPending(tokenToApprove);
+        props.onApproveValidationPending(tokenToApprove);
         const tokenToApproveAddress = tokenBalanceIn.token.address;
         const erc20Token = new ERC20TokenContract(tokenToApproveAddress, web3Wrapper.getProvider());
         
@@ -226,25 +97,168 @@ export class SwapButton extends React.PureComponent<SwapButtonProps> {
                     gasPrice: gasInfo.gasPriceInWei
                 });
         }catch{
-            this.props.onApproveValidationFail(tokenToApprove, ZeroExInstantError.CouldNotSubmitTransaction);
+            props.onApproveValidationFail(tokenToApprove, ZeroExInstantError.CouldNotSubmitTransaction);
         }
 
         const startTimeUnix = new Date().getTime();
         const expectedEndTimeUnix = startTimeUnix + gasInfo.estimatedTimeMs;
-        this.props.onApproveTokenProcessing(tokenToApprove, txHash, startTimeUnix, expectedEndTimeUnix);
+        props.onApproveTokenProcessing(tokenToApprove, txHash, startTimeUnix, expectedEndTimeUnix);
         try {
             await web3Wrapper.awaitTransactionSuccessAsync(txHash);
         } catch (e) {
             if (e instanceof Error && e.message.startsWith(WEB_3_WRAPPER_TRANSACTION_FAILED_ERROR_MSG_PREFIX)) {
-                this.props.onApproveTokenFailure(tokenToApprove, txHash);
+                props.onApproveTokenFailure(tokenToApprove, txHash);
                 return;
             }
             throw e;
         }
       
-        this.props.onApproveTokenSuccess(tokenToApprove, txHash);
-        this.props.onClosePanelStep(this.props.step);
+        props.onApproveTokenSuccess(tokenToApprove, txHash);
+        props.onClosePanelStep(props.step);
     }
 
 
+    const _renderButtonText = () => {
+        const { step, tokenBalanceIn   } = props;
+        const tokenToApprove = tokenBalanceIn.token;
+        switch (step) {
+            case SwapStep.Swap:
+             return 'Preview Trade';
+            case SwapStep.Approve:
+             return `Approve ${tokenToApprove.symbol.toUpperCase()} usage`;
+             case SwapStep.ReviewOrder:
+             return 'Confirm Trade';
+            default:
+             return 'Preview Trade';  
+        }     
+    }
+
+    const _handleSwap = async () => {
+        // The button is disabled when there is no buy quote anyway.
+        const {
+          swapQuote,
+          accountAddress,
+          accountEthBalanceInWei,
+          web3Wrapper,
+      } = props;
+      if (swapQuote === undefined || accountAddress === undefined) {
+          return;
+      }
+
+      props.onValidationPending(swapQuote);
+
+      const ethNeededForBuy = swapQuote.value;
+      // if we don't have a balance for the user, let the transaction through, it will be handled by the wallet
+      const hasSufficientEth = accountEthBalanceInWei === undefined || accountEthBalanceInWei.gte(ethNeededForBuy);
+      if (!hasSufficientEth) {
+          analytics.trackSwapNotEnoughEth(swapQuote);
+          props.onValidationFail(swapQuote, ZeroExInstantError.InsufficientETH);
+          return;
+      }
+      let txHash: string | undefined;
+      const gasInfo = await gasPriceEstimator.getGasInfoAsync();
+      try {
+          analytics.trackSwapStarted(swapQuote);
+          txHash = await web3Wrapper.sendTransactionAsync(swapQuote as Required<SwapQuoteResponse>)
+      } catch (e) {
+          if (e instanceof Error) {
+              if (e.message === SwapQuoteConsumerError.TransactionValueTooLow) {
+                  analytics.trackSwapSimulationFailed(swapQuote);
+                  props.onValidationFail(swapQuote, SwapQuoteConsumerError.TransactionValueTooLow);
+                  return;
+              } else if (e.message === SwapQuoteConsumerError.SignatureRequestDenied) {
+                  analytics.trackSwapSignatureDenied(swapQuote);
+                  props.onSignatureDenied(swapQuote);
+                  return;
+              } else {
+                  errorReporter.report(e);
+                  analytics.trackSwapUnknownError(swapQuote, e.message);
+                  props.onValidationFail(swapQuote, ZeroExInstantError.CouldNotSubmitTransaction);
+                  return;
+              }
+          }
+          // HACK(dekz): Wrappers no longer include decorators which map errors
+          // like transaction deny
+          if (e.message && e.message.includes('User denied transaction signature')) {
+              analytics.trackSwapSignatureDenied(swapQuote);
+              props.onSignatureDenied(swapQuote);
+              return;
+          }
+          // Fortmatic specific error handling
+          if (e.message && e.message.includes('Fortmatic:')) {
+              if (e.message.includes('User denied transaction.')) {
+                  analytics.trackSwapSignatureDenied(swapQuote);
+                  props.onSignatureDenied(swapQuote);
+                  return;
+              }
+          }
+          throw e;
+      }
+
+      const startTimeUnix = new Date().getTime();
+      const expectedEndTimeUnix = startTimeUnix + gasInfo.estimatedTimeMs;
+      props.onSwapProcessing(swapQuote, txHash, startTimeUnix, expectedEndTimeUnix);
+      try {
+          analytics.trackSwapTxSubmitted(swapQuote, txHash, startTimeUnix, expectedEndTimeUnix);
+          await web3Wrapper.awaitTransactionSuccessAsync(txHash);
+      } catch (e) {
+          if (e instanceof Error && e.message.startsWith(WEB_3_WRAPPER_TRANSACTION_FAILED_ERROR_MSG_PREFIX)) {
+              analytics.trackSwapTxFailed(swapQuote, txHash, startTimeUnix, expectedEndTimeUnix);
+              props.onSwapFailure(swapQuote, txHash);
+              return;
+          }
+          throw e;
+      }
+      analytics.trackSwapTxSucceeded(swapQuote, txHash, startTimeUnix, expectedEndTimeUnix);
+      props.onSwapSuccess(swapQuote, txHash);
+      props.onClosePanelStep(props.step)
+  }
+    
+      
+
+    const _handleClick = async () => {
+            const { step, tokenBalanceIn } = props;
+            if(step === SwapStep.Swap && tokenBalanceIn){
+                if(tokenBalanceIn.isUnlocked){
+                    props.onChangeStep(SwapStep.ReviewOrder);
+                }else{
+                    props.onChangeStep(SwapStep.Approve);
+                }
+                props.onShowPanelStep(step)
+            }
+    
+            if(step === SwapStep.Approve){
+                _handleApprove();
+            }
+            
+            if(step === SwapStep.ReviewOrder){
+                _handleSwap();
+            }
+          
+        };
+
+
+
+    return (
+        <Button
+            width="100%"
+            onClick={_handleClick}
+            isDisabled={shouldDisableButton}
+            fontColor={ColorOption.white}
+        >
+            {_renderButtonText()}
+        </Button>
+    );
 }
+    
+
+
+
+  
+
+   
+    
+   
+
+
+

@@ -1,9 +1,9 @@
-import { ChainId } from '@0x/contract-addresses';
+
 import * as React from 'react';
 
 import PhoneIconSvg from '../assets/icons/phone.svg';
 import { ColorOption } from '../style/theme';
-import { Account, AccountState, OperatingSystem, ProviderType, StandardSlidingPanelContent, WalletSuggestion } from '../types';
+import {  AccountState, OperatingSystem, ProviderType, StandardSlidingPanelContent, WalletSuggestion } from '../types';
 import { envUtil } from '../util/env';
 
 import { CoinbaseWalletLogo } from '../components/coinbase_wallet_logo';

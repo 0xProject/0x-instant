@@ -12,12 +12,16 @@ import { Flex } from '../../components/ui/flex';
 import { Text } from '../../components/ui/text';
 import { getAccount, getLatestApiSwapQuote, getSelectedTokenIn, getSelectedTokenOut } from '../../redux/selectors';
 import { useSelector } from 'react-redux';
+import { SectionHeader } from '../../components/section_header';
+import { useState } from 'react';
 
-export const ReviewSwapStepContainer = () => {
+export const SwapStepsContainer = () => {
     const swapQuote = useSelector(getLatestApiSwapQuote);
     const tokenIn = useSelector(getSelectedTokenIn);
     const tokenOut = useSelector(getSelectedTokenOut);
     const account = useSelector(getAccount);
+
+    const [quoteTimestamp, setQuoteTimestamp] = useState();
 
 
     const renderPrice = () => {
@@ -53,7 +57,12 @@ export const ReviewSwapStepContainer = () => {
         } else {
             return (
                 <>
-                <Container padding="10px 0px" borderTop="1px dashed" borderColor={ColorOption.feintGrey}>
+                  <SectionHeader>
+                    Quote expires in 24 seconds
+                </SectionHeader>
+
+
+                <Container padding="10px 0px" borderColor={ColorOption.feintGrey}>
                     <Flex justify="space-between">
                         <Text fontWeight={700} fontColor={ColorOption.grey}>
                             You Pay
@@ -61,7 +70,7 @@ export const ReviewSwapStepContainer = () => {
                         <Container>{renderTokenAmount(true)}</Container>
                     </Flex>
                 </Container>  
-                <Container padding="10px 0px" borderTop="1px dashed" borderColor={ColorOption.feintGrey}>
+                <Container padding="10px 0px"  borderColor={ColorOption.feintGrey}>
                     <Flex justify="space-between">
                         <Text fontWeight={700} fontColor={ColorOption.grey}>
                             You Receive
@@ -77,7 +86,7 @@ export const ReviewSwapStepContainer = () => {
                         <Container>{renderPrice()}</Container>
                     </Flex>
                 </Container> 
-                <Container padding="10px 0px" borderTop="1px dashed" borderColor={ColorOption.feintGrey}>
+                <Container padding="10px 0px"  borderColor={ColorOption.feintGrey}>
                     <Flex justify="space-between">
                         <Text fontWeight={400} fontColor={ColorOption.grey}>
                          Gas Price
@@ -85,14 +94,18 @@ export const ReviewSwapStepContainer = () => {
                         <Container>{renderGasPrice()}</Container>
                     </Flex>
                 </Container> 
+                <Container padding="10px 0px"  borderColor={ColorOption.feintGrey}>
+                    <Flex justify="space-between">
+                        <Text fontWeight={400} fontColor={ColorOption.grey}>
+                        Approval
+                        </Text>
+                        <Container>{renderGasPrice()}</Container>
+                    </Flex>
+                </Container> 
                 </>  
+                
             );
         }
 }
 
     
-
-  
-
-
-

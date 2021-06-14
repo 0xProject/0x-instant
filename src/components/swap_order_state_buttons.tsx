@@ -59,7 +59,7 @@ export interface SwapOrderStateButtonProps {
     onClosePanelStep: (step: SwapStep) => void;
 }
 
-export const SwapOrderStateButtons: React.StatelessComponent<SwapOrderStateButtonProps> = props => {
+export const SwapOrderStateButtons = (props: SwapOrderStateButtonProps) => {
      // Swap button sections
     if (props.swapOrderProcessingState === OrderProcessState.Failure) {
         return (

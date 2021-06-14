@@ -29,7 +29,8 @@ export const ApproveSwapStepContainer = () => {
     }
 
     const renderHeaderText= () => {
-        return `Approve ${tokenApprove.symbol.toUpperCase()} to sell`
+       // return `Approve ${tokenApprove.symbol.toUpperCase()} to sell`
+       return `Order Summary`
     }
 
     const { state } = account;
@@ -38,11 +39,42 @@ export const ApproveSwapStepContainer = () => {
     } else {
         return (
             <Container padding="10px 0px" borderTop="1px dashed" borderColor={ColorOption.feintGrey}>
-                <SectionHeader>{renderHeaderText()}</SectionHeader>
+                <SectionHeader>{renderHeaderText()}
+                    Quote expires in 24 seconds
+                </SectionHeader>
+                <SectionHeader>
+                    <-- Back
+                </SectionHeader>
                 <Container  padding="100px 0px">
                     <Text fontWeight={700} fontColor={ColorOption.grey}>
+                        You Pay
+                    </Text>
+                    <Text fontWeight={700} fontColor={ColorOption.black}>
                         {renderApproveText()}
                     </Text>
+                    <Text fontWeight={700} fontColor={ColorOption.grey}>
+                          You Receive
+                    </Text>
+                    <Text fontWeight={700} fontColor={ColorOption.black}>
+                        {renderApproveText()}
+                    </Text>
+                    <Text fontWeight={700} fontColor={ColorOption.grey}>
+                          Rate
+                    </Text>
+                    <Text fontWeight={700} fontColor={ColorOption.grey}>
+                         This rate
+                    </Text>
+                    <Text fontWeight={700} fontColor={ColorOption.grey}>
+                         Gas Price
+                    </Text>
+                    <Text fontWeight={700} fontColor={ColorOption.grey}>
+                         ZRX Approval
+                    </Text>
+                    <Text fontWeight={700} fontColor={ColorOption.grey}>
+                        Approval 
+                    </Text>
+                    
+
                 </Container>
             </Container>
         );

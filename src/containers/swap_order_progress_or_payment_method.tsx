@@ -20,5 +20,4 @@ export const SwapOrderProgressOrPaymentMethod = () => {
     } else {
         return <PaymentMethodContainer />;
     }
-    return null;
 };

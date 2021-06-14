@@ -62,6 +62,7 @@ interface OptionalState {
     affiliateInfo: AffiliateInfo;
     walletDisplayName: string;
     swapStep: SwapStep;
+    stepWithApprove: boolean;
     onSuccess: (txHash: string) => void;
 }
 
@@ -377,6 +378,11 @@ export const createReducer = (initialState: State) => {
                 return {
                     ...state,
                     tokenBalances: action.data,
+                };
+            case ActionTypes.SetIsStepWithApprove:
+                return {
+                    ...state,
+                    stepWithApprove: action.data,
                 };
             default:
                 return state;

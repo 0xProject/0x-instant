@@ -76,6 +76,7 @@ export enum ActionTypes {
     CloseStandardSlidingPanel = 'CLOSE_STANDARD_SLIDING_PANEL',
     UpdateBaseCurrency = 'UPDATE_BASE_CURRENCY',
     SetProviderState = 'SET_PROVIDER_STATE',
+    SetIsStepWithApprove = 'SET_IS_STEP_WITH_APPROVE',
 }
 
 export const actions = {
@@ -122,6 +123,7 @@ export const actions = {
     updateBaseCurrency: (baseCurrency: BaseCurrency) => createAction(ActionTypes.UpdateBaseCurrency, baseCurrency),
     setProviderState: (providerState: ProviderState) => createAction(ActionTypes.SetProviderState, providerState),
     setUISwapStep: (swapStep: SwapStep) => createAction(ActionTypes.SetUISwapStep, swapStep),
+    setIsStepWithApprove: (isStepWithApprove: boolean) => createAction(ActionTypes. SetIsStepWithApprove, isStepWithApprove),
     updateTokenBalances: (tokenBalances: TokenBalance[]) => createAction(ActionTypes.UpdateTokenBalances, tokenBalances),
 };
 
