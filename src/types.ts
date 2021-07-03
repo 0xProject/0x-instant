@@ -1,6 +1,6 @@
-import { BigNumber, SwapQuoteConsumer, SwapQuoter } from '@0x/asset-swapper';
 import { ChainId } from '@0x/contract-addresses';
 import { AssetProxyId, ObjectMap, SignedOrder } from '@0x/types';
+import { BigNumber } from '@0x/utils';
 import { Web3Wrapper } from '@0x/web3-wrapper';
 import { SupportedProvider, ZeroExProvider } from 'ethereum-types';
 

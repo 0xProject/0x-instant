@@ -1,4 +1,3 @@
-import { SwapQuoteInfo } from '@0x/asset-swapper';
 import { BigNumber } from '@0x/utils';
 import * as _ from 'lodash';
 import * as React from 'react';

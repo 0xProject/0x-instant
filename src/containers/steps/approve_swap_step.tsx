@@ -43,7 +43,7 @@ export const ApproveSwapStepContainer = () => {
                     Quote expires in 24 seconds
                 </SectionHeader>
                 <SectionHeader>
-                    <-- Back
+                   {/* <-- Back*/}
                 </SectionHeader>
                 <Container  padding="100px 0px">
                     <Text fontWeight={700} fontColor={ColorOption.grey}>

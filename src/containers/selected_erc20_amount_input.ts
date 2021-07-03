@@ -1,8 +1,8 @@
-import { SwapQuoter } from '@0x/asset-swapper';
+import * as React from 'react';
 import { BigNumber } from '@0x/utils';
 import { Web3Wrapper } from '@0x/web3-wrapper';
 import * as _ from 'lodash';
-import * as React from 'react';
+
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { ERC20AmountInput, ERC20AmountInputProps } from '../components/erc20_amount_input';

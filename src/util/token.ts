@@ -1,4 +1,3 @@
-import { BigNumber, InsufficientAssetLiquidityError, SwapQuoterError } from '@0x/asset-swapper';
 import { Web3Wrapper } from '@0x/web3-wrapper';
 import * as _ from 'lodash';
 import createKeccakHash from 'keccak';
@@ -24,7 +23,7 @@ export const tokenUtils = {
         return `${symbol.slice(0, 3)}…`;
     },
     swapQuoterErrorMessage: (token: TokenInfo, error: Error): string | undefined => {
-        if (error.message === SwapQuoterError.InsufficientAssetLiquidity) {
+        /*if (error.message === SwapQuoterError.InsufficientAssetLiquidity) {
             const tokenName = tokenUtils.bestNameForToken(token, 'of this token');
             if (
                 error instanceof InsufficientAssetLiquidityError &&
@@ -49,7 +48,7 @@ export const tokenUtils = {
         ) {
             const tokenName = tokenUtils.bestNameForToken(token, 'This token');
             return `${tokenName} is currently unavailable`;
-        }
+        }*/
 
         return undefined;
     },

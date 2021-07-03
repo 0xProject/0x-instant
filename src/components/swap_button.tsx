@@ -1,6 +1,3 @@
-import {
-    SwapQuoteConsumerError,
-} from '@0x/asset-swapper';
 import { ERC20TokenContract } from '@0x/contract-wrappers';
 
 import { BigNumber } from '@0x/utils';
@@ -31,7 +28,7 @@ export interface SwapButtonProps {
     onValidationPending: (swapQuote: SwapQuoteResponse) => void;
     onValidationFail: (
         swapQuote: SwapQuoteResponse,
-        errorMessage: SwapQuoteConsumerError | ZeroExInstantError,
+        errorMessage:  ZeroExInstantError,
     ) => void;
     onSignatureDenied: (swapQuote: SwapQuoteResponse) => void;
     onSwapProcessing: (
@@ -162,20 +159,11 @@ export const SwapButton = (props:SwapButtonProps) => {
           txHash = await web3Wrapper.sendTransactionAsync(swapQuote as Required<SwapQuoteResponse>)
       } catch (e) {
           if (e instanceof Error) {
-              if (e.message === SwapQuoteConsumerError.TransactionValueTooLow) {
-                  analytics.trackSwapSimulationFailed(swapQuote);
-                  props.onValidationFail(swapQuote, SwapQuoteConsumerError.TransactionValueTooLow);
-                  return;
-              } else if (e.message === SwapQuoteConsumerError.SignatureRequestDenied) {
-                  analytics.trackSwapSignatureDenied(swapQuote);
-                  props.onSignatureDenied(swapQuote);
-                  return;
-              } else {
-                  errorReporter.report(e);
-                  analytics.trackSwapUnknownError(swapQuote, e.message);
-                  props.onValidationFail(swapQuote, ZeroExInstantError.CouldNotSubmitTransaction);
-                  return;
-              }
+                errorReporter.report(e);
+                analytics.trackSwapUnknownError(swapQuote, e.message);
+                props.onValidationFail(swapQuote, ZeroExInstantError.CouldNotSubmitTransaction);
+                return;
+              
           }
           // HACK(dekz): Wrappers no longer include decorators which map errors
           // like transaction deny

@@ -1,7 +1,6 @@
-import { BigNumber, SwapQuoter } from '@0x/asset-swapper';
 import { ChainId } from '@0x/contract-addresses';
 import { AssetProxyId } from '@0x/types';
-import { providerUtils } from '@0x/utils';
+import { BigNumber, providerUtils } from '@0x/utils';
 import { SupportedProvider } from 'ethereum-types';
 import * as _ from 'lodash';
 import * as React from 'react';
@@ -216,7 +215,7 @@ export const hasMetaDataForAssetData = (assetData: string): boolean => {
     return assetMetaDataMap[assetData] !== undefined;
 };
 
-export const hasLiquidityForAssetDataAsync = async (
+/*export const hasLiquidityForAssetDataAsync = async (
     takerAssetData: string,
     orderSource: OrderSource,
     chainId: ChainId = ChainId.Mainnet,
@@ -259,7 +258,7 @@ export const hasLiquidityForAssetDataAsync = async (
         takerAssetData,
     );
     return liquidity.makerAssetAvailableInBaseUnits.gt(new BigNumber(0));
-};
+};*/
 
 // Write version info to the exported object for debugging
 export const GIT_SHA = GIT_SHA_FROM_CONSTANT;

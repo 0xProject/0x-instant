@@ -1,4 +1,3 @@
-import {  SwapQuoteConsumerError } from '@0x/asset-swapper';
 import { BigNumber } from '@0x/utils';
 import { Web3Wrapper } from '@0x/web3-wrapper';
 import * as _ from 'lodash';
@@ -53,11 +52,11 @@ interface ConnectedDispatch {
     onRetry: () => void;
     onValidationFail: (
         swapQuote: SwapQuoteResponse,
-        errorMessage: SwapQuoteConsumerError | ZeroExInstantError,
+        errorMessage:  ZeroExInstantError,
     ) => void;
     onApproveValidationFail: (
         token: TokenInfo,
-        errorMessage: SwapQuoteConsumerError | ZeroExInstantError,
+        errorMessage:  ZeroExInstantError,
     ) => void;
     onChangeStep: (step: SwapStep) => void;
 }

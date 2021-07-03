@@ -1,4 +1,3 @@
-import { MarketBuySwapQuote } from '@0x/asset-swapper';
 import { ChainId } from '@0x/contract-addresses';
 import { BigNumber } from '@0x/utils';
 
@@ -56,7 +55,6 @@ interface OptionalState {
     selectedTokenAmountOut: BigNumber;
     isIn: boolean;
     ethUsdPrice: BigNumber;
-    latestSwapQuote: MarketBuySwapQuote;
     latestApiSwapQuote: SwapQuoteResponse;
     latestErrorMessage: string;
     affiliateInfo: AffiliateInfo;
@@ -148,18 +146,6 @@ export const createReducer = (initialState: State) => {
                 return {
                     ...state,
                     selectedTokenAmountIn: action.data,
-                };
-            case ActionTypes.SetQuoteRequestStatePending:
-                return {
-                    ...state,
-                    latestSwapQuote: undefined,
-                    quoteRequestState: AsyncProcessState.Pending,
-                };
-            case ActionTypes.SetQuoteRequestStateFailure:
-                return {
-                    ...state,
-                    latestSwapQuote: undefined,
-                    quoteRequestState: AsyncProcessState.Failure,
                 };
             case ActionTypes.UpdateLatestApiSwapQuote:
                 const newApiSwapQuoteIfExists = action.data;
@@ -337,7 +323,7 @@ export const createReducer = (initialState: State) => {
             case ActionTypes.ResetAmount:
                 return {
                     ...state,
-                    latestSwapQuote: undefined,
+                    latestApiSwapQuote: undefined,
                     quoteRequestState: AsyncProcessState.None,
                     swapOrderState: { processState: OrderProcessState.None },
                     selectedTokenAmountIn: undefined,

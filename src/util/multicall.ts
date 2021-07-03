@@ -1,5 +1,4 @@
-import { ZeroExProvider } from "@0x/order-utils";
-import { ContractWrappers } from '@0x/contract-wrappers';
+import { ContractWrappers, ZeroExProvider } from '@0x/contract-wrappers';
 import { MultiCall } from "@indexed-finance/multicall";
 import { providers } from 'ethers';
 import { TokenBalance, TokenInfo } from "../types";

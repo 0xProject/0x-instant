@@ -1,4 +1,3 @@
-import { MarketBuySwapQuote } from '@0x/asset-swapper';
 import { ChainId } from '@0x/contract-addresses';
 import { BigNumber } from '@0x/utils';
 
@@ -86,23 +85,6 @@ function trackingEventFnWithPayload(eventName: EventNames): (eventProperties: Ev
 }
 
 
-const swapQuoteEventProperties = (swapQuote: MarketBuySwapQuote) => {
-    const makerAssetFillAmount = swapQuote.makerAssetFillAmount.toString();
-    const assetEthAmount = swapQuote.worstCaseQuoteInfo.takerAssetAmount.toString();
-    const feeEthAmount = swapQuote.worstCaseQuoteInfo.protocolFeeInWeiAmount
-        .plus(swapQuote.worstCaseQuoteInfo.feeTakerAssetAmount)
-        .toString();
-    const totalEthAmount = swapQuote.worstCaseQuoteInfo.totalTakerAssetAmount
-        .plus(swapQuote.worstCaseQuoteInfo.protocolFeeInWeiAmount)
-        .toString();
-    return {
-        makerAssetFillAmount,
-        assetEthAmount,
-        feeEthAmount,
-        totalEthAmount,
-        gasPrice: swapQuote.gasPrice.toString(),
-    };
-};
 
 const swapApiQuoteEventProperties = (swapQuote: SwapQuoteResponse) => {
     const makerAssetFillAmount = swapQuote.sellAmount.toString();
@@ -212,8 +194,6 @@ export const analytics = {
     trackPaymentMethodDropdownOpened: trackingEventFnWithoutPayload(EventNames.PaymentMethodDropdownOpened),
     trackPaymentMethodOpenedEtherscan: trackingEventFnWithoutPayload(EventNames.PaymentMethodOpenedEtherscan),
     trackPaymentMethodCopiedAddress: trackingEventFnWithoutPayload(EventNames.PaymentMethodCopiedAddress),
-    trackBuyNotEnoughEth: (swapQuote: MarketBuySwapQuote) =>
-        trackingEventFnWithPayload(EventNames.BuyNotEnoughEth)(swapQuoteEventProperties(swapQuote)),
     trackSwapNotEnoughEth: (swapQuote: SwapQuoteResponse) =>
         trackingEventFnWithPayload(EventNames.SwapNotEnoughEth)(swapApiQuoteEventProperties(swapQuote)),
     trackSwapStarted: (swapQuote: SwapQuoteResponse) =>
@@ -284,11 +264,6 @@ export const analytics = {
         trackingEventFnWithPayload(EventNames.TransactionViewed)({ orderState: orderProcesState }),
     trackApproveTransactionViewed: (approveProcessState: ApproveProcessState) =>
         trackingEventFnWithPayload(EventNames.ApproveTransactionViewed)({approveState: approveProcessState }),
-    trackQuoteFetched: (swapQuote: MarketBuySwapQuote, fetchOrigin: QuoteFetchOrigin) =>
-        trackingEventFnWithPayload(EventNames.QuoteFetched)({
-            ...swapQuoteEventProperties(swapQuote),
-            fetchOrigin,
-        }),
     trackApiQuoteFetched: (swapQuote: SwapQuoteResponse, fetchOrigin: QuoteFetchOrigin) =>
         trackingEventFnWithPayload(EventNames.QuoteFetched)({
             ...swapApiQuoteEventProperties(swapQuote),

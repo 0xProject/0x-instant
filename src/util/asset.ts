@@ -1,11 +1,10 @@
-import { InsufficientAssetLiquidityError, SwapQuoterError } from '@0x/asset-swapper';
+
 import { ChainId } from '@0x/contract-addresses';
 import { AssetProxyId, ObjectMap } from '@0x/types';
-import { BigNumber } from '@0x/utils';
-import { Web3Wrapper } from '@0x/web3-wrapper';
+
 import * as _ from 'lodash';
 
-import { BIG_NUMBER_ZERO, DEFAULT_UNKOWN_ASSET_NAME } from '../constants';
+import {  DEFAULT_UNKOWN_ASSET_NAME } from '../constants';
 import { assetDataNetworkMapping } from '../data/asset_data_network_mapping';
 import { Asset, AssetMetaData, ERC20Asset, Network, ZeroExInstantError } from '../types';
 
@@ -109,37 +108,5 @@ export const assetUtils = {
             asset.metaData.assetProxyId === AssetProxyId.ERC20 ? (asset as ERC20Asset) : undefined,
         );
         return _.compact(erc20sOrUndefined);
-    },
-    swapQuoterErrorMessage: (asset: Asset, error: Error): string | undefined => {
-        if (error.message === SwapQuoterError.InsufficientAssetLiquidity) {
-            const assetName = assetUtils.bestNameForAsset(asset, 'of this asset');
-            if (
-                error instanceof InsufficientAssetLiquidityError &&
-                error.amountAvailableToFill.isGreaterThan(BIG_NUMBER_ZERO)
-            ) {
-                const unitAmountAvailableToFill =
-                    asset.metaData.assetProxyId === AssetProxyId.ERC20
-                        ? Web3Wrapper.toUnitAmount(error.amountAvailableToFill, asset.metaData.decimals)
-                        : error.amountAvailableToFill;
-                const roundedUnitAmountAvailableToFill = unitAmountAvailableToFill.decimalPlaces(
-                    2,
-                    BigNumber.ROUND_DOWN,
-                );
-
-                if (roundedUnitAmountAvailableToFill.isGreaterThan(BIG_NUMBER_ZERO)) {
-                    return `There are only ${roundedUnitAmountAvailableToFill} ${assetName} available to buy`;
-                }
-            }
-
-            return `Not enough ${assetName} available`;
-        } else if (
-            error.message === SwapQuoterError.StandardRelayerApiError ||
-            error.message.startsWith(SwapQuoterError.AssetUnavailable)
-        ) {
-            const assetName = assetUtils.bestNameForAsset(asset, 'This asset');
-            return `${assetName} is currently unavailable`;
-        }
-
-        return undefined;
-    },
+    }
 };
