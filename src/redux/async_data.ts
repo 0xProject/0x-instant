@@ -2,7 +2,7 @@ import { Web3Wrapper } from '@0x/web3-wrapper';
 import * as _ from 'lodash';
 import { Dispatch } from 'redux';
 
-import { BIG_NUMBER_ZERO } from '../constants';
+import { BIG_NUMBER_ZERO, ETH_TOKEN } from '../constants';
 import { defaultTokenList } from '../data/token_lists';
 import { AccountState, BaseCurrency, OrderProcessState, ProviderState, QuoteFetchOrigin, TokenInfo, TokenList } from '../types';
 import { analytics } from '../util/analytics';
@@ -36,10 +36,11 @@ export const asyncData = {
             const response = await fetch(defaultTokenList);
             if(response.ok && response.status  === 200){
                 const tokenList = await response.json() as TokenList;
+                tokenList.tokens.push(ETH_TOKEN)
                 dispatch(actions.setAvailableTokens(tokenList.tokens));
-
-                dispatch(actions.updateSelectedTokenIn(tokenList.tokens[0]));
-                dispatch(actions.updateSelectedTokenOut(tokenList.tokens[1]));
+                // @TODO Remove after finish
+                dispatch(actions.updateSelectedTokenIn(tokenList.tokens.find(t=> t.name.toLowerCase() === 'zap')));
+                dispatch(actions.updateSelectedTokenOut(tokenList.tokens.find(t=> t.symbol.toLowerCase() === 'usdt')));
             }else{
                 throw new Error('Error fetching token list')
             }
@@ -54,33 +55,6 @@ export const asyncData = {
     },
 
 
-    /*fetchAvailableAssetDatasAndDispatchToStore: async (state: State, dispatch: Dispatch) => {
-        const { providerState, assetMetaDataMap, network } = state;
-        const swapQuoter = providerState.swapQuoter;
-        try {
-            const wethAssetData = await swapQuoter.getEtherTokenAssetDataOrThrowAsync();
-            const assetDatas = await swapQuoter.getAvailableMakerAssetDatasAsync(wethAssetData);
-            const deduplicatedAssetDatas = _.uniq(assetDatas);
-            const assetsWithNativeOrders = assetUtils.createAssetsFromAssetDatas(
-                deduplicatedAssetDatas,
-                assetMetaDataMap,
-                network,
-            );
-            const assetsWithBridgeOrders = assetUtils.createAssetsFromAssetDatas(
-                SUPPORTED_TOKEN_ASSET_DATA_WITH_BRIDGE_ORDERS,
-                assetMetaDataMap,
-                network,
-            );
-            const assets = _.uniqBy(_.concat(assetsWithNativeOrders, assetsWithBridgeOrders), asset => asset.assetData);
-            dispatch(actions.setAvailableAssets(assets));
-        } catch (e) {
-            const errorMessage = 'Could not find any assets';
-            errorFlasher.flashNewErrorMessage(dispatch, errorMessage);
-            // On error, just specify that none are available
-            dispatch(actions.setAvailableAssets([]));
-            errorReporter.report(e);
-        }
-    },*/
     fetchAccountInfoAndDispatchToStore: async (
         providerState: ProviderState,
         dispatch: Dispatch,
@@ -160,8 +134,6 @@ export const asyncData = {
                // dispatch(actions.updateTokenBalances(tokenBalances));
 
             }
-
-
         } catch (e) {
             errorReporter.report(e);
             // leave balance as is
@@ -200,31 +172,4 @@ export const asyncData = {
             );
         }
     }
-  /*  fetchCurrentSwapQuoteAndDispatchToStore: async (
-        state: State,
-        dispatch: Dispatch,
-        fetchOrigin: QuoteFetchOrigin,
-        options: { updateSilently: boolean },
-    ) => {
-        const { swapOrderState, providerState, selectedAsset, selectedAssetUnitAmount } = state;
-        const swapQuoter = providerState.swapQuoter;
-        if (
-            selectedAssetUnitAmount !== undefined &&
-            selectedAsset !== undefined &&
-            selectedAssetUnitAmount.isGreaterThan(BIG_NUMBER_ZERO) &&
-            swapOrderState.processState === OrderProcessState.None
-        ) {
-            await swapQuoteUpdater.updateSwapQuoteAsync(
-                swapQuoter,
-                dispatch,
-                selectedAsset,
-                selectedAssetUnitAmount,
-                fetchOrigin,
-                {
-                    setPending: !options.updateSilently,
-                    dispatchErrors: !options.updateSilently,
-                },
-            );
-        }
-    },*/
 };

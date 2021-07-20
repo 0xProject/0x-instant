@@ -85,6 +85,7 @@ const mapDispatchToProps = (
     updateApiSwapQuote: (value, tokenIn, tokenOut, isIn, takerAddress) => {
         // Update the input
         let valueBase;
+        console.log(isIn)
         if(isIn){
             valueBase = Web3Wrapper.toBaseUnitAmount(value, tokenIn.decimals);
             dispatch(actions.updateSelectedTokenAmountIn(valueBase));

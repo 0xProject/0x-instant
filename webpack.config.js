@@ -3,6 +3,7 @@ const ip = require('ip');
 const path = require('path');
 const RollbarSourceMapPlugin = require('rollbar-sourcemap-webpack-plugin');
 const webpack = require('webpack');
+require("regenerator-runtime/runtime");
 
 const GIT_SHA = childProcess.execSync('git rev-parse HEAD').toString().trim();
 

@@ -7,7 +7,6 @@ import { ZERO_EX_SITE_URL } from '../constants';
 
 import { CurrentStandardSlidingPanel } from './current_standard_sliding_panel';
 import { LatestError } from './latest_error';
-import { SelectedTokenInstantHeading } from './selected_token_instant_heading';
 import { SelectedTokenSwapOrderStateButtons } from './selected_token_swap_order_state_buttons';
 import { ColorOption } from '../style/theme';
 import { zIndex } from '../style/z_index';
@@ -19,18 +18,16 @@ import { SlidingPanel } from '../components/sliding_panel';
 import { Container } from '../components/ui/container';
 import { Flex } from '../components/ui/flex';
 
-
-import { ApproveTokenProgressContainer } from './approve_token_progress';
-
 import {  actions } from '../redux/actions';
 import { SwapProgressContainer } from './swap_order_progress';
-import { ApproveSwapStepContainer } from './steps/approve_swap_step';
 import { ERC20TokenSelectorContainer } from './erc20_token_selector';
-import { ReviewSwapStepContainer } from './steps/review_swap_step';
+import { SwapStepsContainer } from './steps/swap_steps';
 import { PaymentMethodContainer } from './payment_method';
 import { OrderSwapDetailsContainer } from './order_swap_details';
 import { useState } from 'react';
 import { getSwapStep } from '../redux/selectors';
+import { SlidingPanelSwapContainer } from './steps/sliding_panel_swap_step';
+import { InstantTokenHeadingContainer } from './instant_token_heading';
 
 export interface ZeroExInstantContainerProps {
     swapStep: SwapStep;
@@ -101,15 +98,9 @@ export const ZeroExInstantContainer = () => {
     const _getContentFromStep = (swapSteps: SwapStep): React.ReactNode => {
         switch (swapSteps) {
             case SwapStep.Approve:
-
-                return (
-                    <>
-                        <ApproveSwapStepContainer />
-                        <ApproveTokenProgressContainer />
-                    </>)
             case SwapStep.ReviewOrder:
                 return (<>
-                    <ReviewSwapStepContainer />
+                    <SwapStepsContainer/>
                     <SwapProgressContainer />
                 </>)
             default:
@@ -139,10 +130,8 @@ export const ZeroExInstantContainer = () => {
                         height="100%"
                     >
                         <Flex direction="column" justify="flex-start" height="100%">
-                            {/*<ConnectedSwapOrderProgressOrPaymentMethod />*/}
-
-                            <SelectedTokenInstantHeading onSelectTokenClick={_handleSymbolClickIn} isIn={true} />
-                            <SelectedTokenInstantHeading onSelectTokenClick={_handleSymbolClickOut} isIn={false} />
+                            <InstantTokenHeadingContainer onSelectTokenClick={_handleSymbolClickIn} isIn={true} />
+                            <InstantTokenHeadingContainer onSelectTokenClick={_handleSymbolClickOut} isIn={false} />
                             <PaymentMethodContainer />
                             <OrderSwapDetailsContainer />
                             <Container padding="20px" width="100%">
@@ -157,22 +146,22 @@ export const ZeroExInstantContainer = () => {
                             <ERC20TokenSelectorContainer onTokenSelect={_handlePanelCloseAfterChose} isIn={isIn} />
                         </SlidingPanel>
 
-                        <SlidingPanel
+                        <SlidingPanelSwapContainer
                             animationState={stepPanelAnimationState}
                             onClose={_handleStepPanelCloseX}
                             onAnimationEnd={_handleStepSlidingPanelAnimationEnd}
                         >
 
-                            <Flex direction="column" justify="flex-start" height="100%">
-                                <Container height="100%">
+                            <Flex direction="column" justify="flex-start" height="100%" width="100%">
+                                <Container height="100%" width="100%">
                                     {_getContentFromStep(swapStep)}
                                 </Container>
-                                <Container padding="20px" width="100%">
+                                <Container padding="20px" width="100%" borderTop="1px dashed" borderColor={ColorOption.feintGrey}>
                                     <SelectedTokenSwapOrderStateButtons onClosePanelStep={_handleStepPanelClose} onShowPanelStep={_handleStepPanelOpen} />
                                 </Container>
                             </Flex>
 
-                        </SlidingPanel>
+                        </SlidingPanelSwapContainer>
 
                         <CurrentStandardSlidingPanel />
                     </Container>

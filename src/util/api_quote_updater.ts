@@ -4,7 +4,7 @@ import { Dispatch } from 'redux';
 import { ZRX_API_URL } from '../constants';
 
 import { Action, actions } from '../redux/actions';
-import {  QuoteFetchOrigin, SwapQuoteResponse, TokenInfo } from '../types';
+import { QuoteFetchOrigin, SwapQuoteResponse, TokenInfo } from '../types';
 
 import { analytics } from './analytics';
 
@@ -29,10 +29,10 @@ export const apiQuoteUpdater = {
         },
         skipValidation: boolean = true,
     ): Promise<void> => {
-        const tokenSell = isIn ? tokenIn : tokenOut; 
-        const tokenBuy = isIn ? tokenOut : tokenIn; 
+        const tokenSell = isIn ? tokenIn : tokenOut;
+        const tokenBuy = isIn ? tokenOut : tokenIn;
 
-       
+
         const tokenAddressSell = tokenSell.address;
         const tokenAddressBuy = tokenBuy.address;
 
@@ -45,19 +45,19 @@ export const apiQuoteUpdater = {
         try {
             let takerAddressString = '';
             let skipValidationString = '';
-            if(takerAddress){
+            if (takerAddress) {
                 takerAddressString = `&takerAddress=${takerAddress}`
             }
-            if(skipValidation){
+            if (skipValidation) {
                 skipValidationString = `&skipValidation=true`
             }
-          
-           const response = await fetch(`${ZRX_API_URL}/quote?sellToken=${tokenAddressSell}&buyToken=${tokenAddressBuy}&sellAmount=${tokenUnitAmount}${takerAddressString}${skipValidationString}`);
-            if(response.ok && response.status === 200){
+
+            const response = await fetch(`${ZRX_API_URL}/quote?sellToken=${tokenAddressSell}&buyToken=${tokenAddressBuy}&sellAmount=${tokenUnitAmount}${takerAddressString}${skipValidationString}`);
+            if (response.ok && response.status === 200) {
                 newSwapQuote = await response.json() as unknown as SwapQuoteResponse;
                 // format quote
                 newSwapQuote = {
-                    ... newSwapQuote,
+                    ...newSwapQuote,
                     value: new BigNumber(newSwapQuote.value),
                     gasPrice: new BigNumber(newSwapQuote.gasPrice),
                     protocolFee: new BigNumber(newSwapQuote.protocolFee),
@@ -72,11 +72,11 @@ export const apiQuoteUpdater = {
                 }
 
 
-            }else{
+            } else {
                 const error = await response.json();
                 throw new Error(error.reason);
             }
-              
+
         } catch (error) {
             const errorMessage = tokenUtils.swapQuoterErrorMessage(tokenSell, error);
 
@@ -93,12 +93,72 @@ export const apiQuoteUpdater = {
         errorFlasher.clearError(dispatch);
         // invalidate the last swap quote.
         dispatch(actions.updateLatestApiSwapQuote(undefined));
-        if(isIn){
+       
+        if (isIn) {
             dispatch(actions.updateSelectedTokenAmountOut(newSwapQuote.buyAmount));
-        }else{
-            dispatch(actions.updateSelectedTokenAmountIn(newSwapQuote.sellAmount));
+        } else {
+            dispatch(actions.updateSelectedTokenAmountIn(newSwapQuote.buyAmount));
         }
         dispatch(actions.updateLatestApiSwapQuote(newSwapQuote));
         analytics.trackApiQuoteFetched(newSwapQuote, fetchOrigin);
     },
+    fetchQuote: async (
+        takerAddress: String,
+        isIn: boolean,
+        tokenIn: {address: string},
+        tokenOut:  {address: string},
+        tokenUnitAmount: BigNumber,
+        skipValidation = true,
+
+    ): Promise<SwapQuoteResponse> => {
+        let newSwapQuote: SwapQuoteResponse | undefined;
+        const tokenSell = isIn ? tokenIn : tokenOut;
+        const tokenBuy = isIn ? tokenOut : tokenIn;
+
+        const tokenAddressSell = tokenSell.address;
+        const tokenAddressBuy = tokenBuy.address;
+        try {
+            let takerAddressString = '';
+            let skipValidationString = '';
+            if (takerAddress) {
+                takerAddressString = `&takerAddress=${takerAddress}`
+            }
+            if (skipValidation) {
+                skipValidationString = `&skipValidation=true`
+            }
+
+            const response = await fetch(`${ZRX_API_URL}/quote?sellToken=${tokenAddressSell}&buyToken=${tokenAddressBuy}&sellAmount=${tokenUnitAmount}${takerAddressString}${skipValidationString}`);
+            if (response.ok && response.status === 200) {
+                newSwapQuote = await response.json() as unknown as SwapQuoteResponse;
+                // format quote
+                newSwapQuote = {
+                    ...newSwapQuote,
+                    value: new BigNumber(newSwapQuote.value),
+                    gasPrice: new BigNumber(newSwapQuote.gasPrice),
+                    protocolFee: new BigNumber(newSwapQuote.protocolFee),
+                    minimumProtocolFee: new BigNumber(newSwapQuote.minimumProtocolFee),
+                    buyAmount: new BigNumber(newSwapQuote.buyAmount),
+                    sellAmount: new BigNumber(newSwapQuote.sellAmount),
+                    gas: new BigNumber(newSwapQuote.gas),
+                    estimatedGas: new BigNumber(newSwapQuote.estimatedGas),
+                    estimatedGasTokenRefund: new BigNumber(newSwapQuote.estimatedGasTokenRefund),
+                    price: new BigNumber(newSwapQuote.price),
+                    guaranteedPrice: new BigNumber(newSwapQuote.guaranteedPrice),
+                }
+                return newSwapQuote;
+
+
+            } else {
+                const error = await response.json();
+                throw new Error(error.reason);
+            }
+
+        } catch (error) {
+            errorReporter.report(error);
+            return;
+        }
+      
+    }
+
+
 };

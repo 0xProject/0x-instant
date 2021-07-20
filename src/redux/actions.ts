@@ -3,6 +3,7 @@ import { BigNumber } from '@0x/utils';
 import { Dispatch } from 'redux';
 
 import {
+    AccountReady,
     ActionsUnion,
     AddressAndEthBalanceInWei,
     BaseCurrency,
@@ -129,13 +130,19 @@ export const actions = {
 
 
 export const updateTokenSelect = (token: TokenInfo, isIn: boolean) => 
-   (dispatch: Dispatch<Action>) => {
+  async (dispatch: Dispatch<Action>, getState: any) => {
         if(isIn){
             dispatch(actions.updateSelectedTokenIn(token));
         }else{
             dispatch(actions.updateSelectedTokenOut(token));
         }
+        const state = getState() as State;
+        const web3Wrapper = state.providerState.web3Wrapper;
+        const tokenIn = state.selectedTokenIn;
+        const tokenOut = state.selectedTokenOut;
+        const address = (state.providerState.account as AccountReady).address;
 
+        asyncData.fetchAccountBalanceAndDispatchToStore(address, web3Wrapper, dispatch, tokenIn, tokenOut);
         dispatch(actions.resetAmount());
 }
 

@@ -4,17 +4,23 @@ import { BigNumber } from '@0x/utils';
 import { Web3Wrapper } from '@0x/web3-wrapper';
 import * as _ from 'lodash';
 import * as React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
 
 import {  UNLIMITED_ALLOWANCE_IN_BASE_UNITS, WEB_3_WRAPPER_TRANSACTION_FAILED_ERROR_MSG_PREFIX } from '../constants';
+import { getApproveState, getIsStepWithApprove, getSwapOrderState } from '../redux/selectors';
 import { ColorOption } from '../style/theme';
-import { AffiliateInfo, SwapQuoteResponse, SwapStep, TokenBalance, TokenInfo, ZeroExInstantError } from '../types';
+import { AffiliateInfo, ApproveProcessState, OrderProcessState, SwapQuoteResponse, SwapStep, TokenBalance, TokenInfo, ZeroExInstantError } from '../types';
 import { analytics } from '../util/analytics';
 import { errorReporter } from '../util/error_reporter';
 import { gasPriceEstimator } from '../util/gas_price_estimator';
-import { util } from '../util/util';
 
+import { Text } from '../components/ui/text';
 import { Button } from './ui/button';
+import { actions } from '../redux/actions';
+import { Container } from './ui/container';
+import { Icon } from './ui/icon';
+import { Flex } from './ui/flex';
 
 export interface SwapButtonProps {
     step: SwapStep;
@@ -65,6 +71,10 @@ export interface SwapButtonProps {
 };*/
 
 export const SwapButton = (props:SwapButtonProps) => {
+    const dispatch = useDispatch();
+    const isStepWithApprove = useSelector(getIsStepWithApprove);
+    const swapOrderState = useSelector(getSwapOrderState);
+    const approveState = useSelector(getApproveState);
     const { swapQuote, accountAddress, step } = props;
     const shouldDisableButton = swapQuote === undefined || accountAddress === undefined;
 
@@ -88,7 +98,7 @@ export const SwapButton = (props:SwapButtonProps) => {
         const gasInfo = await gasPriceEstimator.getGasInfoAsync();
         let txHash: string | undefined;
         try {
-            txHash =  await erc20Token.approve(tokenToApproveAddress, UNLIMITED_ALLOWANCE_IN_BASE_UNITS)
+            txHash =  await erc20Token.approve(swapQuote.allowanceTarget, UNLIMITED_ALLOWANCE_IN_BASE_UNITS)
                 .sendTransactionAsync({
                     from: accountAddress,
                     gasPrice: gasInfo.gasPriceInWei
@@ -113,15 +123,38 @@ export const SwapButton = (props:SwapButtonProps) => {
         props.onApproveTokenSuccess(tokenToApprove, txHash);
         props.onClosePanelStep(props.step);
     }
+    const swapCompleted = swapOrderState.processState ===  OrderProcessState.Success;
+    
+    const _renderNextStepText = () => {
+        const { step   } = props;
+        switch (step) {
+            case SwapStep.Approve:
+             return `Next: Confirm Trade`;
+             case SwapStep.ReviewOrder:
+             return `${props.tokenBalanceIn.token.symbol.toUpperCase()} Approved`;
+            default:
+             return null;  
+        }  
 
+    }
+    const wasApproved = props.step === SwapStep.ReviewOrder
 
     const _renderButtonText = () => {
         const { step, tokenBalanceIn   } = props;
-        const tokenToApprove = tokenBalanceIn.token;
+        if(swapOrderState.processState === OrderProcessState.Processing){
+            return 'Confirming Trade'
+        }
+        if(approveState.processState === ApproveProcessState.Processing){
+            const tokenToApprove = tokenBalanceIn.token;
+            return `Approving ${tokenToApprove.symbol.toUpperCase()}`;
+        }
+
+      
         switch (step) {
             case SwapStep.Swap:
              return 'Preview Trade';
             case SwapStep.Approve:
+            const tokenToApprove = tokenBalanceIn.token;
              return `Approve ${tokenToApprove.symbol.toUpperCase()} usage`;
              case SwapStep.ReviewOrder:
              return 'Confirm Trade';
@@ -209,8 +242,10 @@ export const SwapButton = (props:SwapButtonProps) => {
             if(step === SwapStep.Swap && tokenBalanceIn){
                 if(tokenBalanceIn.isUnlocked){
                     props.onChangeStep(SwapStep.ReviewOrder);
+                    dispatch(actions.setIsStepWithApprove(false));
                 }else{
                     props.onChangeStep(SwapStep.Approve);
+                    dispatch(actions.setIsStepWithApprove(true));
                 }
                 props.onShowPanelStep(step)
             }
@@ -227,15 +262,48 @@ export const SwapButton = (props:SwapButtonProps) => {
 
 
 
-    return (
-        <Button
+    return (    
+        <>  
+        {swapCompleted &&
+         <>  
+                <Button
+                        width="100%"
+                        onClick={_handleClick}
+                        borderColor={ColorOption.black}
+                        backgroundColor={ColorOption.whiteBackground}
+                        isDisabled={shouldDisableButton}
+                        fontColor={ColorOption.black}
+                    >
+                    View Transaction
+                </Button>
+                <Container>
+                    <Icon icon="success" width={34} height={34} color={ColorOption.green}  />
+                    <Text fontWeight={400} fontColor={ColorOption.grey}>
+                        Trade Completed                                                
+                    </Text>
+                </Container>
+             </>  
+
+        }
+       {!swapCompleted &&  <Button
             width="100%"
             onClick={_handleClick}
             isDisabled={shouldDisableButton}
             fontColor={ColorOption.white}
         >
             {_renderButtonText()}
-        </Button>
+        </Button>}
+        {(isStepWithApprove && !swapCompleted && _renderNextStepText()) &&
+            <Container>
+              <Flex  justify="center">
+                    {wasApproved && <Icon icon="success" width={34} height={34} color={ColorOption.green} />}
+                    <Text fontWeight={400} fontColor={ColorOption.grey}>
+                        {_renderNextStepText()}                                                    
+                    </Text>
+                </Flex>
+            </Container>
+        }
+        </>
     );
 }
     

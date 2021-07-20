@@ -108,15 +108,8 @@ export class ZeroExInstantProvider extends React.PureComponent<
         // tslint:disable-next-line:no-floating-promises
         asyncData.fetchEthPriceAndDispatchToStore(dispatch);
         // fetch available assets if none are specified
-        /* TODO: Remove after complete
-        
-        if (state.availableAssets === undefined) {
-            // tslint:disable-next-line:no-floating-promises
-            asyncData.fetchAvailableAssetDatasAndDispatchToStore(
-                state,
-                dispatch,
-            );
-        }*/
+    
+       
         if (state.availableTokens === undefined) {
             // tslint:disable-next-line:no-floating-promises
             asyncData.fetchTokenListAndDispatchToStore(

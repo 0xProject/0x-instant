@@ -1,7 +1,5 @@
-import { ChainId } from '@0x/contract-addresses';
 import { AssetProxyId } from '@0x/types';
 import { BigNumber, providerUtils } from '@0x/utils';
-import { SupportedProvider } from 'ethereum-types';
 import * as _ from 'lodash';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
@@ -15,12 +13,11 @@ import {
 } from './constants';
 import { assetMetaDataMap } from './data/asset_meta_data_map';
 import { ZeroExInstantOverlay, ZeroExInstantOverlayProps } from './index';
-import { OrderSource } from './types';
 import { analytics } from './util/analytics';
 import { assert } from './util/assert';
 import { assetDataEncoder } from './util/asset_data_encoder';
-import { providerFactory } from './util/provider_factory';
 import { util } from './util/util';
+import "regenerator-runtime/runtime.js";
 
 const isInstantRendered = (): boolean =>
     !!document.getElementById(INJECTED_DIV_ID);
