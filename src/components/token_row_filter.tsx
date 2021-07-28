@@ -66,7 +66,7 @@ class TokenSelectorRow extends React.PureComponent<TokenSelectorRowProps> {
                         <Container marginRight="10px">
                             <Circle diameter={26} rawColor={circleColor}>
                                 <Flex height="100%" width="100%">
-                                   <TokenSelectorRowIcon token={token} />
+                                    <TokenSelectorRowIcon token={token} />
                                 </Flex>
                             </Circle>
                         </Container>
@@ -95,13 +95,19 @@ interface TokenSelectorRowIconProps {
 class TokenSelectorRowIcon extends React.PureComponent<TokenSelectorRowIconProps> {
     public render(): React.ReactNode {
         const { token } = this.props;
-        if(token.logoURI){
+        if (token.logoURI) {
             return <img src={token.logoURI} />;
+        }
+        if (tokenUtils.isETH(token)) {
+            const displaySymbol = tokenUtils.bestNameForToken(token);
+            return <Text fontColor={ColorOption.white} fontSize="8px">
+                {displaySymbol}
+            </Text>
         }
 
         const iconUrlIfExists = tokenUtils.getIconUrl(tokenUtils.toChecksum(token.address));
 
-        const TokenIcon = tokenUtils.getIcon(token.symbol);
+        const TokenIcon = tokenUtils.getIcon(token.symbol.toLowerCase());
         const displaySymbol = tokenUtils.bestNameForToken(token);
         if (iconUrlIfExists !== undefined) {
             return <img src={iconUrlIfExists} />;

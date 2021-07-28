@@ -36,8 +36,7 @@ export const SwapStepsContainer = () => {
     const account = useSelector(getAccount);
     const ethUSDPrice = useSelector(getEthUsdPrice);
     const isStepWithApprove = useSelector(getIsStepWithApprove);
-    const swapStep = useSelector(getSwapStep);
-   
+
     const usdQuoteTokenIn = useTokenPriceUSD(tokenIn, ChainId.Mainnet, false);
     const usdQuoteTokenOut = useTokenPriceUSD(tokenOut, ChainId.Mainnet, false);
 
@@ -112,16 +111,18 @@ export const SwapStepsContainer = () => {
                         </Text>
                         <Container>
                             <Text fontWeight={500} fontColor={ColorOption.black} fontSize={'16px'} lineHeight={'19px'}>
-                                {renderTokenAmount(true)}
+                                {renderTokenAmount(true)} {' '}
 
                             </Text>
-                            <Text fontWeight={400} fontColor={ColorOption.grey}>
-                                {usdQuoteTokenIn.loading ?
-                                    <AmountPlaceholder color={ColorOption.grey} isPulsating={true}/> :
-                                    renderTokenAmountUSD(true)
-                                }
-                                { }
-                            </Text>
+                  
+                                <Text fontWeight={400} fontColor={ColorOption.grey} >
+                                    {usdQuoteTokenIn.loading ?
+                                        <AmountPlaceholder color={ColorOption.grey} isPulsating={true}/> :
+                                        renderTokenAmountUSD(true)
+                                    }
+                                    { }
+                                </Text>
+                         
 
 
                         </Container>
@@ -134,15 +135,17 @@ export const SwapStepsContainer = () => {
                         </Text>
                         <Container>
                             <Text fontWeight={'bold'} fontColor={ColorOption.black}>
-                                {renderTokenAmount(false)}
+                                {renderTokenAmount(false)} {' '}
 
                             </Text>
-                            <Text fontWeight={400} fontColor={ColorOption.grey}>
-                                {usdQuoteTokenOut.loading ?
-                                     <AmountPlaceholder color={ColorOption.grey} isPulsating={true}/> :
-                                        renderTokenAmountUSD(false)
-                                    }
-                            </Text>
+                           
+                                <Text fontWeight={400} fontColor={ColorOption.grey}>
+                                    {usdQuoteTokenOut.loading ?
+                                        <AmountPlaceholder color={ColorOption.grey} isPulsating={true}/> :
+                                            renderTokenAmountUSD(false)
+                                        }
+                                </Text>
+                       
 
                         </Container>
                     </Flex>
@@ -152,12 +155,12 @@ export const SwapStepsContainer = () => {
                         <Text fontWeight={500} fontColor={ColorOption.black} fontSize={'16px'} lineHeight={'19px'}>
                             Rate
                         </Text>
-                        <Container>
+                      
                             <Text fontWeight={500} fontColor={ColorOption.black} fontSize={'16px'} lineHeight={'19px'}>
                                 {renderPrice()}
 
                             </Text>
-                        </Container>
+
                     </Flex>
                 </Container>
                 <Container padding="10px 0px" borderColor={ColorOption.feintGrey}>
@@ -167,11 +170,13 @@ export const SwapStepsContainer = () => {
                         </Text>
                         <Container>
                             <Text fontWeight={500} fontColor={ColorOption.black} fontSize={'16px'} lineHeight={'19px'}>
-                                {renderGasPrice()}
+                                {renderGasPrice()} {' '}
                             </Text>
-                            <Text fontWeight={400} fontColor={ColorOption.grey}>
-                                {renderGasPriceUSD()}
+                           
+                             <Text fontWeight={400} fontColor={ColorOption.grey}>
+                                    {renderGasPriceUSD()}
                             </Text>
+                 
 
 
                         </Container>

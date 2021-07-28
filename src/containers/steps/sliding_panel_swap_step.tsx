@@ -9,11 +9,11 @@ import { SlideAnimation } from '../../components/animations/slide_animation';
 
 import { Container } from '../../components/ui/container';
 import { Flex } from '../../components/ui/flex';
-import { Icon } from '../../components/ui/icon';
 import { SectionHeader } from '../../components/section_header';
 import { Text } from '../../components/ui/text';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { getApproveState, getIsStepWithApprove, getSelectedTokenIn, getSwapOrderState } from '../../redux/selectors';
+import { actions } from '../../redux/actions';
 
 
 interface PanelProps {
@@ -26,6 +26,16 @@ const Panel = ({ children, onClose }: PanelProps) => {
     const swapOrderState = useSelector(getSwapOrderState);
     const approveState = useSelector(getApproveState);
     const tokenIn = useSelector(getSelectedTokenIn);
+    const dispatch = useDispatch();
+    const onClosePanel = () => {
+        // reset all state
+        dispatch(actions.setSwapOrderStateNone());
+        dispatch(actions.setApproveTokenStateNone());
+        onClose()
+    }
+
+
+
     const titleText = () => {
         if(isStepWithApprove){
             if (
@@ -78,7 +88,9 @@ const Panel = ({ children, onClose }: PanelProps) => {
                 </SectionHeader>
                     <SectionHeader>
                     <Flex justify="flex-end">
-                        <Icon padding="5px" width={12} color={ColorOption.lightGrey} icon="closeX" onClick={onClose} />
+                         <Text fontWeight={300} fontColor={ColorOption.grey} fontSize={'12px'} onClick={onClosePanel}>
+                             ← Back  
+                       </Text>
                     </Flex>
 
                     </SectionHeader>

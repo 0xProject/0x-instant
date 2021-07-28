@@ -21,6 +21,7 @@ import { actions } from '../redux/actions';
 import { Container } from './ui/container';
 import { Icon } from './ui/icon';
 import { Flex } from './ui/flex';
+import { tokenUtils } from '../util/token';
 
 export interface SwapButtonProps {
     step: SwapStep;
@@ -64,12 +65,6 @@ export interface SwapButtonProps {
     onChangeStep: (step: SwapStep) => void;
 }
 
-/*public static defaultProps = {
-    onClick: util.boundNoop,
-    onBuySuccess: util.boundNoop,
-    onBuyFailure: util.boundNoop,
-};*/
-
 export const SwapButton = (props:SwapButtonProps) => {
     const dispatch = useDispatch();
     const isStepWithApprove = useSelector(getIsStepWithApprove);
@@ -103,8 +98,9 @@ export const SwapButton = (props:SwapButtonProps) => {
                     from: accountAddress,
                     gasPrice: gasInfo.gasPriceInWei
                 });
-        }catch{
+        }catch(e){
             props.onApproveValidationFail(tokenToApprove, ZeroExInstantError.CouldNotSubmitTransaction);
+            throw e;
         }
 
         const startTimeUnix = new Date().getTime();

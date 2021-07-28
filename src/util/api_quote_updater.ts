@@ -78,14 +78,12 @@ export const apiQuoteUpdater = {
             }
 
         } catch (error) {
-            const errorMessage = tokenUtils.swapQuoterErrorMessage(tokenSell, error);
-
             errorReporter.report(error);
             analytics.trackQuoteError(error.message ? error.message : 'other', tokenUnitAmount, fetchOrigin);
 
             if (options.dispatchErrors) {
                 dispatch(actions.setQuoteRequestStateFailure());
-                errorFlasher.flashNewErrorMessage(dispatch, errorMessage || 'Error fetching price, please try again');
+                errorFlasher.flashNewErrorMessage(dispatch,  'Error fetching price, please try again');
             }
             return;
         }

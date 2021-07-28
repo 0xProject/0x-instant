@@ -50,7 +50,7 @@ export const ApproveRow = () => {
                 </Text>
                 <Container>
                     <Text fontWeight={500} fontColor={ColorOption.black} fontSize={'16px'} lineHeight={'19px'} textDecorationLine={wasApproved ? 'line-through' : ''}>
-                        {renderGasPrice()}
+                        {renderGasPrice()} {' '}
                     </Text>
                     <Text fontWeight={400} fontColor={ColorOption.grey} textDecorationLine={wasApproved ? 'line-through' : ''}>
                         {renderGasPriceUSD()}

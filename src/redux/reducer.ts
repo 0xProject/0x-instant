@@ -23,6 +23,7 @@ import {
     SwapStep,
     TokenBalance,
     TokenInfo,
+    TokenList,
 } from '../types';
 
 import { Action, ActionTypes } from './actions';
@@ -45,6 +46,7 @@ interface PropsDerivedState {
 
 // State that is optional
 interface OptionalState {
+    tokenList: string | TokenList;
     selectedTokenIn: TokenInfo;
     selectedTokenOut: TokenInfo;
     selectedTokenInBalance: TokenBalance;

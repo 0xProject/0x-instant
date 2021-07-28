@@ -1,3 +1,4 @@
+import { BigNumber } from '@0x/utils';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
@@ -50,41 +51,20 @@ export class ZeroExInstantProvider extends React.PureComponent<
             props.provider,
             props.walletDisplayName,
         );
-        // merge the additional additionalAssetMetaDataMap with our default map
-      /*  const completeAssetMetaDataMap = {
-            // Make sure the passed in assetDatas are lower case
-            ..._.mapKeys(props.additionalAssetMetaDataMap || {}, (value, key) =>
-                key.toLowerCase(),
-            ),
-            ...defaultState.assetMetaDataMap,
-        };
-
-        const selectedAsset =
-            props.defaultSelectedAssetData === undefined
-                ? undefined
-                : assetUtils.createAssetFromAssetDataOrThrow(
-                      props.defaultSelectedAssetData,
-                      completeAssetMetaDataMap,
-                      networkId,
-                  );
-
-        let selectedAssetUnitAmount: BigNumber | undefined;
-        if (selectedAsset !== undefined) {
-            if (selectedAsset.metaData.assetProxyId === AssetProxyId.ERC20) {
-                selectedAssetUnitAmount =
-                    props.defaultAssetBuyAmount === undefined
-                        ? undefined
-                        : new BigNumber(props.defaultAssetBuyAmount);
-            } else if (
-                selectedAsset.metaData.assetProxyId === AssetProxyId.ERC721
-            ) {
-                selectedAssetUnitAmount = new BigNumber(1);
-            }
-        }*/
+        const selectedTokenIn = props.defaultSelectedTokenIn === undefined ? undefined : props.defaultSelectedTokenIn;
+        const selectedTokenOut = props.defaultSelectedTokenOut === undefined ? undefined : props.defaultSelectedTokenOut;
+        const selectedTokenAmountIn = props.defaultAmountTokenIn === undefined ? undefined : new BigNumber(props.defaultAmountTokenIn);
+        const selectedTokenAmountOut = props.defaultAmountTokenOut === undefined ? undefined : new BigNumber(props.defaultAmountTokenOut);
+        const tokenList = props.tokenList === undefined ? undefined : props.tokenList;
 
         // construct the final state
         const storeStateFromProps: State = {
             ...defaultState,
+            selectedTokenIn,
+            selectedTokenOut,
+            tokenList,
+            selectedTokenAmountIn,
+            selectedTokenAmountOut,
             providerState,
             network: networkId,
             walletDisplayName: props.walletDisplayName,

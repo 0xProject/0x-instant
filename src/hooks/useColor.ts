@@ -3,6 +3,7 @@ import { shade } from 'polished'
 import Vibrant from 'node-vibrant'
 import { hex } from 'wcag-contrast'
 import { TokenInfo } from '../types'
+import { getAddress } from 'ethers/lib/utils'
 
 /**
  * Given a URI that may be ipfs, ipns, http, or https protocol, return the fetch-able http(s) URLs for the same content
@@ -31,8 +32,9 @@ async function getColorFromToken(token: TokenInfo): Promise<string | null> {
   if (token.chainId !== 1) {
     return Promise.resolve('#FAAB14')
   }
+  const address = getAddress(token.address)
 
-  const path = `https://raw.githubusercontent.com/uniswap/assets/master/blockchains/ethereum/assets/${token.address}/logo.png`
+  const path = `https://raw.githubusercontent.com/uniswap/assets/master/blockchains/ethereum/assets/${address}/logo.png`
 
   return Vibrant.from(path)
     .getPalette()

@@ -31,16 +31,18 @@ export const asyncData = {
         }
     },
     fetchTokenListAndDispatchToStore: async (state: State, dispatch: Dispatch) => {
-  
-        try {      
-            const response = await fetch(defaultTokenList);
+        const tokenList = state.tokenList;
+        if((tokenList as TokenList)?.tokens.length){
+            dispatch(actions.setAvailableTokens((tokenList as TokenList).tokens.concat(ETH_TOKEN)));
+            return;
+        }
+
+        try {       
+            const response = await fetch(tokenList as string || defaultTokenList);
             if(response.ok && response.status  === 200){
                 const tokenList = await response.json() as TokenList;
-                tokenList.tokens.push(ETH_TOKEN)
-                dispatch(actions.setAvailableTokens(tokenList.tokens));
-                // @TODO Remove after finish
-                dispatch(actions.updateSelectedTokenIn(tokenList.tokens.find(t=> t.name.toLowerCase() === 'zap')));
-                dispatch(actions.updateSelectedTokenOut(tokenList.tokens.find(t=> t.symbol.toLowerCase() === 'usdt')));
+                const tokens = tokenList.tokens.concat(ETH_TOKEN)
+                dispatch(actions.setAvailableTokens(tokens));   
             }else{
                 throw new Error('Error fetching token list')
             }
@@ -121,7 +123,7 @@ export const asyncData = {
             }
             if(tokenArray.length){
                 const chainId = await web3Wrapper.getChainIdAsync();
-                const tokenBalances = await MulticallUtils.getTokensBalancesAndAllowances(web3Wrapper.getProvider() as any, tokenArray, chainId, address);
+                const tokenBalances = await MulticallUtils.getTokensBalancesAndAllowances(web3Wrapper.getProvider() as any, tokenArray, chainId, address, ethBalanceInWei);
                 if(tokenIn && tokenOut){
                     dispatch(actions.updateSelectedTokenInBalance(tokenBalances[0]));
                     dispatch(actions.updateSelectedTokenOutBalance(tokenBalances[1]));
