@@ -25,14 +25,13 @@ export const  PaymentMethodDropdown  = (props: PaymentMethodDropdownProps) =>   
         const etherscanUrl = etherscanUtil.getEtherScanEthAddressIfExists(accountAddress, network);
         window.open(etherscanUrl, '_blank');
     };
-        const handleCopyToClipboardClick = (): void => {
+    const handleCopyToClipboardClick = (): void => {
             analytics.trackPaymentMethodCopiedAddress();
 
             const { accountAddress } = props;
             copy(accountAddress);
         };
 
-   
     const getDropdownItemConfigs = (): DropdownItemConfig[] => {
         if (envUtil.isMobileOperatingSystem()) {
             return [];
@@ -47,12 +46,11 @@ export const  PaymentMethodDropdown  = (props: PaymentMethodDropdownProps) =>   
         };
         return [viewOnEtherscan, copyAddressToClipboard];
     };
-    
 
     const { accountAddress, accountEthBalanceInWei } = props;
-        const value = format.ethAddress(accountAddress);
-        const label = format.ethBaseUnitAmount(accountEthBalanceInWei, 4, '') as string;
-        return (
+    const value = format.ethAddress(accountAddress);
+    const label = format.ethBaseUnitAmount(accountEthBalanceInWei, 4, '') as string;
+    return (
             <Dropdown
                 value={value}
                 label={label}
@@ -60,4 +58,4 @@ export const  PaymentMethodDropdown  = (props: PaymentMethodDropdownProps) =>   
                 onOpen={analytics.trackPaymentMethodDropdownOpened}
             />
         );
-}
+};

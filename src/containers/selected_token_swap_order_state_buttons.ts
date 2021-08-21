@@ -52,11 +52,11 @@ interface ConnectedDispatch {
     onRetry: () => void;
     onValidationFail: (
         swapQuote: SwapQuoteResponse,
-        errorMessage:  ZeroExInstantError,
+        errorMessage: ZeroExInstantError,
     ) => void;
     onApproveValidationFail: (
         token: TokenInfo,
-        errorMessage:  ZeroExInstantError,
+        errorMessage: ZeroExInstantError,
     ) => void;
     onChangeStep: (step: SwapStep) => void;
 }
@@ -113,7 +113,6 @@ const mapStateToProps = (state: State, _ownProps: SelectedTokenSwapOrderStateBut
                     return;
                 }
             }
-
 
         },
     };
@@ -179,13 +178,12 @@ const mapDispatchToProps = (
     onApproveTokenSuccess: ( token: TokenInfo, txHash: string) => dispatch(actions.setApproveTokenStateSuccess(txHash)),
     onApproveTokenFailure: ( token: TokenInfo, txHash: string) => dispatch(actions.setApproveTokenStateFailure(txHash)),
 
-
     onRetry: () => {
         dispatch(actions.resetAmount());
     },
     onChangeStep: (step: SwapStep) => {
         dispatch(actions.setUISwapStep(step));
-    }
+    },
 });
 
 const mergeProps = (

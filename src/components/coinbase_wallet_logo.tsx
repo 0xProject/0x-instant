@@ -18,5 +18,3 @@ export const CoinbaseWalletLogo = ({ width = 164, height = 164 }: CoinbaseWallet
 );
 
 CoinbaseWalletLogo.displayName = 'CoinbaseWalletLogo';
-
-

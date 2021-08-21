@@ -4,12 +4,10 @@ import * as React from 'react';
 
 import { ColorOption, transparentWhite } from '../style/theme';
 import { SimpleHandler, TokenInfo } from '../types';
-
 import { tokenUtils } from '../util/token';
 import { util } from '../util/util';
 
 import { ScalingAmountInput } from './scaling_amount_input';
-
 import { Container } from './ui/container';
 import { Flex } from './ui/flex';
 import { Icon } from './ui/icon';
@@ -131,9 +129,9 @@ export class ERC20AmountInput extends React.PureComponent<ERC20AmountInputProps,
     };
 
     private readonly _handleChange = (value?: BigNumber): void => {
-        this.props.onChange(value, 
-            this.props.tokenIn, 
-            this.props.tokenOut, 
+        this.props.onChange(value,
+            this.props.tokenIn,
+            this.props.tokenOut,
             this.props.isInInput);
     };
     private readonly _handleFontSizeChange = (fontSizePx: number): void => {

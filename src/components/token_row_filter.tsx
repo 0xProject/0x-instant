@@ -1,13 +1,13 @@
-import _ from "lodash";
-import React from "react";
+import _ from 'lodash';
+import React from 'react';
 
-import { ColorOption } from "../style/theme";
-import { TokenInfo } from "../types";
 import { Circle } from '../components/ui/circle';
 import { Container } from '../components/ui/container';
 import { Flex } from '../components/ui/flex';
 import { Text } from '../components/ui/text';
-import { tokenUtils } from "../util/token";
+import { ColorOption } from '../style/theme';
+import { TokenInfo } from '../types';
+import { tokenUtils } from '../util/token';
 
 interface TokenRowFilterProps {
     tokens: TokenInfo[];
@@ -91,7 +91,6 @@ interface TokenSelectorRowIconProps {
     token: TokenInfo;
 }
 
-
 class TokenSelectorRowIcon extends React.PureComponent<TokenSelectorRowIconProps> {
     public render(): React.ReactNode {
         const { token } = this.props;
@@ -102,7 +101,7 @@ class TokenSelectorRowIcon extends React.PureComponent<TokenSelectorRowIconProps
             const displaySymbol = tokenUtils.bestNameForToken(token);
             return <Text fontColor={ColorOption.white} fontSize="8px">
                 {displaySymbol}
-            </Text>
+            </Text>;
         }
 
         const iconUrlIfExists = tokenUtils.getIconUrl(tokenUtils.toChecksum(token.address));

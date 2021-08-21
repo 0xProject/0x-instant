@@ -14,7 +14,7 @@ export interface ButtonProps {
     fontSize?: string;
     width?: string;
     padding?: string;
-    type?: "button" | "submit" | "reset";
+    type?: 'button' | 'submit' | 'reset';
     isDisabled?: boolean;
     href?: string;
     onClick?: ButtonOnClickHandler;

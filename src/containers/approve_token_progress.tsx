@@ -1,13 +1,11 @@
 import * as React from 'react';
-
-import { TimedProgressBar } from '../components/timed_progress_bar';
+import { useSelector } from 'react-redux';
 
 import { TimeCounter } from '../components/time_counter';
+import { TimedProgressBar } from '../components/timed_progress_bar';
 import { Container } from '../components/ui/container';
-import { ApproveProcessState } from '../types';
-import { useSelector } from 'react-redux';
 import { getApproveState } from '../redux/selectors';
-
+import { ApproveProcessState } from '../types';
 
 export const ApproveTokenProgressContainer = () => {
     const approveState = useSelector(getApproveState);

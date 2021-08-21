@@ -1,13 +1,13 @@
 import { ERC20TokenContract } from '@0x/contract-wrappers';
-
 import { BigNumber } from '@0x/utils';
 import { Web3Wrapper } from '@0x/web3-wrapper';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-
+import { Text } from '../components/ui/text';
 import {  UNLIMITED_ALLOWANCE_IN_BASE_UNITS, WEB_3_WRAPPER_TRANSACTION_FAILED_ERROR_MSG_PREFIX } from '../constants';
+import { actions } from '../redux/actions';
 import { getApproveState, getIsStepWithApprove, getSwapOrderState } from '../redux/selectors';
 import { ColorOption } from '../style/theme';
 import { AffiliateInfo, ApproveProcessState, OrderProcessState, SwapQuoteResponse, SwapStep, TokenBalance, TokenInfo, ZeroExInstantError } from '../types';
@@ -15,13 +15,10 @@ import { analytics } from '../util/analytics';
 import { errorReporter } from '../util/error_reporter';
 import { gasPriceEstimator } from '../util/gas_price_estimator';
 
-import { Text } from '../components/ui/text';
 import { Button } from './ui/button';
-import { actions } from '../redux/actions';
 import { Container } from './ui/container';
-import { Icon } from './ui/icon';
 import { Flex } from './ui/flex';
-import { tokenUtils } from '../util/token';
+import { Icon } from './ui/icon';
 
 export interface SwapButtonProps {
     step: SwapStep;
@@ -35,7 +32,7 @@ export interface SwapButtonProps {
     onValidationPending: (swapQuote: SwapQuoteResponse) => void;
     onValidationFail: (
         swapQuote: SwapQuoteResponse,
-        errorMessage:  ZeroExInstantError,
+        errorMessage: ZeroExInstantError,
     ) => void;
     onSignatureDenied: (swapQuote: SwapQuoteResponse) => void;
     onSwapProcessing: (
@@ -65,12 +62,12 @@ export interface SwapButtonProps {
     onChangeStep: (step: SwapStep) => void;
 }
 
-export const SwapButton = (props:SwapButtonProps) => {
+export const SwapButton = (props: SwapButtonProps) => {
     const dispatch = useDispatch();
     const isStepWithApprove = useSelector(getIsStepWithApprove);
     const swapOrderState = useSelector(getSwapOrderState);
     const approveState = useSelector(getApproveState);
-    const { swapQuote, accountAddress, step } = props;
+    const { swapQuote, accountAddress } = props;
     const shouldDisableButton = swapQuote === undefined || accountAddress === undefined;
 
     const _handleApprove = async () => {
@@ -89,16 +86,16 @@ export const SwapButton = (props:SwapButtonProps) => {
         props.onApproveValidationPending(tokenToApprove);
         const tokenToApproveAddress = tokenBalanceIn.token.address;
         const erc20Token = new ERC20TokenContract(tokenToApproveAddress, web3Wrapper.getProvider());
-        
+
         const gasInfo = await gasPriceEstimator.getGasInfoAsync();
         let txHash: string | undefined;
         try {
             txHash =  await erc20Token.approve(swapQuote.allowanceTarget, UNLIMITED_ALLOWANCE_IN_BASE_UNITS)
                 .sendTransactionAsync({
                     from: accountAddress,
-                    gasPrice: gasInfo.gasPriceInWei
+                    gasPrice: gasInfo.gasPriceInWei,
                 });
-        }catch(e){
+        } catch (e) {
             props.onApproveValidationFail(tokenToApprove, ZeroExInstantError.CouldNotSubmitTransaction);
             throw e;
         }
@@ -115,12 +112,12 @@ export const SwapButton = (props:SwapButtonProps) => {
             }
             throw e;
         }
-      
+
         props.onApproveTokenSuccess(tokenToApprove, txHash);
         props.onClosePanelStep(props.step);
-    }
+    };
     const swapCompleted = swapOrderState.processState ===  OrderProcessState.Success;
-    
+
     const _renderNextStepText = () => {
         const { step   } = props;
         switch (step) {
@@ -129,35 +126,34 @@ export const SwapButton = (props:SwapButtonProps) => {
              case SwapStep.ReviewOrder:
              return `${props.tokenBalanceIn.token.symbol.toUpperCase()} Approved`;
             default:
-             return null;  
-        }  
+             return null;
+        }
 
-    }
-    const wasApproved = props.step === SwapStep.ReviewOrder
+    };
+    const wasApproved = props.step === SwapStep.ReviewOrder;
 
     const _renderButtonText = () => {
         const { step, tokenBalanceIn   } = props;
-        if(swapOrderState.processState === OrderProcessState.Processing){
-            return 'Confirming Trade'
+        if (swapOrderState.processState === OrderProcessState.Processing) {
+            return 'Confirming Trade';
         }
-        if(approveState.processState === ApproveProcessState.Processing){
+        if (approveState.processState === ApproveProcessState.Processing) {
             const tokenToApprove = tokenBalanceIn.token;
             return `Approving ${tokenToApprove.symbol.toUpperCase()}`;
         }
 
-      
         switch (step) {
             case SwapStep.Swap:
              return 'Preview Trade';
             case SwapStep.Approve:
             const tokenToApprove = tokenBalanceIn.token;
-             return `Approve ${tokenToApprove.symbol.toUpperCase()} usage`;
+            return `Approve ${tokenToApprove.symbol.toUpperCase()} usage`;
              case SwapStep.ReviewOrder:
              return 'Confirm Trade';
             default:
-             return 'Preview Trade';  
-        }     
-    }
+             return 'Preview Trade';
+        }
+    };
 
     const _handleSwap = async () => {
         // The button is disabled when there is no buy quote anyway.
@@ -167,32 +163,32 @@ export const SwapButton = (props:SwapButtonProps) => {
           accountEthBalanceInWei,
           web3Wrapper,
       } = props;
-      if (swapQuote === undefined || accountAddress === undefined) {
+        if (swapQuote === undefined || accountAddress === undefined) {
           return;
       }
 
-      props.onValidationPending(swapQuote);
+        props.onValidationPending(swapQuote);
 
-      const ethNeededForBuy = swapQuote.value;
+        const ethNeededForBuy = swapQuote.value;
       // if we don't have a balance for the user, let the transaction through, it will be handled by the wallet
-      const hasSufficientEth = accountEthBalanceInWei === undefined || accountEthBalanceInWei.gte(ethNeededForBuy);
-      if (!hasSufficientEth) {
+        const hasSufficientEth = accountEthBalanceInWei === undefined || accountEthBalanceInWei.gte(ethNeededForBuy);
+        if (!hasSufficientEth) {
           analytics.trackSwapNotEnoughEth(swapQuote);
           props.onValidationFail(swapQuote, ZeroExInstantError.InsufficientETH);
           return;
       }
-      let txHash: string | undefined;
-      const gasInfo = await gasPriceEstimator.getGasInfoAsync();
-      try {
+        let txHash: string | undefined;
+        const gasInfo = await gasPriceEstimator.getGasInfoAsync();
+        try {
           analytics.trackSwapStarted(swapQuote);
-          txHash = await web3Wrapper.sendTransactionAsync(swapQuote as Required<SwapQuoteResponse>)
+          txHash = await web3Wrapper.sendTransactionAsync(swapQuote as Required<SwapQuoteResponse>);
       } catch (e) {
           if (e instanceof Error) {
                 errorReporter.report(e);
                 analytics.trackSwapUnknownError(swapQuote, e.message);
                 props.onValidationFail(swapQuote, ZeroExInstantError.CouldNotSubmitTransaction);
                 return;
-              
+
           }
           // HACK(dekz): Wrappers no longer include decorators which map errors
           // like transaction deny
@@ -212,10 +208,10 @@ export const SwapButton = (props:SwapButtonProps) => {
           throw e;
       }
 
-      const startTimeUnix = new Date().getTime();
-      const expectedEndTimeUnix = startTimeUnix + gasInfo.estimatedTimeMs;
-      props.onSwapProcessing(swapQuote, txHash, startTimeUnix, expectedEndTimeUnix);
-      try {
+        const startTimeUnix = new Date().getTime();
+        const expectedEndTimeUnix = startTimeUnix + gasInfo.estimatedTimeMs;
+        props.onSwapProcessing(swapQuote, txHash, startTimeUnix, expectedEndTimeUnix);
+        try {
           analytics.trackSwapTxSubmitted(swapQuote, txHash, startTimeUnix, expectedEndTimeUnix);
           await web3Wrapper.awaitTransactionSuccessAsync(txHash);
       } catch (e) {
@@ -226,42 +222,38 @@ export const SwapButton = (props:SwapButtonProps) => {
           }
           throw e;
       }
-      analytics.trackSwapTxSucceeded(swapQuote, txHash, startTimeUnix, expectedEndTimeUnix);
-      props.onSwapSuccess(swapQuote, txHash);
-      props.onClosePanelStep(props.step)
-  }
-    
-      
+        analytics.trackSwapTxSucceeded(swapQuote, txHash, startTimeUnix, expectedEndTimeUnix);
+        props.onSwapSuccess(swapQuote, txHash);
+        props.onClosePanelStep(props.step);
+  };
 
     const _handleClick = async () => {
             const { step, tokenBalanceIn } = props;
-            if(step === SwapStep.Swap && tokenBalanceIn){
-                if(tokenBalanceIn.isUnlocked){
+            if (step === SwapStep.Swap && tokenBalanceIn) {
+                if (tokenBalanceIn.isUnlocked) {
                     props.onChangeStep(SwapStep.ReviewOrder);
                     dispatch(actions.setIsStepWithApprove(false));
-                }else{
+                } else {
                     props.onChangeStep(SwapStep.Approve);
                     dispatch(actions.setIsStepWithApprove(true));
                 }
-                props.onShowPanelStep(step)
+                props.onShowPanelStep(step);
             }
-    
-            if(step === SwapStep.Approve){
+
+            if (step === SwapStep.Approve) {
                 _handleApprove();
             }
-            
-            if(step === SwapStep.ReviewOrder){
+
+            if (step === SwapStep.ReviewOrder) {
                 _handleSwap();
             }
-          
+
         };
 
-
-
-    return (    
-        <>  
+    return (
+        <>
         {swapCompleted &&
-         <>  
+         <>
                 <Button
                         width="100%"
                         onClick={_handleClick}
@@ -275,10 +267,10 @@ export const SwapButton = (props:SwapButtonProps) => {
                 <Container>
                     <Icon icon="success" width={34} height={34} color={ColorOption.green}  />
                     <Text fontWeight={400} fontColor={ColorOption.grey}>
-                        Trade Completed                                                
+                        Trade Completed
                     </Text>
                 </Container>
-             </>  
+             </>
 
         }
        {!swapCompleted &&  <Button
@@ -294,23 +286,11 @@ export const SwapButton = (props:SwapButtonProps) => {
               <Flex  justify="center">
                     {wasApproved && <Icon icon="success" width={34} height={34} color={ColorOption.green} />}
                     <Text fontWeight={400} fontColor={ColorOption.grey}>
-                        {_renderNextStepText()}                                                    
+                        {_renderNextStepText()}
                     </Text>
                 </Flex>
             </Container>
         }
         </>
     );
-}
-    
-
-
-
-  
-
-   
-    
-   
-
-
-
+};

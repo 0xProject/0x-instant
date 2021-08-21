@@ -1,14 +1,14 @@
-import React from "react";
-import { useSelector } from "react-redux";
-import { Container } from "../../components/ui/container";
-import { Flex } from "../../components/ui/flex";
-import { getEthUsdPrice, getIsStepWithApprove, getSelectedTokenIn, getSwapStep, getLatestApiSwapQuote } from "../../redux/selectors";
-import { ColorOption } from "../../style/theme";
-import { Text } from '../../components/ui/text';
-import { format } from '../../util/format';
-import { useEstimateGasApproval } from "../../hooks/useEstimateGasApproval";
-import { SwapStep } from "../../types";
+import React from 'react';
+import { useSelector } from 'react-redux';
 
+import { Container } from '../../components/ui/container';
+import { Flex } from '../../components/ui/flex';
+import { Text } from '../../components/ui/text';
+import { useEstimateGasApproval } from '../../hooks/useEstimateGasApproval';
+import { getEthUsdPrice, getIsStepWithApprove, getLatestApiSwapQuote, getSelectedTokenIn, getSwapStep } from '../../redux/selectors';
+import { ColorOption } from '../../style/theme';
+import { SwapStep } from '../../types';
+import { format } from '../../util/format';
 
 export const ApproveRow = () => {
     const tokenIn = useSelector(getSelectedTokenIn);
@@ -16,31 +16,30 @@ export const ApproveRow = () => {
     const swapQuote = useSelector(getLatestApiSwapQuote);
     const estimatedGas = useEstimateGasApproval(tokenIn, swapQuote?.allowanceTarget);
     const isStepWithApprove = useSelector(getIsStepWithApprove);
-    const swapStep = useSelector(getSwapStep)
+    const swapStep = useSelector(getSwapStep);
     const approvalTitleText = () => {
         if (tokenIn) {
-            return `${tokenIn.symbol.toUpperCase()} Approval`
+            return `${tokenIn.symbol.toUpperCase()} Approval`;
         }
 
-    }
+    };
     const renderGasPrice = () => {
         if (estimatedGas) {
             return format.ethBaseUnitAmount(estimatedGas);
         }
-        return '-'
-    }
+        return '-';
+    };
 
     const renderGasPriceUSD = () => {
 
         if (estimatedGas) {
             return format.ethBaseUnitAmountInUsd(estimatedGas, ethUSDPrice);
         }
-        return '-'
+        return '-';
 
-    }
+    };
 
     const wasApproved = !(swapStep === SwapStep.Approve) && isStepWithApprove;
-
 
     return (
         <Container padding="10px 0px" borderColor={ColorOption.feintGrey}>
@@ -59,7 +58,5 @@ export const ApproveRow = () => {
             </Flex>
         </Container>
 
-
-    )
-}
-
+    );
+};

@@ -1,5 +1,4 @@
 import * as _ from 'lodash';
-import * as React from 'react';
 import { connect } from 'react-redux';
 
 import { State } from '../redux/reducer';

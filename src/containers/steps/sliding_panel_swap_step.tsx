@@ -1,20 +1,17 @@
 import * as React from 'react';
-
-import { ColorOption } from '../../style/theme';
-import { zIndex } from '../../style/z_index';
-import { ApproveProcessState, OrderProcessState, SlideAnimationState } from '../../types';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { PositionAnimationSettings } from '../../components/animations/position_animation';
 import { SlideAnimation } from '../../components/animations/slide_animation';
-
+import { SectionHeader } from '../../components/section_header';
 import { Container } from '../../components/ui/container';
 import { Flex } from '../../components/ui/flex';
-import { SectionHeader } from '../../components/section_header';
 import { Text } from '../../components/ui/text';
-import { useDispatch, useSelector } from 'react-redux';
-import { getApproveState, getIsStepWithApprove, getSelectedTokenIn, getSwapOrderState } from '../../redux/selectors';
 import { actions } from '../../redux/actions';
-
+import { getApproveState, getIsStepWithApprove, getSelectedTokenIn, getSwapOrderState } from '../../redux/selectors';
+import { ColorOption } from '../../style/theme';
+import { zIndex } from '../../style/z_index';
+import { ApproveProcessState, OrderProcessState, SlideAnimationState } from '../../types';
 
 interface PanelProps {
     onClose?: () => void;
@@ -31,51 +28,47 @@ const Panel = ({ children, onClose }: PanelProps) => {
         // reset all state
         dispatch(actions.setSwapOrderStateNone());
         dispatch(actions.setApproveTokenStateNone());
-        onClose()
-    }
-
-
+        onClose();
+    };
 
     const titleText = () => {
-        if(isStepWithApprove){
+        if (isStepWithApprove) {
             if (
-                approveState.processState === ApproveProcessState.Processing 
-            ){
+                approveState.processState === ApproveProcessState.Processing
+            ) {
                 return `Approving ${tokenIn.symbol.toUpperCase()}`;
             }
             if (
-                approveState.processState === ApproveProcessState.Success     
-            ){
+                approveState.processState === ApproveProcessState.Success
+            ) {
                 return 'Approved';
             }
 
-            if(approveState.processState === ApproveProcessState.Failure){
-                return `Approving ${tokenIn.symbol.toUpperCase()} failed`
+            if (approveState.processState === ApproveProcessState.Failure) {
+                return `Approving ${tokenIn.symbol.toUpperCase()} failed`;
             }
 
-        }else{
+        } else {
             if (
-                swapOrderState.processState === OrderProcessState.Processing 
-            ){
+                swapOrderState.processState === OrderProcessState.Processing
+            ) {
                 return 'Processing';
             }
-            if(swapOrderState.processState === OrderProcessState.Failure){
+            if (swapOrderState.processState === OrderProcessState.Failure) {
                 return 'Trade Failed';
             }
 
-            if(  swapOrderState.processState === OrderProcessState.Success){
+            if (  swapOrderState.processState === OrderProcessState.Success) {
                 return 'Trade Completed';
             }
         }
-        return 'Order Summary'
+        return 'Order Summary';
 
-    }
+    };
 
-    
-    
     return (
     <Container backgroundColor={ColorOption.white} width="100%" height="100%" zIndex={zIndex.panel} padding="20px">
-      
+
                 <Flex justify="space-between">
                 <SectionHeader>
                     <Text fontWeight={700} fontColor={ColorOption.black}>
@@ -84,25 +77,23 @@ const Panel = ({ children, onClose }: PanelProps) => {
                     <Text fontWeight={300} fontColor={ColorOption.grey} fontSize={'12px'}>
                        {/* Quote expires in 24 seconds*/}
                     </Text>
-                    
+
                 </SectionHeader>
                     <SectionHeader>
                     <Flex justify="flex-end">
                          <Text fontWeight={300} fontColor={ColorOption.grey} fontSize={'12px'} onClick={onClosePanel}>
-                             ← Back  
+                             ← Back
                        </Text>
                     </Flex>
 
                     </SectionHeader>
                 </Flex>
-      
 
-        
         <Container position="relative" top="-10px"  height="100%" width="100%">
             {children}
         </Container>
     </Container>
-)
+);
 };
 
 Panel.displayName = 'Panel';

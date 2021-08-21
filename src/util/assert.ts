@@ -61,6 +61,6 @@ export const assert = {
         assert.isString(`${variableName}.name`, token.name);
         assert.isString(`${variableName}.symbol`, token.symbol);
         assert.isWebUri(`${variableName}.logoUri`, token.logoURI);
-          
+
     },
 };

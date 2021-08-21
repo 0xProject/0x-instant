@@ -1,31 +1,28 @@
 
+import { ChainId } from '@0x/contract-addresses';
 import * as _ from 'lodash';
 import * as React from 'react';
+import { useSelector } from 'react-redux';
 
-import { ColorOption } from '../../style/theme';
-import { AccountState, SwapStep } from '../../types';
-import { format } from '../../util/format';
-
+import { AmountPlaceholder } from '../../components/amount_placeholder';
 import { Container } from '../../components/ui/container';
 import { Flex } from '../../components/ui/flex';
 import { Text } from '../../components/ui/text';
-import {
-     getAccount, 
-    getEthUsdPrice, 
-    getIsStepWithApprove, 
-    getLatestApiSwapQuote, 
-    getSelectedTokenIn, 
-    getSelectedTokenOut, 
-    getSwapStep, 
-    getSelectedTokenAmountIn, 
-    getSelectedTokenAmountOut } from '../../redux/selectors';
-import { useSelector } from 'react-redux';
-
 import { useTokenPriceUSD } from '../../hooks/useTokenPriceUSD';
-import { ChainId } from '@0x/contract-addresses';
-import { ApproveRow } from './approveRow';
-import { AmountPlaceholder } from '../../components/amount_placeholder';
+import {
+     getAccount,
+    getEthUsdPrice,
+    getIsStepWithApprove,
+    getLatestApiSwapQuote,
+    getSelectedTokenAmountIn,
+    getSelectedTokenAmountOut,
+    getSelectedTokenIn,
+    getSelectedTokenOut } from '../../redux/selectors';
+import { ColorOption } from '../../style/theme';
+import { AccountState } from '../../types';
+import { format } from '../../util/format';
 
+import { ApproveRow } from './approveRow';
 
 export const SwapStepsContainer = () => {
     const swapQuote = useSelector(getLatestApiSwapQuote);
@@ -44,26 +41,25 @@ export const SwapStepsContainer = () => {
         if (swapQuote && tokenIn && tokenOut) {
             return `1 ${tokenIn.symbol.toUpperCase()} = ${swapQuote.price.toFixed(8)} ${tokenOut.symbol.toUpperCase()}`;
         } else {
-            return '-'
+            return '-';
         }
-    }
+    };
     const renderGasPrice = () => {
         if (swapQuote && swapQuote.gasPrice && swapQuote.gas) {
             return format.ethBaseUnitAmount(swapQuote.gas.multipliedBy(swapQuote.gasPrice));
         } else {
-            return '-'
+            return '-';
         }
 
-    }
+    };
 
     const renderGasPriceUSD = () => {
         if (swapQuote && swapQuote.gas && ethUSDPrice && swapQuote.gasPrice) {
             return format.ethBaseUnitAmountInUsd(swapQuote.gas.multipliedBy(swapQuote.gasPrice), ethUSDPrice);
         } else {
-            return '-'
+            return '-';
         }
-    }
-
+    };
 
     const renderTokenAmount = (isIn: boolean) => {
         const selectedToken = isIn ? tokenIn : tokenOut;
@@ -79,7 +75,7 @@ export const SwapStepsContainer = () => {
             );
         }
         return '-';
-    }
+    };
 
     const renderTokenAmountUSD = (isIn: boolean) => {
         const selectedToken = isIn ? tokenIn : tokenOut;
@@ -94,9 +90,7 @@ export const SwapStepsContainer = () => {
             );
         }
         return '-';
-    }
-  
-
+    };
 
     const { state } = account;
     if (state !== AccountState.Ready) {
@@ -114,16 +108,14 @@ export const SwapStepsContainer = () => {
                                 {renderTokenAmount(true)} {' '}
 
                             </Text>
-                  
+
                                 <Text fontWeight={400} fontColor={ColorOption.grey} >
                                     {usdQuoteTokenIn.loading ?
                                         <AmountPlaceholder color={ColorOption.grey} isPulsating={true}/> :
                                         renderTokenAmountUSD(true)
                                     }
-                                    { }
+                                    {}
                                 </Text>
-                         
-
 
                         </Container>
                     </Flex>
@@ -138,14 +130,13 @@ export const SwapStepsContainer = () => {
                                 {renderTokenAmount(false)} {' '}
 
                             </Text>
-                           
+
                                 <Text fontWeight={400} fontColor={ColorOption.grey}>
                                     {usdQuoteTokenOut.loading ?
                                         <AmountPlaceholder color={ColorOption.grey} isPulsating={true}/> :
                                             renderTokenAmountUSD(false)
                                         }
                                 </Text>
-                       
 
                         </Container>
                     </Flex>
@@ -155,7 +146,7 @@ export const SwapStepsContainer = () => {
                         <Text fontWeight={500} fontColor={ColorOption.black} fontSize={'16px'} lineHeight={'19px'}>
                             Rate
                         </Text>
-                      
+
                             <Text fontWeight={500} fontColor={ColorOption.black} fontSize={'16px'} lineHeight={'19px'}>
                                 {renderPrice()}
 
@@ -172,12 +163,10 @@ export const SwapStepsContainer = () => {
                             <Text fontWeight={500} fontColor={ColorOption.black} fontSize={'16px'} lineHeight={'19px'}>
                                 {renderGasPrice()} {' '}
                             </Text>
-                           
+
                              <Text fontWeight={400} fontColor={ColorOption.grey}>
                                     {renderGasPriceUSD()}
                             </Text>
-                 
-
 
                         </Container>
                     </Flex>
@@ -187,5 +176,4 @@ export const SwapStepsContainer = () => {
 
         );
     }
-}
-
+};

@@ -61,5 +61,4 @@ export const WalletPrompt = ({
     </Container>
 );
 
-
 WalletPrompt.displayName = 'WalletPrompt';

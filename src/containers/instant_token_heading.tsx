@@ -1,36 +1,36 @@
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { SelectedERC20AmountInput } from './selected_erc20_amount_input';
-import { useColor } from '../hooks/useColor';
-import { 
-
-    getAccount, 
-    getSelectedTokenIn, 
-    getSelectedTokenInBalance, 
-    getSelectedTokenOut, 
-    getSelectedTokenOutBalance, 
-    } from '../redux/selectors';
-
-import { ColorOption } from '../style/theme';
-import {   AccountState, TokenInfo } from '../types';
-import { format } from '../util/format';
 
 import { AmountPlaceholder } from '../components/amount_placeholder';
 import { Container } from '../components/ui/container';
 import { Flex } from '../components/ui/flex';
 import { Text } from '../components/ui/text';
+import { useColor } from '../hooks/useColor';
 import { actions } from '../redux/actions';
+import {
+
+    getAccount,
+    getSelectedTokenIn,
+    getSelectedTokenInBalance,
+    getSelectedTokenOut,
+    getSelectedTokenOutBalance,
+    } from '../redux/selectors';
+import { ColorOption } from '../style/theme';
+import {   AccountState, TokenInfo } from '../types';
+import { format } from '../util/format';
 import { tokenUtils } from '../util/token';
 
-export interface InstantTokenHeadingProps { 
+import { SelectedERC20AmountInput } from './selected_erc20_amount_input';
+
+export interface InstantTokenHeadingProps {
     isIn: boolean;
     onSelectTokenClick?: (token?: TokenInfo) => void;
 }
 
 const PLACEHOLDER_COLOR = ColorOption.white;
 
-export const InstantTokenHeadingContainer  = (props:InstantTokenHeadingProps) => {
+export const InstantTokenHeadingContainer  = (props: InstantTokenHeadingProps) => {
   const dispatch = useDispatch();
   const selectedTokenIn = useSelector(getSelectedTokenIn);
   const account = useSelector(getAccount);
@@ -38,18 +38,17 @@ export const InstantTokenHeadingContainer  = (props:InstantTokenHeadingProps) =>
   const selectedTokenInBalance = useSelector(getSelectedTokenInBalance);
   const selectedTokenOutBalance = useSelector(getSelectedTokenOutBalance);
   const onSwitchTokens = () => {
-      if(selectedTokenOut){
+      if (selectedTokenOut) {
         dispatch(actions.updateSelectedTokenIn(selectedTokenOut));
       }
-      if(selectedTokenIn){
+      if (selectedTokenIn) {
         dispatch(actions.updateSelectedTokenOut(selectedTokenIn));
       }
 
+  };
+  const color =  useColor(props.isIn ? selectedTokenIn :  selectedTokenOut );
 
-  }
-  const color =  useColor(props.isIn ? selectedTokenIn :  selectedTokenOut )
-
-   const _renderERC20AssetHeading = () => {
+  const _renderERC20AssetHeading = () => {
         return (
             <Container rawBackgroundColor={color} width="100%" padding="20px">
                 <Container marginBottom="5px">
@@ -85,7 +84,7 @@ export const InstantTokenHeadingContainer  = (props:InstantTokenHeadingProps) =>
                         />
                     </Flex>
                 </Flex>
-                {props.isIn &&  
+                {props.isIn &&
                 <Container position="absolute">
                     <Flex direction="row" justify="flex-start">
                         <Text
@@ -101,10 +100,9 @@ export const InstantTokenHeadingContainer  = (props:InstantTokenHeadingProps) =>
                  </Container>}
             </Container>
         );
-    }
+    };
 
-
-    const _renderTokenHeadingContent = () => {
+  const _renderTokenHeadingContent = () => {
         const { isIn } = props;
         const selectedToken = isIn ? selectedTokenIn : selectedTokenOut;
 
@@ -114,47 +112,46 @@ export const InstantTokenHeadingContainer  = (props:InstantTokenHeadingProps) =>
         }
         if (selectedToken) {
             return _renderERC20AssetHeading();
-        } 
+        }
         return null;
-    }
+    };
 
-    const _renderTopText = () => {
-        if(props.isIn){
+  const _renderTopText = () => {
+        if (props.isIn) {
             return 'You send';
-        }else{
+        } else {
             return 'You receive';
         }
-    }
+    };
 
-    const _renderTokenBalance = () => {
+  const _renderTokenBalance = () => {
         const {isIn} = props;
         const selectedToken = isIn ? selectedTokenIn : selectedTokenOut;
-        const tokenBalance = isIn ? selectedTokenInBalance: selectedTokenOutBalance
+        const tokenBalance = isIn ? selectedTokenInBalance : selectedTokenOutBalance;
 
-        if(selectedToken ){
-            if(tokenUtils.isETH(selectedToken)){
-                if(account.state === AccountState.Ready && account.ethBalanceInWei){
-                    const formattedETH = format.ethBaseUnitAmount(account.ethBalanceInWei)
-                    return `Balance: ${formattedETH}`
-                }else{
-                    return <AmountPlaceholder isPulsating={true} color={PLACEHOLDER_COLOR} />
+        if (selectedToken ) {
+            if (tokenUtils.isETH(selectedToken)) {
+                if (account.state === AccountState.Ready && account.ethBalanceInWei) {
+                    const formattedETH = format.ethBaseUnitAmount(account.ethBalanceInWei);
+                    return `Balance: ${formattedETH}`;
+                } else {
+                    return <AmountPlaceholder isPulsating={true} color={PLACEHOLDER_COLOR} />;
                 }
             }
-            if(tokenBalance){
+            if (tokenBalance) {
                 const token = tokenBalance.token;
                 const balance = tokenBalance.balance;
                 const formattedBalance = format.tokenBaseUnitAmount(token.symbol, token.decimals, balance, 4);
-                return `Balance: ${formattedBalance}`
-            }else{
-                return <AmountPlaceholder isPulsating={true} color={PLACEHOLDER_COLOR} />
+                return `Balance: ${formattedBalance}`;
+            } else {
+                return <AmountPlaceholder isPulsating={true} color={PLACEHOLDER_COLOR} />;
             }
-            
-        }else{
+
+        } else {
             return null;
         }
-        
-    }
 
-    return _renderTokenHeadingContent();
-}
+    };
 
+  return _renderTokenHeadingContent();
+};

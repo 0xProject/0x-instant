@@ -1,8 +1,7 @@
 import * as React from 'react';
 
-import { ZeroExInstantContainer } from '../containers/zero_ex_instant_container';
-
 import { INJECTED_DIV_CLASS } from '../constants';
+import { ZeroExInstantContainer } from '../containers/zero_ex_instant_container';
 
 import { ZeroExInstantProvider, ZeroExInstantProviderProps } from './zero_ex_instant_provider';
 

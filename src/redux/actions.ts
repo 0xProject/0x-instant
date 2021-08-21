@@ -1,5 +1,4 @@
 import { BigNumber } from '@0x/utils';
-
 import { Dispatch } from 'redux';
 
 import {
@@ -17,6 +16,7 @@ import {
 } from '../types';
 import { analytics } from '../util/analytics';
 import { providerStateFactory } from '../util/provider_state_factory';
+
 import { asyncData } from './async_data';
 import { State } from './reducer';
 
@@ -128,12 +128,11 @@ export const actions = {
     updateTokenBalances: (tokenBalances: TokenBalance[]) => createAction(ActionTypes.UpdateTokenBalances, tokenBalances),
 };
 
-
-export const updateTokenSelect = (token: TokenInfo, isIn: boolean) => 
+export const updateTokenSelect = (token: TokenInfo, isIn: boolean) =>
   async (dispatch: Dispatch<Action>, getState: any) => {
-        if(isIn){
+        if (isIn) {
             dispatch(actions.updateSelectedTokenIn(token));
-        }else{
+        } else {
             dispatch(actions.updateSelectedTokenOut(token));
         }
         const state = getState() as State;
@@ -144,13 +143,13 @@ export const updateTokenSelect = (token: TokenInfo, isIn: boolean) =>
 
         asyncData.fetchAccountBalanceAndDispatchToStore(address, web3Wrapper, dispatch, tokenIn, tokenOut);
         dispatch(actions.resetAmount());
-}
+};
 
-export const unlockWalletAndDispatchToStore = (providerType: ProviderType) => 
+export const unlockWalletAndDispatchToStore = (providerType: ProviderType) =>
     async (dispatch: Dispatch<Action>, getState: any) => {
         const state = getState() as State;
         const chainId = await state.providerState.web3Wrapper.getChainIdAsync();
-        const newProviderState: ProviderState = providerStateFactory.getProviderStateBasedOnProviderType(     
+        const newProviderState: ProviderState = providerStateFactory.getProviderStateBasedOnProviderType(
             providerType,
             chainId,
         );
@@ -160,4 +159,4 @@ export const unlockWalletAndDispatchToStore = (providerType: ProviderType) =>
         analytics.trackAccountUnlockRequested();
         // tslint:disable-next-line:no-floating-promises
         asyncData.fetchAccountInfoAndDispatchToStore(newProviderState, dispatch, true);
-}
+};

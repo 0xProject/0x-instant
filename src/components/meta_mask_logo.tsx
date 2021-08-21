@@ -73,4 +73,3 @@ export const MetaMaskLogo = ({ width = 85, height = 80 }: MetaMaskLogoProps) => 
 );
 
 MetaMaskLogo.displayName = 'MetaMaskLogo';
-

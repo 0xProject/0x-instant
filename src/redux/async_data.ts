@@ -32,21 +32,21 @@ export const asyncData = {
     },
     fetchTokenListAndDispatchToStore: async (state: State, dispatch: Dispatch) => {
         const tokenList = state.tokenList;
-        if((tokenList as TokenList)?.tokens.length){
+        if ((tokenList as TokenList)?.tokens.length) {
             dispatch(actions.setAvailableTokens((tokenList as TokenList).tokens.concat(ETH_TOKEN)));
             return;
         }
 
-        try {       
+        try {
             const response = await fetch(tokenList as string || defaultTokenList);
-            if(response.ok && response.status  === 200){
+            if (response.ok && response.status  === 200) {
                 const tokenList = await response.json() as TokenList;
-                const tokens = tokenList.tokens.concat(ETH_TOKEN)
-                dispatch(actions.setAvailableTokens(tokens));   
-            }else{
-                throw new Error('Error fetching token list')
+                const tokens = tokenList.tokens.concat(ETH_TOKEN);
+                dispatch(actions.setAvailableTokens(tokens));
+            } else {
+                throw new Error('Error fetching token list');
             }
-            
+
         } catch (e) {
             const errorMessage = 'Could not find any tokens';
             errorFlasher.flashNewErrorMessage(dispatch, errorMessage);
@@ -55,7 +55,6 @@ export const asyncData = {
             errorReporter.report(e);
         }
     },
-
 
     fetchAccountInfoAndDispatchToStore: async (
         providerState: ProviderState,
@@ -91,7 +90,7 @@ export const asyncData = {
                 const chainId = await providerState.web3Wrapper.getChainIdAsync();
 
                 // If Fortmatic is not used, revert to injected provider
-                const initialProviderState = providerStateFactory.getInitialProviderStateWithCurrentProviderState(  
+                const initialProviderState = providerStateFactory.getInitialProviderStateWithCurrentProviderState(
                     providerState,
                     chainId,
                 );
@@ -115,23 +114,23 @@ export const asyncData = {
             const ethBalanceInWei = await web3Wrapper.getBalanceInWeiAsync(address);
             dispatch(actions.updateAccountEthBalance({ address, ethBalanceInWei }));
             const tokenArray: TokenInfo[] = [];
-            if(tokenIn){
+            if (tokenIn) {
                 tokenArray.push(tokenIn);
             }
-            if(tokenOut){
+            if (tokenOut) {
                 tokenArray.push(tokenOut);
             }
-            if(tokenArray.length){
+            if (tokenArray.length) {
                 const chainId = await web3Wrapper.getChainIdAsync();
                 const tokenBalances = await MulticallUtils.getTokensBalancesAndAllowances(web3Wrapper.getProvider() as any, tokenArray, chainId, address, ethBalanceInWei);
-                if(tokenIn && tokenOut){
+                if (tokenIn && tokenOut) {
                     dispatch(actions.updateSelectedTokenInBalance(tokenBalances[0]));
                     dispatch(actions.updateSelectedTokenOutBalance(tokenBalances[1]));
-                }else if (tokenIn && !tokenOut) {
+                } else if (tokenIn && !tokenOut) {
                     dispatch(actions.updateSelectedTokenInBalance(tokenBalances[0]));
-                }else if(!tokenIn && tokenOut){
+                } else if (!tokenIn && tokenOut) {
                     dispatch(actions.updateSelectedTokenOutBalance(tokenBalances[0]));
-                }   
+                }
                // @TODO: Check if it is necessary to fetch all token balances, this will slow down the whole application
                // dispatch(actions.updateTokenBalances(tokenBalances));
 
@@ -151,7 +150,7 @@ export const asyncData = {
         const { swapOrderState, providerState, selectedTokenIn, selectedTokenOut, selectedTokenAmountOut, selectedTokenAmountIn, isIn } = state;
         const takerAddress = providerState.account.state === AccountState.Ready ? providerState.account.address : '';
         const selectedTokenUnitAmount = isIn ? selectedTokenAmountIn : selectedTokenAmountOut;
-       
+
         if (
             selectedTokenUnitAmount !== undefined &&
             selectedTokenIn !== undefined &&
@@ -173,5 +172,5 @@ export const asyncData = {
                 },
             );
         }
-    }
+    },
 };

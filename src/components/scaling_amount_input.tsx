@@ -2,10 +2,9 @@ import { BigNumber } from '@0x/utils';
 import * as _ from 'lodash';
 import * as React from 'react';
 
-import { Maybe } from '../types';
-
 import { GIT_SHA, MAGIC_TRIGGER_ERROR_INPUT, MAGIC_TRIGGER_ERROR_MESSAGE, NPM_PACKAGE_VERSION } from '../constants';
 import { ColorOption } from '../style/theme';
+import { Maybe } from '../types';
 import { maybeBigNumberUtil } from '../util/maybe_big_number';
 import { util } from '../util/util';
 

@@ -3,6 +3,7 @@ import { BigNumber, providerUtils } from '@0x/utils';
 import * as _ from 'lodash';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import 'regenerator-runtime/runtime.js';
 
 import {
     DEFAULT_ZERO_EX_CONTAINER_SELECTOR,
@@ -17,7 +18,6 @@ import { analytics } from './util/analytics';
 import { assert } from './util/assert';
 import { assetDataEncoder } from './util/asset_data_encoder';
 import { util } from './util/util';
-import "regenerator-runtime/runtime.js";
 
 const isInstantRendered = (): boolean =>
     !!document.getElementById(INJECTED_DIV_ID);
@@ -26,7 +26,7 @@ const validateInstantRenderConfig = (
     config: ZeroExInstantConfig,
     selector: string,
 ) => {
-   
+
     if (config.defaultSelectedTokenIn !== undefined) {
         assert.isTokenInfo(
             'defaultSelectedTokenIn',
@@ -48,7 +48,6 @@ const validateInstantRenderConfig = (
     if (config.defaultAmountTokenOut !== undefined) {
         assert.isNumber('defaultAmountTokenOut', config.defaultAmountTokenOut);
     }
-
 
     if (config.chainId !== undefined) {
         assert.isNumber('chainId', config.chainId);
@@ -73,7 +72,6 @@ const validateInstantRenderConfig = (
     if (config.tokenList !== undefined) {
         assert.isWebUri('tokenList', config.tokenList);
     }
-
 
     if (config.shouldDisablePushToHistory !== undefined) {
         assert.isBoolean(
@@ -105,7 +103,7 @@ export const unrender = () => {
 
 // Render instant and return a callback that allows you to remove it from the DOM.
 const renderInstant = (config: ZeroExInstantConfig, selector: string) => {
-    const appendToIfExists = document.querySelector(selector);
+    const appendToIfExists = document.querySector);
     assert.assert(
         appendToIfExists !== null,
         `Could not find div with selector: ${selector}`,

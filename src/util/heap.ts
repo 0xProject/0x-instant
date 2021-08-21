@@ -75,7 +75,7 @@ const setupZeroExInstantHeap = () => {
     (window as any).heap.load(HEAP_ANALYTICS_ID);
     /* tslint:enable */
 
-    return curWindow.heap as HeapAnalytics;
+    return curWindow.heap;
 };
 
 export const heapUtil = {

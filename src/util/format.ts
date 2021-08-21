@@ -107,7 +107,6 @@ export const format = {
         return format.tokenUnitAmountInUsd(tokenUnitAmount, tokenUsdPrice, decimalPlaces, minUnitAmountToDisplay);
     },
 
-
     ethUnitAmountInUsd: (
         ethUnitAmount?: BigNumber,
         ethUsdPrice?: BigNumber,

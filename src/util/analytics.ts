@@ -84,13 +84,11 @@ function trackingEventFnWithPayload(eventName: EventNames): (eventProperties: Ev
     };
 }
 
-
-
 const swapApiQuoteEventProperties = (swapQuote: SwapQuoteResponse) => {
     const makerAssetFillAmount = swapQuote.sellAmount.toString();
     const assetEthAmount = swapQuote.buyAmount.toString();
-    const feeEthAmount = swapQuote.estimatedGas.toString()
-    
+    const feeEthAmount = swapQuote.estimatedGas.toString();
+
     const totalEthAmount = new BigNumber(swapQuote.sellAmount)
         .plus(swapQuote.protocolFee)
         .toString();
@@ -138,7 +136,6 @@ export enum StepSelectorClosedVia {
     ApproveChoose = 'Approve Choose',
     ReviewChoose = 'Review Choose',
 }
-
 
 export const analytics = {
     addUserProperties: (properties: AnalyticsUserOptions): void => {
@@ -200,10 +197,10 @@ export const analytics = {
         trackingEventFnWithPayload(EventNames.SwapStarted)(swapApiQuoteEventProperties(swapQuote)),
     trackSwapSignatureDenied: (swapQuote: SwapQuoteResponse) =>
         trackingEventFnWithPayload(EventNames.SwapSignatureDenied)(swapApiQuoteEventProperties(swapQuote)),
- 
+
     trackSwapSimulationFailed: (swapQuote: SwapQuoteResponse) =>
         trackingEventFnWithPayload(EventNames.SwapSimulationFailed)(swapApiQuoteEventProperties(swapQuote)),
-  
+
     trackSwapUnknownError: (swapQuote: SwapQuoteResponse, errorMessage: string) =>
         trackingEventFnWithPayload(EventNames.SwapUnknownError)({
             ...swapApiQuoteEventProperties(swapQuote),
@@ -220,7 +217,7 @@ export const analytics = {
                 txHash,
                 expectedTxTimeMs: expectedEndTimeUnix - startTimeUnix,
             }),
-   
+
     trackSwapTxSucceeded: (
             swapQuote: SwapQuoteResponse,
             txHash: string,

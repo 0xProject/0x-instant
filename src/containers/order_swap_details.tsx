@@ -3,17 +3,14 @@ import * as _ from 'lodash';
 import * as React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-
+import { Container } from '../components/ui/container';
+import { Flex } from '../components/ui/flex';
+import { Text } from '../components/ui/text';
 import { BIG_NUMBER_ZERO } from '../constants';
 import { actions } from '../redux/actions';
 import { getAccount, getBaseCurrency, getEthUsdPrice, getLatestApiSwapQuote, getSelectedTokenAmountOut, getSelectedTokenIn, getSelectedTokenOut } from '../redux/selectors';
 import { ColorOption } from '../style/theme';
 import { AccountState, BaseCurrency } from '../types';
-
-import { Container } from '../components/ui/container';
-import { Flex } from '../components/ui/flex';
-import { Text } from '../components/ui/text';
-
 
 export const OrderSwapDetailsContainer = () => {
     const dispatch = useDispatch();
@@ -39,20 +36,18 @@ export const OrderSwapDetailsContainer = () => {
                 {' to view ETH prices'}
             </Text>
         );
-    }
+    };
     const displayPrice = () => {
         if (swapQuote && tokenIn && tokenOut) {
             return `1 ${tokenIn.symbol.toUpperCase()} = ${swapQuote.price.toFixed(8)} ${tokenOut.symbol.toUpperCase()}`;
         } else {
-            return '-'
+            return '-';
         }
-    }
+    };
 
     const hadErrorFetchingUsdPrice = (): boolean => {
         return ethUsdPrice ? ethUsdPrice.isEqualTo(BIG_NUMBER_ZERO) : false;
-    }
-
-
+    };
 
     const renderRows = () =>
         <React.Fragment>
@@ -60,10 +55,7 @@ export const OrderSwapDetailsContainer = () => {
                 labelText="Price"
                 primaryValue={displayPrice()}
             />
-        </React.Fragment>
-
-
-
+        </React.Fragment>;
 
     const shouldShowUsdError = baseCurrency === BaseCurrency.USD && hadErrorFetchingUsdPrice();
     const { state } = account;
@@ -76,7 +68,7 @@ export const OrderSwapDetailsContainer = () => {
             </Container>
         );
     }
-}
+};
 
 export interface OrderDetailsRowProps {
     labelText: React.ReactNode;
@@ -85,7 +77,7 @@ export interface OrderDetailsRowProps {
     primaryValue: React.ReactNode;
     secondaryValue?: React.ReactNode;
 }
-export const OrderDetailsRow = (props:OrderDetailsRowProps) => {
+export const OrderDetailsRow = (props: OrderDetailsRowProps) => {
     const renderValues = () =>  {
         const secondaryValueNode: React.ReactNode = props.secondaryValue && (
             <Container marginRight="3px" display="inline-block">
@@ -98,10 +90,8 @@ export const OrderDetailsRow = (props:OrderDetailsRowProps) => {
                 <Text fontWeight={props.isPrimaryValueBold ? 700 : 400}>{props.primaryValue}</Text>
             </React.Fragment>
         );
-    }
+    };
 
-
-    
     return (
         <Container padding="10px 0px" borderTop="1px dashed" borderColor={ColorOption.feintGrey}>
             <Flex justify="space-between">
@@ -113,4 +103,4 @@ export const OrderDetailsRow = (props:OrderDetailsRowProps) => {
         </Container>
     );
 
-}
+};

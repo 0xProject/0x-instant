@@ -3,7 +3,6 @@ import * as React from 'react';
 import { ColorOption } from '../style/theme';
 
 import { Pulse } from './animations/pulse';
-
 import { Text } from './ui/text';
 
 interface PlainPlaceholder {
@@ -20,7 +19,7 @@ export interface AmountPlaceholderProps {
     isPulsating: boolean;
 }
 
-export const AmountPlaceholder = (props:AmountPlaceholderProps) => {
+export const AmountPlaceholder = (props: AmountPlaceholderProps) => {
     if (props.isPulsating) {
         return (
             <Pulse>

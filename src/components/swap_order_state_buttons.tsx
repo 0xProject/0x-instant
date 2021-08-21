@@ -5,13 +5,12 @@ import * as React from 'react';
 import { ColorOption } from '../style/theme';
 import { AffiliateInfo, ApproveProcessState, OrderProcessState, SwapQuoteResponse, SwapStep, TokenBalance, TokenInfo, ZeroExInstantError } from '../types';
 
-import { SwapButton } from './swap_button';
+import { ApproveTokenButton } from './approve_token_button';
 import { PlacingOrderButton } from './placing_order_button';
 import { SecondaryButton } from './secondary_button';
-
+import { SwapButton } from './swap_button';
 import { Button } from './ui/button';
 import { Flex } from './ui/flex';
-import { ApproveTokenButton } from './approve_token_button';
 
 export interface SwapOrderStateButtonProps {
     accountAddress?: string;
@@ -28,7 +27,7 @@ export interface SwapOrderStateButtonProps {
     onValidationPending: (swapQuote: SwapQuoteResponse) => void;
     onValidationFail: (
         swapQuote: SwapQuoteResponse,
-        errorMessage:  ZeroExInstantError,
+        errorMessage: ZeroExInstantError,
     ) => void;
     onApproveValidationPending: (token: TokenInfo) => void;
     onApproveValidationFail: (
@@ -99,8 +98,6 @@ export const SwapOrderStateButtons = (props: SwapOrderStateButtonProps) => {
     } else if (props.approveProcessingState === ApproveProcessState.Validating) {
         return <ApproveTokenButton />;
     }
-
-
 
     return (
         <SwapButton

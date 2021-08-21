@@ -111,7 +111,7 @@ export const providerStateFactory = {
         providerType: ProviderType,
         chainId: ChainId,
     ): ProviderState => {
-        
+
         // Returns current provider if the provider type selected is not found
         if (providerType === ProviderType.MetaMask) {
             const provider = providerFactory.getInjectedProviderIfExists();

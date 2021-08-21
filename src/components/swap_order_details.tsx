@@ -10,7 +10,6 @@ import { format } from '../util/format';
 
 import { AmountPlaceholder } from './amount_placeholder';
 import { SectionHeader } from './section_header';
-
 import { Container } from './ui/container';
 import { Flex } from './ui/flex';
 import { Text, TextProps } from './ui/text';

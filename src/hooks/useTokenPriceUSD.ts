@@ -1,40 +1,40 @@
-import { ChainId } from "@0x/contract-addresses";
-import { Token } from "@0x/types";
-import {  fromTokenUnitAmount } from "@0x/utils";
-import { useEffect, useState } from "react";
-import { SwapQuoteResponse } from "../types";
-import { apiQuoteUpdater } from "../util/api_quote_updater";
+import { ChainId } from '@0x/contract-addresses';
+import { Token } from '@0x/types';
+import {  fromTokenUnitAmount } from '@0x/utils';
+import { useEffect, useState } from 'react';
 
+import { SwapQuoteResponse } from '../types';
+import { apiQuoteUpdater } from '../util/api_quote_updater';
 
 /**
  * Fetch price in real time
- * @param address 
- * @param network 
- * @param side 
- * @param amount 
- * @param decimals 
- * @param refresh 
- * @returns 
+ * @param address
+ * @param network
+ * @param side
+ * @param amount
+ * @param decimals
+ * @param refresh
+ * @returns
  */
 export const useTokenPriceUSD = (token?: Token,  chainId?: ChainId, refresh?: boolean) => {
     const [priceQuote, setPriceQuote] = useState<SwapQuoteResponse>();
     const [loading, setLoading] = useState<boolean>();
 
-    useEffect(()=> {
-        if(token &&  chainId){
-            let amountAPI = fromTokenUnitAmount('1', token.decimals);
-       
+    useEffect(() => {
+        if (token &&  chainId) {
+            const amountAPI = fromTokenUnitAmount('1', token.decimals);
+
             const referenceToken = {
-                address: 'USDC'
-            }
+                address: 'USDC',
+            };
             setLoading(true);
             apiQuoteUpdater.fetchQuote('', true, token, referenceToken, amountAPI)
-            .then(p=> setPriceQuote(p))
+            .then(p => setPriceQuote(p))
             .catch(console.log)
-            .finally(()=> setLoading(false))
+            .finally(() => setLoading(false));
         }
 
-    }, [token, chainId,  refresh])
+    }, [token, chainId,  refresh]);
 
-    return {priceQuote, loading}
-}
+    return {priceQuote, loading};
+};

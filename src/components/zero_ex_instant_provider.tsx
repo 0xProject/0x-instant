@@ -88,8 +88,7 @@ export class ZeroExInstantProvider extends React.PureComponent<
         // tslint:disable-next-line:no-floating-promises
         asyncData.fetchEthPriceAndDispatchToStore(dispatch);
         // fetch available assets if none are specified
-    
-       
+
         if (state.availableTokens === undefined) {
             // tslint:disable-next-line:no-floating-promises
             asyncData.fetchTokenListAndDispatchToStore(
@@ -97,7 +96,6 @@ export class ZeroExInstantProvider extends React.PureComponent<
                 dispatch,
             );
         }
-
 
         if (state.providerState.account.state !== AccountState.None) {
             this._accountUpdateHeartbeat = generateAccountHeartbeater({

@@ -1,16 +1,14 @@
-import * as React from 'react';
 import { BigNumber } from '@0x/utils';
 import { Web3Wrapper } from '@0x/web3-wrapper';
 import * as _ from 'lodash';
-
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
-import { ERC20AmountInput, ERC20AmountInputProps } from '../components/erc20_amount_input';
 
+import { ERC20AmountInput, ERC20AmountInputProps } from '../components/erc20_amount_input';
 import { Action, actions } from '../redux/actions';
 import { State } from '../redux/reducer';
 import { ColorOption } from '../style/theme';
-import {  Omit, OrderProcessState, QuoteFetchOrigin, TokenInfo } from '../types';
+import {  AffiliateInfo, Omit, OrderProcessState, QuoteFetchOrigin, TokenInfo } from '../types';
 import { apiQuoteUpdater } from '../util/api_quote_updater';
 
 export interface SelectedERC20AmountInputProps {
@@ -29,10 +27,11 @@ interface ConnectedState {
     isInputDisabled: boolean;
     numberOfTokensAvailable?: number;
     canSelectOtherToken: boolean;
+    affiliateInfo?: AffiliateInfo
 }
 
 interface ConnectedDispatch {
-    updateApiSwapQuote: (value?: BigNumber, tokenIn?: TokenInfo, tokenOut?: TokenInfo, isIn?: boolean, takerAddress?: string) => void;
+    updateApiSwapQuote: (value?: BigNumber, tokenIn?: TokenInfo, tokenOut?: TokenInfo, isIn?: boolean, takerAddress?: string, affiliateInfo?: AffiliateInfo) => void;
 }
 
 type ConnectedProps = Omit<ERC20AmountInputProps, keyof SelectedERC20AmountInputProps>;
@@ -47,7 +46,8 @@ const mapStateToProps = (state: State, _ownProps: SelectedERC20AmountInputProps)
     const selectedTokenOut = state.selectedTokenOut;
     const selectedTokenAmountIn = state.selectedTokenAmountIn;
     const selectedTokenAmountOut = state.selectedTokenAmountOut;
-    
+    const affiliateInfo = state.affiliateInfo;
+
     const numberOfTokensAvailable = state.availableTokens === undefined ? undefined : state.availableTokens.length;
     const canSelectOtherToken =
         numberOfTokensAvailable && numberOfTokensAvailable > 1
@@ -55,14 +55,14 @@ const mapStateToProps = (state: State, _ownProps: SelectedERC20AmountInputProps)
             : false;
 
     let valueIn;
-    if(selectedTokenIn && selectedTokenAmountIn){
+    if (selectedTokenIn && selectedTokenAmountIn) {
         valueIn = Web3Wrapper.toUnitAmount(selectedTokenAmountIn, selectedTokenIn.decimals).decimalPlaces(4).precision(4);
     }
     let valueOut;
-    if(selectedTokenOut && selectedTokenAmountOut){
+    if (selectedTokenOut && selectedTokenAmountOut) {
         valueOut = Web3Wrapper.toUnitAmount(selectedTokenAmountOut, selectedTokenOut.decimals).decimalPlaces(4).precision(4);
     }
- 
+
     return {
         valueIn,
         valueOut,
@@ -71,6 +71,7 @@ const mapStateToProps = (state: State, _ownProps: SelectedERC20AmountInputProps)
         isInputDisabled,
         numberOfTokensAvailable,
         canSelectOtherToken,
+        affiliateInfo
     };
 };
 
@@ -82,19 +83,19 @@ const mapDispatchToProps = (
     dispatch: Dispatch<Action>,
     _ownProps: SelectedERC20AmountInputProps,
 ): ConnectedDispatch => ({
-    updateApiSwapQuote: (value, tokenIn, tokenOut, isIn, takerAddress) => {
+    updateApiSwapQuote: (value, tokenIn, tokenOut, isIn, takerAddress, affiliateInfo) => {
         // Update the input
         let valueBase;
-        if(isIn){
+        if (isIn) {
             valueBase = Web3Wrapper.toBaseUnitAmount(value, tokenIn.decimals);
             dispatch(actions.updateSelectedTokenAmountIn(valueBase));
-        }else{
+        } else {
             valueBase = Web3Wrapper.toBaseUnitAmount(value, tokenOut.decimals);
             dispatch(actions.updateSelectedTokenAmountOut(valueBase));
         }
-      
+
         dispatch(actions.setIsIn(isIn));
-       
+
         // invalidate the last swap quote.
         dispatch(actions.updateLatestApiSwapQuote(undefined));
         // reset our swap state
@@ -107,9 +108,9 @@ const mapDispatchToProps = (
             debouncedUpdateSwapApiQuoteAsync( dispatch, isIn, takerAddress, tokenIn, tokenOut, valueBase, QuoteFetchOrigin.Manual,  {
                 setPending: true,
                 dispatchErrors: true,
-            });
+            }, true, affiliateInfo);
         }
-    }
+    },
 });
 
 const mergeProps = (
@@ -124,7 +125,7 @@ const mergeProps = (
         valueIn: connectedState.valueIn,
         valueOut: connectedState.valueOut,
         onChange: (value?: BigNumber, tokenIn?: TokenInfo, tokenOut?: TokenInfo, isIn?: boolean, takerAddress?: string) => {
-            connectedDispatch.updateApiSwapQuote(value, tokenIn, tokenOut, isIn, takerAddress);
+            connectedDispatch.updateApiSwapQuote(value, tokenIn, tokenOut, isIn, takerAddress, connectedState.affiliateInfo);
         },
         isInputDisabled: connectedState.isInputDisabled,
         numberOfTokensAvailable: connectedState.numberOfTokensAvailable,

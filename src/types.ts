@@ -22,7 +22,6 @@ export enum OrderProcessState {
     Failure = 'FAILURE',
 }
 
-
 export enum ApproveProcessState {
     None = 'NONE',
     Validating = 'VALIDATING',
@@ -44,7 +43,7 @@ export enum BaseCurrency {
 export enum SwapStep {
     ReviewOrder = 'ReviewOrder',
     Approve = 'Approve',
-    Swap = 'Swap'
+    Swap = 'Swap',
 }
 
 export interface SimulatedProgress {
@@ -223,7 +222,6 @@ export enum ProviderType {
     Fallback = 'FALLBACK',
 }
 
-
 export interface AffiliateInfo {
     feeRecipient: string;
     feePercentage: number;
@@ -245,7 +243,6 @@ export interface ZeroExInstantOptionalBaseConfig {
 
 export type ZeroExInstantBaseConfig = Partial<ZeroExInstantOptionalBaseConfig>;
 
-
 export interface SwapQuoteResponse extends SwapQuoteResponsePartialTransaction, SwapQuoteResponsePrice {
         gasPrice: BigNumber;
         protocolFee: BigNumber;
@@ -263,19 +260,19 @@ export interface SwapQuoteResponse extends SwapQuoteResponsePartialTransaction, 
         allowanceTarget?: string;
        // quoteReport?: QuoteReport;
     }
-    
+
 export interface SwapQuoteResponsePartialTransaction {
         to: string;
         data: string;
         value: BigNumber;
         decodedUniqueId: string;
 }
-    
+
 export interface SwapQuoteResponsePrice {
         price: BigNumber;
         guaranteedPrice: BigNumber;
 }
-    
+
 export interface GetSwapQuoteResponseLiquiditySource {
         name: string;
         proportion: BigNumber;
@@ -292,27 +289,26 @@ export interface TokenInfo {
     readonly logoURI?: string;
     readonly tags?: string[];
   }
-export interface TokenBalance{
-    token: TokenInfo,
+export interface TokenBalance {
+    token: TokenInfo;
     balance: BigNumber;
     isUnlocked: boolean;
 }
 
-  
-  export interface Version {
+export interface Version {
     readonly major: number;
     readonly minor: number;
     readonly patch: number;
   }
-  
-  export interface Tags {
+
+export interface Tags {
     readonly [tagId: string]: {
       readonly name: string;
       readonly description: string;
     };
   }
-  
-  export interface TokenList {
+
+export interface TokenList {
     readonly name: string;
     readonly timestamp: string;
     readonly version: Version;

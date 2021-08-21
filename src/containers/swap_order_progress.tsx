@@ -1,13 +1,11 @@
 import * as React from 'react';
 import { useSelector } from 'react-redux';
 
-import { TimedProgressBar } from '../components/timed_progress_bar';
-
 import { TimeCounter } from '../components/time_counter';
+import { TimedProgressBar } from '../components/timed_progress_bar';
 import { Container } from '../components/ui/container';
 import { getSwapOrderState } from '../redux/selectors';
 import { OrderProcessState } from '../types';
-
 
 export const SwapProgressContainer = () => {
     const swapOrderState = useSelector(getSwapOrderState);
@@ -31,4 +29,3 @@ export const SwapProgressContainer = () => {
     }
     return null;
 };
-

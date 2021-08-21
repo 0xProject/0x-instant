@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { ZeroExInstantContainer } from '../containers/zero_ex_instant_container';
 import { MAIN_CONTAINER_DIV_CLASS, OVERLAY_CLOSE_BUTTON_DIV_CLASS, OVERLAY_DIV_CLASS } from '../constants';
+import { ZeroExInstantContainer } from '../containers/zero_ex_instant_container';
 import { ColorOption } from '../style/theme';
 
 import { Container } from './ui/container';

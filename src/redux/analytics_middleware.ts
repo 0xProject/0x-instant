@@ -7,7 +7,6 @@ import { AccountState, StandardSlidingPanelContent } from '../types';
 import { analytics } from '../util/analytics';
 
 import { Action, ActionTypes } from './actions';
-
 import { State } from './reducer';
 
 export const analyticsMiddleware: Middleware = store => next => middlewareAction => {

@@ -1,9 +1,7 @@
 import { ChainId } from '@0x/contract-addresses';
 import { BigNumber } from '@0x/utils';
 
-
 import { LOADING_ACCOUNT, LOCKED_ACCOUNT, NO_ACCOUNT } from '../constants';
-
 import {
     Account,
     AccountReady,
@@ -284,7 +282,6 @@ export const createReducer = (initialState: State) => {
                 }
                 return state;
 
-
             case ActionTypes.SetErrorMessage:
                 return {
                     ...state,
@@ -410,8 +407,7 @@ const doesSwapQuoteMatchState = (
     }
 
     if (swapQuote === state.latestApiSwapQuote) {
-        return true
+        return true;
     }
-
 
 };

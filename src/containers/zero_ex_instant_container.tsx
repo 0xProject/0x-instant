@@ -1,33 +1,30 @@
 import * as React from 'react';
+import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import PoweredByLogo from '../assets/powered_by_0x.svg';
+import { CSSReset } from '../components/css_reset';
+import { SlidingPanel } from '../components/sliding_panel';
+import { Container } from '../components/ui/container';
+import { Flex } from '../components/ui/flex';
 import { ZERO_EX_SITE_URL } from '../constants';
-
-
-import { CurrentStandardSlidingPanel } from './current_standard_sliding_panel';
-import { LatestError } from './latest_error';
-import { SelectedTokenSwapOrderStateButtons } from './selected_token_swap_order_state_buttons';
+import {  actions } from '../redux/actions';
+import { getSwapStep } from '../redux/selectors';
 import { ColorOption } from '../style/theme';
 import { zIndex } from '../style/z_index';
 import { SlideAnimationState, SwapStep } from '../types';
 import { analytics, TokenSelectorClosedVia } from '../util/analytics';
 
-import { CSSReset } from '../components/css_reset';
-import { SlidingPanel } from '../components/sliding_panel';
-import { Container } from '../components/ui/container';
-import { Flex } from '../components/ui/flex';
-
-import {  actions } from '../redux/actions';
-import { SwapProgressContainer } from './swap_order_progress';
+import { CurrentStandardSlidingPanel } from './current_standard_sliding_panel';
 import { ERC20TokenSelectorContainer } from './erc20_token_selector';
-import { SwapStepsContainer } from './steps/swap_steps';
-import { PaymentMethodContainer } from './payment_method';
-import { OrderSwapDetailsContainer } from './order_swap_details';
-import { useState } from 'react';
-import { getSwapStep } from '../redux/selectors';
-import { SlidingPanelSwapContainer } from './steps/sliding_panel_swap_step';
 import { InstantTokenHeadingContainer } from './instant_token_heading';
+import { LatestError } from './latest_error';
+import { OrderSwapDetailsContainer } from './order_swap_details';
+import { PaymentMethodContainer } from './payment_method';
+import { SelectedTokenSwapOrderStateButtons } from './selected_token_swap_order_state_buttons';
+import { SlidingPanelSwapContainer } from './steps/sliding_panel_swap_step';
+import { SwapStepsContainer } from './steps/swap_steps';
+import { SwapProgressContainer } from './swap_order_progress';
 
 export interface ZeroExInstantContainerProps {
     swapStep: SwapStep;
@@ -42,16 +39,16 @@ export interface ZeroExInstantContainerState {
 export const ZeroExInstantContainer = () => {
     const dispatch = useDispatch();
     const swapStep = useSelector(getSwapStep);
-    const [isIn, setIsIn] = useState(false); 
-    const [tokenSelectionPanelAnimationState, setTokenSelectionPanelAnimationState] = useState<SlideAnimationState>('none'); 
-    const [stepPanelAnimationState, setStepPanelAnimationState] = useState<SlideAnimationState>('none'); 
+    const [isIn, setIsIn] = useState(false);
+    const [tokenSelectionPanelAnimationState, setTokenSelectionPanelAnimationState] = useState<SlideAnimationState>('none');
+    const [stepPanelAnimationState, setStepPanelAnimationState] = useState<SlideAnimationState>('none');
     const _handleSymbolClickIn = (): void => {
         analytics.trackTokenSelectorOpened();
         setIsIn(true);
         setTokenSelectionPanelAnimationState('slidIn');
-      
+
     };
-   const _handleSymbolClickOut = (): void => {
+    const _handleSymbolClickOut = (): void => {
         analytics.trackTokenSelectorOpened();
         setIsIn(false);
         setTokenSelectionPanelAnimationState('slidIn');
@@ -78,7 +75,6 @@ export const ZeroExInstantContainer = () => {
         setStepPanelAnimationState('slidIn');
     };
 
-
     const _handleSlidingPanelAnimationEnd = (): void => {
         if (tokenSelectionPanelAnimationState === 'slidOut') {
             // When the slidOut animation completes, don't keep the panel mounted.
@@ -91,7 +87,7 @@ export const ZeroExInstantContainer = () => {
         if (stepPanelAnimationState === 'slidOut') {
             // When the slidOut animation completes, don't keep the panel mounted.
             // Performance optimization
-            setStepPanelAnimationState('none')
+            setStepPanelAnimationState('none');
         }
     };
 
@@ -102,12 +98,11 @@ export const ZeroExInstantContainer = () => {
                 return (<>
                     <SwapStepsContainer/>
                     <SwapProgressContainer />
-                </>)
+                </>);
             default:
                 return null;
         }
-    }
-
+    };
 
     return (
             <React.Fragment>
@@ -179,8 +174,4 @@ export const ZeroExInstantContainer = () => {
                 </Container>
             </React.Fragment>
         );
-}
-
-
-
-
+};

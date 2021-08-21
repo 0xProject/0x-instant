@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useSelector } from 'react-redux';
-import { getSelectedTokenIn } from '../redux/selectors';
 
+import { getSelectedTokenIn } from '../redux/selectors';
 import { ColorOption } from '../style/theme';
 
 import { Button } from './ui/button';
@@ -16,7 +16,7 @@ export const ApproveTokenButton = () => {
             <Spinner widthPx={16} heightPx={16} />
         </Container>
           {`Approving ${tokenIn.symbol.toUpperCase()} for Swap`}
-    </Button>
+    </Button>;
 
-}
+};
 ApproveTokenButton.displayName = 'ApproveTokenButton';

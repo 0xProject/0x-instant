@@ -1,8 +1,8 @@
 
-import * as _ from 'lodash';
 import createKeccakHash from 'keccak';
-import { DEFAULT_UNKOWN_ASSET_NAME, ETH_ADDRESS } from '../constants';
+import * as _ from 'lodash';
 
+import { DEFAULT_UNKOWN_ASSET_NAME, ETH_ADDRESS } from '../constants';
 import {  TokenInfo } from '../types';
 
 export const tokenUtils = {
@@ -24,8 +24,8 @@ export const tokenUtils = {
     },
     // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-55.md
     toChecksum: (address: string) => {
-        address = address.toLowerCase().replace('0x', '')
-        const hash = createKeccakHash('keccak256').update(address).digest('hex')
+        address = address.toLowerCase().replace('0x', '');
+        const hash = createKeccakHash('keccak256').update(address).digest('hex');
         let ret = '0x';
 
         for (let i = 0; i < address.length; i++) {
@@ -36,13 +36,13 @@ export const tokenUtils = {
             }
         }
 
-        return ret
+        return ret;
 
     },
 
     isETH: (token: TokenInfo) => {
         return token.address.toLowerCase() === ETH_ADDRESS ? true : false;
-        
+
     },
 
     getIcon: (symbol: string) => {
@@ -61,5 +61,5 @@ export const tokenUtils = {
             // Can't find icon
             return undefined;
         }
-    }
+    },
 };

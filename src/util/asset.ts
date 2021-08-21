@@ -1,7 +1,6 @@
 
 import { ChainId } from '@0x/contract-addresses';
 import { AssetProxyId, ObjectMap } from '@0x/types';
-
 import * as _ from 'lodash';
 
 import {  DEFAULT_UNKOWN_ASSET_NAME } from '../constants';
@@ -108,5 +107,5 @@ export const assetUtils = {
             asset.metaData.assetProxyId === AssetProxyId.ERC20 ? (asset as ERC20Asset) : undefined,
         );
         return _.compact(erc20sOrUndefined);
-    }
+    },
 };

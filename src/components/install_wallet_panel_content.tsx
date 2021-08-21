@@ -48,7 +48,7 @@ export const InstallWalletPanelContent = () => {
             analytics.trackInstallWalletModalClickedGet();
             util.createOpenUrlInNewWindow(actionUrl)();
         };
-        
+
         return {
             image: <MetaMaskLogo width={85} height={80} />,
             title: 'Install MetaMask',
@@ -68,14 +68,10 @@ export const InstallWalletPanelContent = () => {
                     {actionText}
                 </Button>
             ),
-         }
-        }
+         };
+        };
 
+    const panelProps = getStandardPanelContentProps();
+    return <StandardPanelContent {...panelProps} />;
 
- 
-        const panelProps = getStandardPanelContentProps();
-        return <StandardPanelContent {...panelProps} />;
-
-   
-
-}
+};

@@ -1,7 +1,4 @@
-import { State } from "./reducer";
-
-
-
+import { State } from './reducer';
 
 export const getApproveState = (state: State) => state.approveState;
 export const getAvailableTokens = (state: State) => state.availableTokens;

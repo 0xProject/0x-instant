@@ -1,11 +1,8 @@
 
 import * as React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
 import PhoneIconSvg from '../assets/icons/phone.svg';
-import { ColorOption } from '../style/theme';
-import {  AccountState, OperatingSystem, ProviderType, StandardSlidingPanelContent, WalletSuggestion } from '../types';
-import { envUtil } from '../util/env';
-
 import { CoinbaseWalletLogo } from '../components/coinbase_wallet_logo';
 import { MetaMaskLogo } from '../components/meta_mask_logo';
 import { PaymentMethodDropdown } from '../components/payment_method_dropdown';
@@ -13,12 +10,13 @@ import { SectionHeader } from '../components/section_header';
 import { Container } from '../components/ui/container';
 import { Flex } from '../components/ui/flex';
 import { WalletPrompt } from '../components/wallet_prompt';
-import { getAccount, getChainId, getWalletDisplayName } from '../redux/selectors';
-import { useDispatch, useSelector } from 'react-redux';
-import { COINBASE_WALLET_SITE_URL, COINBASE_WALLET_ANDROID_APP_STORE_URL, COINBASE_WALLET_IOS_APP_STORE_URL } from '../constants';
-import { analytics } from '../util/analytics';
+import { COINBASE_WALLET_ANDROID_APP_STORE_URL, COINBASE_WALLET_IOS_APP_STORE_URL, COINBASE_WALLET_SITE_URL } from '../constants';
 import { actions, unlockWalletAndDispatchToStore } from '../redux/actions';
-
+import { getAccount, getChainId, getWalletDisplayName } from '../redux/selectors';
+import { ColorOption } from '../style/theme';
+import {  AccountState, OperatingSystem, ProviderType, StandardSlidingPanelContent, WalletSuggestion } from '../types';
+import { analytics } from '../util/analytics';
+import { envUtil } from '../util/env';
 
 export const PaymentMethodContainer = () =>  {
     const account  = useSelector(getAccount);
@@ -33,7 +31,7 @@ export const PaymentMethodContainer = () =>  {
 
         analytics.trackInstallWalletClicked(walletSuggestion);
         if (walletSuggestion === WalletSuggestion.MetaMask) {
-            dispatch(actions.openStandardSlidingPanel(StandardSlidingPanelContent.InstallWallet))
+            dispatch(actions.openStandardSlidingPanel(StandardSlidingPanelContent.InstallWallet));
         } else {
             const operatingSystem = envUtil.getOperatingSystem();
             let url = COINBASE_WALLET_SITE_URL;
@@ -49,9 +47,7 @@ export const PaymentMethodContainer = () =>  {
             }
             window.open(url, '_blank');
         }
-    }
-
-
+    };
 
     const renderTitleText = (): string => {
         switch (account.state) {
@@ -72,7 +68,7 @@ export const PaymentMethodContainer = () =>  {
         const secondaryColor = ColorOption.whiteBackground;
         const colors = { primaryColor, secondaryColor };
         const onUnlockGenericWallet = () => {
-           dispatch(unlockWalletAndDispatchToStore(ProviderType.MetaMask))
+           dispatch(unlockWalletAndDispatchToStore(ProviderType.MetaMask));
         };
         const onUnlockFormatic = () => dispatch(unlockWalletAndDispatchToStore(ProviderType.Fortmatic));
         switch (account.state) {
@@ -157,9 +153,8 @@ export const PaymentMethodContainer = () =>  {
         }
     };
 
-
     const marginBottom = account.state !== AccountState.Ready ? '77px' : null;
-        return (
+    return (
             <Container width="100%" height="100%" padding="20px 20px 0px 20px" marginBottom={marginBottom}>
                 <Container marginBottom="12px">
                     <Flex justify="space-between">
@@ -169,4 +164,4 @@ export const PaymentMethodContainer = () =>  {
                 <Container>{renderMainContent()}</Container>
             </Container>
         );
-}
+};
