@@ -11,11 +11,11 @@
     marginBottom="40px"
 />
 
-Check out a live example on [mainnet](http://0x-instant-staging.s3-website-us-east-1.amazonaws.com/) and [kovan](http://0x-instant-staging.s3-website-us-east-1.amazonaws.com/?networkId=42&assetData=0xf47261b00000000000000000000000002002d3812f58e35f0ea1ffbf80a75a38c32175fa&liquiditySource=provided).
+Check out a live example on [mainnet](http://0x-instant-staging.s3-website-us-east-1.amazonaws.com/) and [ropsten](http://0x-instant-staging.s3-website-us-east-1.amazonaws.com/?networkId=42&assetData=0xf47261b00000000000000000000000002002d3812f58e35f0ea1ffbf80a75a38c32175fa&liquiditySource=provided).
 
 ## Libraries
 
-0x Instant has the library the `0x Instant UI component` that users will see  and is powered by 0x API. Check out the `0x API` documentation [here](https://0x.org/docs/api).
+0x Instant has the library `0x Instant UI component` that users will see  and is powered by 0x API. Check out the `0x API` documentation [here](https://0x.org/docs/api).
 
 
 ## Affiliate Fees
@@ -24,7 +24,7 @@ As an end host of 0x Instant, you can charge users a fee on all trades made thro
 
 # UI Integration
 
-The 0x Instant UI and Asset Swapper are bundled together in a convenient JS package for you. You can either download and serve the package yourself, or use the CDN-hosted version from 0x.
+The 0x Instant UI powered by 0x API are bundled together in a convenient JS package for you. You can either download and serve the package yourself, or use the CDN-hosted version from 0x.
 
 <CodeTabs tabs={['html']}>
 
@@ -33,7 +33,7 @@ The 0x Instant UI and Asset Swapper are bundled together in a convenient JS pack
 <html>
     <head>
         <meta charset="utf-8" />
-        <script src="https://instant.0x.org/v3/instant.js"></script>
+        <script src="https://instant.0x.org/v4/instant.js"></script>
     </head>
     <body>
         <script type="text/javascript">
@@ -71,10 +71,11 @@ Codepen [example](https://codepen.io/dekz/pen/LYYwyqm)
 | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `provider`                       | An instance of an Ethereum [provider](#q-what-is-a-provider), but teams may optionally source liquidity themselves and pass in specific [SignedOrders](#faqs). If none is provided, 0x instant will try to grab the injected provider if one exists, otherwise it will suggest the user to install MetaMask                                                                                                                                           |
 | `walletDisplayName`              | A display string for the wallet you are connected to. Defaults to our best guess (i.e. MetaMask, Coinbase Wallet) but should be provided if a custom provider is supplied as an optional config.                                                                                                                                                                                                                                                      |
-| `availableAssetDatas`            | An array of [assetDatas](#q-what-is-assetdata), but teams may optionally source liquidity themselves and pass in specific [SignedOrders](#q-what-is-a-signedorder) that can be purchased through Instant. Defaults to all token pairs from orderSource. Will throw an error if empty.                                                                                                                                                                 |
-| `defaultSelectedAssetData`       | The asset that should be opened by default. If this is not provided, Instant will show "Select Token" if there are multiple availableAssetDatas.                                                                                                                                                                                                                                                                                                      |
-| `defaultAssetBuyAmount`          | Pre-fill the amount of tokens to purchase. Defaults to 0.                                                                                                                                                                                                                                                                                                                                                                                             |
-| `additionalAssetMetaDataMap`     | An object with keys that are assetData strings and values that are objects that adhere to the [AssetMetaData schema](#q-what-is-assetmetadata), but teams may optionally source liquidity themselves and pass in specific [SignedOrders](#q-what-is-a-signedorder). The values represent the meta data for that asset. There is an internal mapping for popular tokens that cannot be overriden and only appended to using this configuration option. |
+| `defaultSelectedTokenIn`         | Default Token used on input in, must be available on the Token List                                                                                                                             |
+| `defaultSelectedTokenOut`        | Default Token used on input out, must be available on the Token List                                                                                                                                                                                                                                                                                                           |
+| `defaultAmountTokenIn`           | Pre-fill the amount of in tokens Defaults to 0.               
+| `defaultAmountTokenOut`          | Pre-fill the amount of out tokens Defaults to 0.                                                                                                                                                                                                                                                                                                                                                                                             |
+| `tokenList`                      | Token list url where to fetch the list of supported tokens                                                                                                                                                                                                                                                                                                                                                                                            |
 | `chainId`                        | Chain Id of Ethereum network to connect to. Defaults to 1 (mainnet).                                                                                                                                                                                                                                                                                                                                                                                  |
 | `affiliateInfo`                  | An object specifying what % ETH fee should be added to orders and where the fee should be sent. Max feePercentage is .05 (See examples below)                                                                                                                                                                                                                                                                                                         |
 | `shouldDisableAnalyticsTracking` | An option to turn on / off analytics used to make Instant a better experience. Defaults to false.                                                                                                                                                                                                                                                                                                                                                     |
@@ -83,26 +84,15 @@ Codepen [example](https://codepen.io/dekz/pen/LYYwyqm)
 
 # Examples
 
-## Serving Own Liquidity
+
+## With token list
+
+Check all others token lists on [List Repository](https://tokenlists.org/) or create one following the [specification](https://github.com/Uniswap/token-lists) and host it on Github
 
 ```typescript
 zeroExInstant.render(
     {
-        // these can come from your own api, or anywhere
-        orderSource: [signedOrder1, signedOrder2],
-    },
-    'body',
-);
-```
-
-## Using All Standard Relayer API Available Assets
-
-Using [/asset_pairs](https://github.com/0xProject/standard-relayer-api/blob/master/http/v3.md#get-v3asset_pairs) to find all `*/WETH` pairs
-
-```typescript
-zeroExInstant.render(
-    {
-        orderSource: 'https://api.0x.org/sra/',
+        tokenList: 'https://tokens.coingecko.com/uniswap/all.json',
     },
     'body',
 );
@@ -123,14 +113,12 @@ zeroExInstant.render(
 );
 ```
 
-## Providing a Default Token
+## Providing a Default Token In
 
 ```typescript
 zeroExInstant.render(
     {
-        orderSource: 'https://api.0x.org/sra/',
-        availableAssetDatas: ['0xf47261b0000000000000000000000000744d70fdbe2bc4cf95131626614a1764df805b9e'],
-        defaultSelectedAssetData: '0xf47261b0000000000000000000000000744d70fdbe2bc4cf95131626614a1764df805b9e',
+       defaultSelectedTokenIn: '0xe41d2489571d322189246dafa5ebde1f4699f498'
     },
     'body',
 );
@@ -141,7 +129,6 @@ zeroExInstant.render(
 ```typescript
 zeroExInstant.render(
     {
-        orderSource: 'https://api.0x.org/sra/',
         onSuccess: txHash => {
             console.log('Success! Transaction hash is: ' + txHash);
         },
@@ -149,35 +136,6 @@ zeroExInstant.render(
     'body',
 );
 ```
-
-## Providing a Custom Token
-
-Your token may not be currently supported by Instant by default. Check [here](https://github.com/0xProject/0x-monorepo/blob/development/packages/instant/src/data/asset_meta_data_map.ts) for a list of tokens supported by default. Check "What is assetMetaData?" in [the FAQ section](#q-what-is-assetmetadata), but teams may optionally source liquidity themselves and pass in specific [SignedOrders](#q-what-is-a-signedorder) for more information about the object being passed in. For the `orderSource` parameter you will likely need to pass in an array of [`SignedOrder`](https://0x.org/docs/tools/order-utils#interface-signedorder)s, unless you are running your own relayer, or know of a relayer that has liquidity for your custom token.
-
-```typescript
-const erc20TokenAddress = '0xe41d2489571d322189246dafa5ebde1f4699f498';
-const erc20TokenAssetData = zeroExInstant.assetDataForERC20TokenAddress(erc20TokenAddress);
-
-zeroExInstant.render(
-    {
-        // these can contain makerAssetDatas that are not supported by default
-        orderSource: [signedOrder1, signedOrder2],
-        additionalAssetMetaDataMap: {
-            [erc20TokenAssetData]: {
-                assetProxyId: zeroExInstant.ERC20_PROXY_ID,
-                decimals: 18,
-                symbol: 'XXX',
-                name: 'My Custom Token',
-                primaryColor: '#F2F7FF', // Optional
-                iconUrl: 'https://cdn.icons.com/my_icon.svg', // Optional
-            },
-        },
-    },
-    'body',
-);
-```
-
-
 
 # Learn about affiliate fees
 
@@ -188,7 +146,6 @@ Example: 3% of transaction volume (in ETH) will be deposited into 0x50ff5828a216
 ```typescript
 zeroExInstant.render(
     {
-        orderSource: 'https://api.0x.org/sra/',
         affiliateInfo: {
             feeRecipient: '0x50ff5828a216170cf224389f1c5b0301a5d0a230',
             feePercentage: 0.03,
@@ -304,33 +261,16 @@ The icon referenced by `iconUrl` will go on top of a 26x26 circle that has `prim
 
 We provide assetMetaData for a subset of ERC20 tokens. You can call the helper function `zeroExInstant.hasMetaDataForAssetData` which returns a boolean indiciating whether or not we have assetMetaData for a given assetData string.
 
-### Q: Do users need to have ZRX to pay for fees on orders?
 
-Nope! The Asset Swapper will calculate the ZRX required to pay for fees on the desired orders, and automatically purchase ZRX from your order source to cover your fees as part of the order. Note that Instant cannot use a user's existing ZRX balance and the liquidity source must be able to provide ZRX / ETH orders.
 
-### Q: Does this work with order matching relayers (vs. open orderbook)?
+### Q: Can I swap through 0x Instant  ERC-20 tokens like WETH or DAI?
 
-No, 0x Instant currently needs globally accessible orders and is only compatible with orders from open orderbook relayers.
+0x Instant supports any ERC20 <-> ERC20 swaps.
 
-### Q: What happens if there's not enough liquidity to purchase an asset?
-
-To prevent massive price ranges, 0x Instant calculates a maximum amount of assets that a user can buy under a given amount of price slippage and restricts purchasing to that amount.
-
-### Q: Can I pay for assets through 0x Instant using an ERC-20 token like WETH or DAI?
-
-0x Instant currently only supports purchasing ERC-20 using ETH for now, but we're looking into adding ERC-20 to ERC-20 purchasing in the future.
-
-### Q: Does 0x Instant work with permissioned liquidity pools that require KYC?
-
-0x Instant currently passes all orders through a forwarding contract for wrapping ETH and filling orders and is therefore incompatible with many on-chain KYC solutions. Check with the KYC solution you're using to verify.
-
-### Q: Can Instant be used to sell tokens that are not available on a relayer?
-
-Even if an ERC20 token is not listed on a relayer, 0x Instant can be configured to source liquidity from a static set of orders, by providing an array of [`SignedOrder`](https://0x.org/docs/tools/order-utils#interface-signedorder)s as the `orderSource`.
 
 ### Q: How can I get help integrating Instant?
 
-Join us on [Discord](https://discord.gg/d3FTX3M) and join the #general-help channel to receive help from our dev team.
+Create question on [StackExchange](https://ethereum.stackexchange.com/questions/tagged/0x)
 
 ## Mobile
 

@@ -27,7 +27,7 @@ interface ConnectedState {
     isInputDisabled: boolean;
     numberOfTokensAvailable?: number;
     canSelectOtherToken: boolean;
-    affiliateInfo?: AffiliateInfo
+    affiliateInfo?: AffiliateInfo;
 }
 
 interface ConnectedDispatch {
@@ -71,7 +71,7 @@ const mapStateToProps = (state: State, _ownProps: SelectedERC20AmountInputProps)
         isInputDisabled,
         numberOfTokensAvailable,
         canSelectOtherToken,
-        affiliateInfo
+        affiliateInfo,
     };
 };
 

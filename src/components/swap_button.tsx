@@ -72,9 +72,7 @@ export const SwapButton = (props: SwapButtonProps) => {
 
     const _handleApprove = async () => {
         const {
-            swapQuote,
             tokenBalanceIn,
-            accountAddress,
             web3Wrapper,
         } = props;
 
@@ -158,8 +156,6 @@ export const SwapButton = (props: SwapButtonProps) => {
     const _handleSwap = async () => {
         // The button is disabled when there is no buy quote anyway.
         const {
-          swapQuote,
-          accountAddress,
           accountEthBalanceInWei,
           web3Wrapper,
       } = props;

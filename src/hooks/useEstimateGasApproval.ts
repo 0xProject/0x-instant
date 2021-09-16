@@ -24,7 +24,8 @@ export const useEstimateGasApproval = (token: TokenInfo, allowanceTarget?: strin
              };
 
             asyncEstimateGas()
-            .then(g => setGas(g));
+            .then(g => setGas(g))
+            .catch(console.log);
          }
      }, [token, web3Wrapper, allowanceTarget, account ]);
 

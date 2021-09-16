@@ -21,7 +21,6 @@ import { envUtil } from '../util/env';
 export const PaymentMethodContainer = () =>  {
     const account  = useSelector(getAccount);
     const network  = useSelector(getChainId);
-    const walletDisplayName = useSelector(getWalletDisplayName);
     const dispatch = useDispatch();
     const onInstallWalletClick = () => {
         const isMobile = envUtil.isMobileOperatingSystem();

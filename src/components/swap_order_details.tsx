@@ -162,7 +162,6 @@ export class SwapOrderDetails extends React.PureComponent<SwapOrderDetailsProps>
 
     private _pricePerTokenWei(): BigNumber | undefined {
         const swapQuoteAccessor = oc(this.props.swapQuote);
-        const assetTotalInWei = swapQuoteAccessor.buyAmount;
         const selectedTokenUnitAmount = this.props.selectedTokenUnitAmount;
         return selectedTokenUnitAmount;
        /* return assetTotalInWei !== undefined &&

@@ -147,7 +147,7 @@ export const asyncData = {
         fetchOrigin: QuoteFetchOrigin,
         options: { updateSilently: boolean },
     ) => {
-        const { swapOrderState, providerState, selectedTokenIn, selectedTokenOut, selectedTokenAmountOut, selectedTokenAmountIn, isIn } = state;
+        const { swapOrderState, providerState, selectedTokenIn, selectedTokenOut, selectedTokenAmountOut, selectedTokenAmountIn, isIn, affiliateInfo } = state;
         const takerAddress = providerState.account.state === AccountState.Ready ? providerState.account.address : '';
         const selectedTokenUnitAmount = isIn ? selectedTokenAmountIn : selectedTokenAmountOut;
 
@@ -170,6 +170,8 @@ export const asyncData = {
                     setPending: !options.updateSilently,
                     dispatchErrors: !options.updateSilently,
                 },
+                undefined,
+                affiliateInfo,
             );
         }
     },

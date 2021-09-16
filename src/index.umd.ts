@@ -1,5 +1,5 @@
-import { AssetProxyId } from '@0x/types';
-import { BigNumber, providerUtils } from '@0x/utils';
+
+import { providerUtils } from '@0x/utils';
 import * as _ from 'lodash';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
@@ -12,11 +12,9 @@ import {
     INJECTED_DIV_ID,
     NPM_PACKAGE_VERSION,
 } from './constants';
-import { assetMetaDataMap } from './data/asset_meta_data_map';
 import { ZeroExInstantOverlay, ZeroExInstantOverlayProps } from './index';
 import { analytics } from './util/analytics';
 import { assert } from './util/assert';
-import { assetDataEncoder } from './util/asset_data_encoder';
 import { util } from './util/util';
 
 const isInstantRendered = (): boolean =>
@@ -103,12 +101,12 @@ export const unrender = () => {
 
 // Render instant and return a callback that allows you to remove it from the DOM.
 const renderInstant = (config: ZeroExInstantConfig, selector: string) => {
-    const appendToIfExists = document.querySector);
+    const appendToIfExists = document.querySelector(selector);
     assert.assert(
         appendToIfExists !== null,
         `Could not find div with selector: ${selector}`,
     );
-    parentElement = appendToIfExists as Element;
+    parentElement = appendToIfExists;
     injectedDiv = document.createElement('div');
     injectedDiv.setAttribute('id', INJECTED_DIV_ID);
     injectedDiv.setAttribute('class', INJECTED_DIV_CLASS);
@@ -183,77 +181,6 @@ export const render = (
     };
     window.onpopstate = onPopStateHandler;
 };
-
-export const ERC721_PROXY_ID = AssetProxyId.ERC721;
-
-export const ERC20_PROXY_ID = AssetProxyId.ERC20;
-
-export const assetDataForERC20TokenAddress = (tokenAddress: string): string => {
-    assert.isETHAddressHex('tokenAddress', tokenAddress);
-    return assetDataEncoder
-        .ERC20Token(tokenAddress)
-        .getABIEncodedTransactionData();
-};
-
-export const assetDataForERC721TokenAddress = (
-    tokenAddress: string,
-    tokenId: string | number,
-): string => {
-    assert.isETHAddressHex('tokenAddress', tokenAddress);
-    return assetDataEncoder
-        .ERC721Token(tokenAddress, new BigNumber(tokenId))
-        .getABIEncodedTransactionData();
-};
-
-export const hasMetaDataForAssetData = (assetData: string): boolean => {
-    assert.isHexString('assetData', assetData);
-    return assetMetaDataMap[assetData] !== undefined;
-};
-
-/*export const hasLiquidityForAssetDataAsync = async (
-    takerAssetData: string,
-    orderSource: OrderSource,
-    chainId: ChainId = ChainId.Mainnet,
-    supportedProvider?: SupportedProvider,
-): Promise<boolean> => {
-    assert.isHexString('takerAssetData', takerAssetData);
-    assert.isValidOrderSource('orderSource', orderSource);
-    assert.isNumber('chainId', chainId);
-
-    let provider = supportedProvider;
-    if (provider !== undefined) {
-        provider = providerUtils.standardizeOrThrow(provider);
-    }
-
-    const bestProvider: SupportedProvider =
-        provider ||
-        providerUtils.standardizeOrThrow(
-            providerFactory.getFallbackNoSigningProvider(
-                chainId,
-            ) as SupportedProvider,
-        );
-
-    const swapQuoterOptions = { chainId };
-
-    const swapQuoter = _.isString(orderSource)
-        ? SwapQuoter.getSwapQuoterForStandardRelayerAPIUrl(
-              bestProvider,
-              orderSource,
-              swapQuoterOptions,
-          )
-        : SwapQuoter.getSwapQuoterForProvidedOrders(
-              bestProvider,
-              orderSource,
-              swapQuoterOptions,
-          );
-
-    const wethAssetData = await swapQuoter.getEtherTokenAssetDataOrThrowAsync();
-    const liquidity = await swapQuoter.getLiquidityForMakerTakerAssetDataPairAsync(
-        wethAssetData,
-        takerAssetData,
-    );
-    return liquidity.makerAssetAvailableInBaseUnits.gt(new BigNumber(0));
-};*/
 
 // Write version info to the exported object for debugging
 export const GIT_SHA = GIT_SHA_FROM_CONSTANT;

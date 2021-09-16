@@ -20,14 +20,18 @@ export const OrderSwapDetailsContainer = () => {
     const baseCurrency = useSelector(getBaseCurrency);
     const ethUsdPrice = useSelector(getEthUsdPrice);
     const account = useSelector(getAccount);
-    const selectedTokenUnitAmount = useSelector(getSelectedTokenAmountOut);
+
+
 
     const renderErrorFetchingUsdPrice = () => {
+        const onClickText = () => {
+           dispatch(actions.updateBaseCurrency(BaseCurrency.ETH));
+        }
         return (
             <Text>
                 There was an error fetching the USD price.
                 <Text
-                    onClick={() => dispatch(actions.updateBaseCurrency(BaseCurrency.ETH))}
+                    onClick={onClickText}
                     fontWeight={700}
                     fontColor={ColorOption.primaryColor}
                 >

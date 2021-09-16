@@ -13,7 +13,7 @@ export const apiQuoteUpdater = {
     updateSwapQuoteAsync: async (
         dispatch: Dispatch<Action>,
         isIn: boolean,
-        takerAddress: String,
+        takerAddress: string,
         tokenIn: TokenInfo,
         tokenOut: TokenInfo,
         tokenUnitAmount: BigNumber,
@@ -23,7 +23,7 @@ export const apiQuoteUpdater = {
             dispatchErrors: boolean;
         },
         skipValidation: boolean = true,
-        affiliateInfo?: AffiliateInfo
+        affiliateInfo?: AffiliateInfo,
     ): Promise<void> => {
         const tokenSell = isIn ? tokenIn : tokenOut;
         const tokenBuy = isIn ? tokenOut : tokenIn;
@@ -40,6 +40,7 @@ export const apiQuoteUpdater = {
         try {
             let takerAddressString = '';
             let skipValidationString = '';
+            let buyTokenPercentage = '';
             if (takerAddress) {
                 takerAddressString = `&takerAddress=${takerAddress}`;
             }
@@ -47,10 +48,10 @@ export const apiQuoteUpdater = {
                 skipValidationString = `&skipValidation=true`;
             }
             if (affiliateInfo) {
-                buyTokenPercenta = `&skipValidation=true`;
+                buyTokenPercentage = `&buyTokenPercentageFee=${affiliateInfo.feePercentage}&feeRecipient=${affiliateInfo.feeRecipient}`;
             }
 
-            const response = await fetch(`${ZRX_API_URL}/quote?sellToken=${tokenAddressSell}&buyToken=${tokenAddressBuy}&sellAmount=${tokenUnitAmount}${takerAddressString}${skipValidationString}`);
+            const response = await fetch(`${ZRX_API_URL}/quote?sellToken=${tokenAddressSell}&buyToken=${tokenAddressBuy}&sellAmount=${tokenUnitAmount}${takerAddressString}${skipValidationString}${buyTokenPercentage}`);
             if (response.ok && response.status === 200) {
                 newSwapQuote = await response.json() as unknown as SwapQuoteResponse;
                 // format quote
@@ -98,13 +99,13 @@ export const apiQuoteUpdater = {
         analytics.trackApiQuoteFetched(newSwapQuote, fetchOrigin);
     },
     fetchQuote: async (
-        takerAddress: String,
+        takerAddress: string,
         isIn: boolean,
         tokenIn: {address: string},
         tokenOut: {address: string},
         tokenUnitAmount: BigNumber,
         skipValidation = true,
-
+        affiliateInfo?: AffiliateInfo,
     ): Promise<SwapQuoteResponse> => {
         let newSwapQuote: SwapQuoteResponse | undefined;
         const tokenSell = isIn ? tokenIn : tokenOut;
@@ -115,14 +116,18 @@ export const apiQuoteUpdater = {
         try {
             let takerAddressString = '';
             let skipValidationString = '';
+            let buyTokenPercentage = '';
             if (takerAddress) {
                 takerAddressString = `&takerAddress=${takerAddress}`;
             }
             if (skipValidation) {
                 skipValidationString = `&skipValidation=true`;
             }
+            if (affiliateInfo) {
+                buyTokenPercentage = `&buyTokenPercentageFee=${affiliateInfo.feePercentage}&feeRecipient=${affiliateInfo.feeRecipient}`;
+            }
 
-            const response = await fetch(`${ZRX_API_URL}/quote?sellToken=${tokenAddressSell}&buyToken=${tokenAddressBuy}&sellAmount=${tokenUnitAmount}${takerAddressString}${skipValidationString}`);
+            const response = await fetch(`${ZRX_API_URL}/quote?sellToken=${tokenAddressSell}&buyToken=${tokenAddressBuy}&sellAmount=${tokenUnitAmount}${takerAddressString}${skipValidationString}${buyTokenPercentage}`);
             if (response.ok && response.status === 200) {
                 newSwapQuote = await response.json() as unknown as SwapQuoteResponse;
                 // format quote
