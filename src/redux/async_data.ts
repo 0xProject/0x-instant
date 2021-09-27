@@ -39,9 +39,9 @@ export const asyncData = {
 
         try {
             const response = await fetch(tokenList as string || defaultTokenList);
-            if (response.ok && response.status  === 200) {
-                const tokenList = await response.json() as TokenList;
-                const tokens = tokenList.tokens.concat(ETH_TOKEN);
+            if (response.status  === 200) {
+                const tokenListResponse = await response.json() as TokenList;
+                const tokens = tokenListResponse.tokens.concat(ETH_TOKEN);
                 dispatch(actions.setAvailableTokens(tokens));
             } else {
                 throw new Error('Error fetching token list');

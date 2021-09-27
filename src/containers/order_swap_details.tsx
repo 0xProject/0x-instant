@@ -8,7 +8,7 @@ import { Flex } from '../components/ui/flex';
 import { Text } from '../components/ui/text';
 import { BIG_NUMBER_ZERO } from '../constants';
 import { actions } from '../redux/actions';
-import { getAccount, getBaseCurrency, getEthUsdPrice, getLatestApiSwapQuote, getSelectedTokenAmountOut, getSelectedTokenIn, getSelectedTokenOut } from '../redux/selectors';
+import { getAccount, getBaseCurrency, getEthUsdPrice, getLatestApiSwapQuote, getSelectedTokenIn, getSelectedTokenOut } from '../redux/selectors';
 import { ColorOption } from '../style/theme';
 import { AccountState, BaseCurrency } from '../types';
 
@@ -21,12 +21,10 @@ export const OrderSwapDetailsContainer = () => {
     const ethUsdPrice = useSelector(getEthUsdPrice);
     const account = useSelector(getAccount);
 
-
-
     const renderErrorFetchingUsdPrice = () => {
         const onClickText = () => {
            dispatch(actions.updateBaseCurrency(BaseCurrency.ETH));
-        }
+        };
         return (
             <Text>
                 There was an error fetching the USD price.

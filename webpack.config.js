@@ -60,7 +60,7 @@ const getRollbarTokens = (dischargeTarget, rollbarRequired) => {
 };
 
 const generateConfig = (dischargeTarget, heapConfigOptions, rollbarConfigOptions, nodeEnv) => {
-    const outputPath = process.env.WEBPACK_OUTPUT_PATH || 'umd/v3';
+    const outputPath = process.env.WEBPACK_OUTPUT_PATH || 'umd/v4';
 
     const { heapAnalyticsIdEnvName, heapAnalyticsIdRequired } = heapConfigOptions;
     const heapAnalyticsId = process.env[heapAnalyticsIdEnvName];

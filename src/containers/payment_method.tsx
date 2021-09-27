@@ -12,7 +12,7 @@ import { Flex } from '../components/ui/flex';
 import { WalletPrompt } from '../components/wallet_prompt';
 import { COINBASE_WALLET_ANDROID_APP_STORE_URL, COINBASE_WALLET_IOS_APP_STORE_URL, COINBASE_WALLET_SITE_URL } from '../constants';
 import { actions, unlockWalletAndDispatchToStore } from '../redux/actions';
-import { getAccount, getChainId, getWalletDisplayName } from '../redux/selectors';
+import { getAccount, getChainId } from '../redux/selectors';
 import { ColorOption } from '../style/theme';
 import {  AccountState, OperatingSystem, ProviderType, StandardSlidingPanelContent, WalletSuggestion } from '../types';
 import { analytics } from '../util/analytics';

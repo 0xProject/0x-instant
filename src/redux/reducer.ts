@@ -388,26 +388,4 @@ const reduceStateWithAccount = (state: State, account: Account) => {
     };
 };
 
-const doesSwapQuoteMatchState = (
-    swapQuote: SwapQuoteResponse,
-    state: State,
-): boolean => {
-    const selectedTokenIn = state.selectedTokenIn;
-    const selectedTokenAmountIn = state.selectedTokenAmountIn;
-    const selectedTokenOut = state.selectedTokenOut;
-    const selectedTokenAmountOut = state.selectedTokenAmountOut;
-    // if no selectedAsset or selectedAssetAmount exists on the current state, return false
-    if (
-        selectedTokenIn === undefined ||
-        selectedTokenAmountIn === undefined ||
-        selectedTokenOut === undefined ||
-        selectedTokenAmountOut === undefined
-    ) {
-        return false;
-    }
 
-    if (swapQuote === state.latestApiSwapQuote) {
-        return true;
-    }
-
-};
