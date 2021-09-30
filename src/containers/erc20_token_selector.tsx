@@ -1,17 +1,17 @@
-import * as _ from "lodash";
-import * as React from "react";
-import { useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import * as _ from 'lodash';
+import * as React from 'react';
+import { useMemo } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
-import { SearchInput } from "../components/search_input";
-import { TokenRowFilter } from "../components/token_row_filter";
-import { Container } from "../components/ui/container";
-import { Text } from "../components/ui/text";
-import { updateTokenSelect } from "../redux/actions";
-import { getAvailableTokens } from "../redux/selectors";
-import { ColorOption } from "../style/theme";
-import { TokenInfo } from "../types";
-import { analytics } from "../util/analytics";
+import { SearchInput } from '../components/search_input';
+import { TokenRowFilter } from '../components/token_row_filter';
+import { Container } from '../components/ui/container';
+import { Text } from '../components/ui/text';
+import { updateTokenSelect } from '../redux/actions';
+import { getAvailableTokens } from '../redux/selectors';
+import { ColorOption } from '../style/theme';
+import { TokenInfo } from '../types';
+import { analytics } from '../util/analytics';
 
 export interface ERC20TokenSelectorProps {
   isIn: boolean;
@@ -21,12 +21,12 @@ export interface ERC20TokenSelectorProps {
 export const ERC20TokenSelectorContainer = (props: ERC20TokenSelectorProps) => {
   const tokens = useSelector(getAvailableTokens);
   const dispatch = useDispatch();
-  const [searchQuery, setSearchQuery] = React.useState("");
+  const [searchQuery, setSearchQuery] = React.useState('');
   const [page, _setPage] = React.useState(0);
   const [perPage, _setPerPage] = React.useState(10);
 
   const handleSearchInputChange = (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     setSearchQuery(event.target.value);
     analytics.trackTokenSelectorSearched(searchQuery);
@@ -39,10 +39,9 @@ export const ERC20TokenSelectorContainer = (props: ERC20TokenSelectorProps) => {
   };
   const filteredTokens = useMemo(() => {
     return tokens
-      .filter(
-        (t) =>
+      .filter(t =>
           t.name.toLowerCase().indexOf(searchQuery.toLowerCase()) !== -1 ||
-          t.symbol.toLowerCase().indexOf(searchQuery.toLowerCase()) !== -1
+          t.symbol.toLowerCase().indexOf(searchQuery.toLowerCase()) !== -1,
       )
       .slice(0, perPage * (page + 1));
   }, [tokens, searchQuery, page, perPage]);

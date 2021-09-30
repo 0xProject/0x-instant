@@ -105,7 +105,7 @@ export const SwapStepsContainer = () => {
                         </Text>
                         <Container>
                             <Text fontWeight={500} fontColor={ColorOption.black} fontSize={'16px'} lineHeight={'19px'}>
-                                {renderTokenAmount(true)} {' '}
+                                {renderTokenAmount(true)} &nbsp;
 
                             </Text>
 
@@ -127,7 +127,7 @@ export const SwapStepsContainer = () => {
                         </Text>
                         <Container>
                             <Text fontWeight={'bold'} fontColor={ColorOption.black}>
-                                {renderTokenAmount(false)} {' '}
+                                {renderTokenAmount(false)}  &nbsp;
 
                             </Text>
 
@@ -161,7 +161,7 @@ export const SwapStepsContainer = () => {
                         </Text>
                         <Container>
                             <Text fontWeight={500} fontColor={ColorOption.black} fontSize={'16px'} lineHeight={'19px'}>
-                                {renderGasPrice()} {' '}
+                                {renderGasPrice()}  &nbsp;
                             </Text>
 
                              <Text fontWeight={400} fontColor={ColorOption.grey}>

@@ -39,9 +39,7 @@ The 0x Instant UI powered by 0x API are bundled together in a convenient JS pack
         <script type="text/javascript">
             function renderZeroExInstant() {
                 zeroExInstant.render(
-                    {
-                        orderSource: 'https://api.0x.org/sra/',
-                    },
+                    {},
                     'body',
                 );
             }
@@ -124,6 +122,19 @@ zeroExInstant.render(
 );
 ```
 
+## Example of Swap Token In by Token out with defined amount
+
+```typescript
+zeroExInstant.render(
+    {
+       defaultSelectedTokenIn: '0xe41d2489571d322189246dafa5ebde1f4699f498',
+       defaultSelectedTokenOut: '0x1985365e9f78359a9b6ad760e32412f4a445e862',
+       defaultAmountTokenIn: 10000000000,
+    },
+    'body',
+);
+```
+
 ## Providing your own callback handler
 
 ```typescript
@@ -139,7 +150,7 @@ zeroExInstant.render(
 
 # Learn about affiliate fees
 
-As an end host of 0x Instant, you can charge users a fee on all trades made through Instant with the `affiliateFee` option. Simply specify an ethereum address and feePercentage (up to 5%), and a percentage of each transaction will be deposited into the specified address (denominated in ETH).
+As an end host of 0x Instant, you can charge users a fee on all trades made through Instant with the `affiliateFee` option. Simply specify an ethereum address and feePercentage (up to 5%), and a percentage of each transaction will be deposited into the specified address (denominated in bought tokens).
 
 Example: 3% of transaction volume (in ETH) will be deposited into 0x50ff5828a216170cf224389f1c5b0301a5d0a230
 
@@ -159,108 +170,14 @@ zeroExInstant.render(
 
 ## General
 
-### Q: What is a SignedOrder?
-
-A SignedOrder is a basic primitive of the 0x protocol. You can think of the SignedOrder as a set of parameters that define the terms of a trade, plus a signature that proves that the creator (also known as the 'maker') of an order has approved the trade. For example, a SignedOrder can specify: address A wants to trade 5 REP tokens in exchange for 1 WETH token.
-
-The order includes a signature produced by address A's private key which is the signed hash of the order parameters. For exact JavaScript / TypeScript definition of a SignedOrder, refer to our [docs](https://github.com/0xProject/0x-monorepo/blob/development/packages/types/src/index.ts#L40).
-
-### Q: What is the Standard Relayer API?
-
-The Standard relayer API is an HTTP specification that facilitates discovering and publishing SignedOrders. As an integrator of 0x Instant you will want to grab an API url from the [Relayer Registry](https://github.com/0xProject/0x-relayer-registry/blob/master/relayers.json). Check out the exact specification of the API in the [documentation](http://sra3-spec.s3-website-us-east-1.amazonaws.com/).
-
 ### Q: What is a provider?
 
 Check out this [article](/docs/guides/web3-provider-explained) in the guides section for an explanation of web3 providers. A dApp developer typically grabs this object from window.ethereum or window.web3.currentProvider. For advanced usage of providers check out the [examples](/docs/guides/web3-provider-explained#web3-provider-examples) of how to create your own providers
 
-### Q: How can I check liquidity of an asset prior to rendering Instant?
-
-There is a helper method available at `zeroExInstant.hasLiquidityForAssetDataAsync` which takes in an assetData string and order source (Standard Relayer API url or an array of signed orders) and returns a Promise which resolves a boolean value indicating if there is an liquidity available for a given assetData.
-
-<CodeTabs tabs={['html']}>
-
-```html
-<div id="liquidityContainer">Loading...</div>
-<script>
-    const erc20TokenAddress = '0xd26114cd6EE289AccF82350c8d8487fedB8A0C07';
-    const assetData = zeroExInstant.assetDataForERC20TokenAddress(erc20TokenAddress);
-
-    zeroExInstant.hasLiquidityForAssetDataAsync(assetData, 'https://api.0x.org/sra/').then(l => {
-        document.getElementById('liquidityContainer').innerHTML = `Relayer has liquidity: ${l ? 'Yes' : 'No'}`;
-    });
-</script>
-```
 
 </CodeTabs>
 
 Codepen [example](https://codepen.io/dekz/pen/yLLmbrV)
-
-### Q: What is assetData?
-
-As we now support multiple [token transfer proxies](/docs/guides/v3-specification#assetproxy), the identifier of which proxy to use for the token transfer must be encoded, along with the token information. Each proxy in 0x has a unique identifier. If you're using `@0x/contract-wrappers` there are helper methods for this [encoding](https://0x.org/docs/tools/contract-wrappers#encodeerc20assetdata) and [decoding](https://0x.org/docs/tools/contract-wrappers#decodeerc20assetdata).
-
-The identifier for the Proxy uses a similar scheme to [ABI function selectors](https://github.com/ethereum/wiki/wiki/Ethereum-Contract-ABI#function-selector).
-
-```
-// ERC20 Proxy ID  0xf47261b0
-bytes4(keccak256("ERC20Token(address)"))
-// ERC721 Proxy ID 0x02571792
-bytes4(keccak256("ERC721Token(address,uint256)"))
-```
-
-Asset data is encoded using [ABI encoding](https://solidity.readthedocs.io/en/develop/abi-spec.html).
-
-For example, encoding the ERC20 token contract (address: 0x1dc4c1cefef38a777b15aa20260a54e584b16c48) using the ERC20 Transfer Proxy (id: 0xf47261b0) would be:
-
-```
-0xf47261b00000000000000000000000001dc4c1cefef38a777b15aa20260a54e584b16c48
-```
-
-Encoding the ERC721 token contract (address: `0x371b13d97f4bf77d724e78c16b7dc74099f40e84`), token id (id: `99`, which hex encoded is `0x63`) and the ERC721 Transfer Proxy (id: `0x02571792`) would be:
-
-```
-0x02571792000000000000000000000000371b13d97f4bf77d724e78c16b7dc74099f40e840000000000000000000000000000000000000000000000000000000000000063
-```
-
-For convenience, zeroExInstant exposes a `zeroExInstant.assetDataForERC20TokenAddress` method, which returns the `assetData` for a given ERC20 address.
-
-For more information see [the Asset Proxy](/docs/guides/v3-specification#erc20proxy) section of the v3 spec and the [Ethereum ABI Spec](https://solidity.readthedocs.io/en/develop/abi-spec.html).
-
-### Q: What is assetMetaData?
-
-In order to provide a good user experience, Instant requires data that is not available on-chain. This includes the `decimals`, `symbol` and `name` of the token along with optional information like `primaryColor`, and `iconUrl` that informs Instant how to theme itself when that token is selected. It also requires to know whether the token is ERC20 or some other standard via the assetProxyId field.
-
-The keys in this mapping are the `assetData` (see "What is assetData?" above) for the corresponding token.
-
-**Example assetMetaDataMap**
-
-```js
-{
-    '0xf47261b0000000000000000000000000744d70fdbe2bc4cf95131626614a1764df805b9e': {
-        assetProxyId: '0xf47261b0', // ERC20 Proxy Id
-        decimals: 18,
-        symbol: 'XXX',
-        name: 'My Custom Token',
-        primaryColor: '#F2F7FF', // Optional
-        iconUrl: 'https://cdn.icons.com/my_icon.svg', // Optional
-    },
-}
-
-```
-
-| Field                   | Description                                                                          |
-| ----------------------- | ------------------------------------------------------------------------------------ |
-| assetProxyId            | Only ERC20 is supported and the value for assetProxyId should always be “0xf47261b0” |
-| decimals                | The number of decimal places this token requires                                     |
-| symbol                  | The token symbol (ex: `ZRX`, `BAT`, etc...)                                          |
-| name                    | The full name of the token (ex: `0x`, `Basic Attention Token`, etc...)               |
-| primaryColor (optional) | The color Instant will theme itself when this token is selected                      |
-| iconUrl (optional)      | The url to the icon to use for this token                                            |
-
-The icon referenced by `iconUrl` will go on top of a 26x26 circle that has `primaryColor` as a background. If an `iconUrl` is not provided, the specified token `symbol` will be displayed over the circle in white.
-
-We provide assetMetaData for a subset of ERC20 tokens. You can call the helper function `zeroExInstant.hasMetaDataForAssetData` which returns a boolean indiciating whether or not we have assetMetaData for a given assetData string.
-
 
 
 ### Q: Can I swap through 0x Instant  ERC-20 tokens like WETH or DAI?
@@ -276,10 +193,10 @@ Create question on [StackExchange](https://ethereum.stackexchange.com/questions/
 
 ### Q: How can I make 0x Instant work in my mobile app?
 
-For apps using React Native or apps that have a web view, the Asset Swapper engine will work out of the box with your application. For apps that are written in a native language like Java or Swift, you will need to wrap the asset-swapper logic in a JS interpreter.
+For apps using React Native or apps that have a web view, the 0x API will work out of the box with your application. For apps that are written in a native language like Java or Swift, you will need to wrap the asset-swapper logic in a JS interpreter.
 
 ## Affiliates
 
 ### Q: How do I make money as an affiliate?
 
-If you host 0x Instant, you can designate an address that you own to receive a small % of ETH that users spend on assets. The fee percent maxes out at 5%. You can configure this in the AffiliateInfo setting.
+If you host 0x Instant, you can designate an address that you own to receive a small % of bought tokens that users spend on assets. The fee percent maxes out at 5%. You can configure this in the AffiliateInfo setting.

@@ -387,5 +387,3 @@ const reduceStateWithAccount = (state: State, account: Account) => {
         providerState: newProviderState,
     };
 };
-
-

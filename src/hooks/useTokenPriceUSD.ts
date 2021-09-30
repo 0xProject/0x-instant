@@ -6,7 +6,6 @@ import { useEffect, useState } from 'react';
 import { SwapQuoteResponse } from '../types';
 import { apiQuoteUpdater } from '../util/api_quote_updater';
 
-
 export const useTokenPriceUSD = (token?: Token,  chainId?: ChainId, refresh?: boolean) => {
     const [priceQuote, setPriceQuote] = useState<SwapQuoteResponse>();
     const [loading, setLoading] = useState<boolean>();

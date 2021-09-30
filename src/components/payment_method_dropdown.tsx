@@ -1,14 +1,14 @@
-import { ChainId } from "@0x/contract-addresses";
-import { BigNumber } from "@0x/utils";
-import * as copy from "copy-to-clipboard";
-import * as React from "react";
+import { ChainId } from '@0x/contract-addresses';
+import { BigNumber } from '@0x/utils';
+import * as copy from 'copy-to-clipboard';
+import * as React from 'react';
 
-import { analytics } from "../util/analytics";
-import { envUtil } from "../util/env";
-import { etherscanUtil } from "../util/etherscan";
-import { format } from "../util/format";
+import { analytics } from '../util/analytics';
+import { envUtil } from '../util/env';
+import { etherscanUtil } from '../util/etherscan';
+import { format } from '../util/format';
 
-import { Dropdown, DropdownItemConfig } from "./ui/dropdown";
+import { Dropdown, DropdownItemConfig } from './ui/dropdown';
 
 export interface PaymentMethodDropdownProps {
   accountAddress: string;
@@ -23,9 +23,9 @@ export const PaymentMethodDropdown = (props: PaymentMethodDropdownProps) => {
 
     const etherscanUrl = etherscanUtil.getEtherScanEthAddressIfExists(
       accountAddress,
-      network
+      network,
     );
-    window.open(etherscanUrl, "_blank");
+    window.open(etherscanUrl, '_blank');
   };
   const handleCopyToClipboardClick = (): void => {
     analytics.trackPaymentMethodCopiedAddress();
@@ -39,11 +39,11 @@ export const PaymentMethodDropdown = (props: PaymentMethodDropdownProps) => {
       return [];
     }
     const viewOnEtherscan = {
-      text: "View on Etherscan",
+      text: 'View on Etherscan',
       onClick: handleEtherscanClick,
     };
     const copyAddressToClipboard = {
-      text: "Copy address to clipboard",
+      text: 'Copy address to clipboard',
       onClick: handleCopyToClipboardClick,
     };
     return [viewOnEtherscan, copyAddressToClipboard];
@@ -53,7 +53,7 @@ export const PaymentMethodDropdown = (props: PaymentMethodDropdownProps) => {
   const label = format.ethBaseUnitAmount(
     accountEthBalanceInWei,
     4,
-    ""
+    '',
   ) as string;
   return (
     <Dropdown

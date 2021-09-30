@@ -1,22 +1,22 @@
-import { ERC20TokenContract } from "@0x/contract-wrappers";
-import { BigNumber } from "@0x/utils";
-import { Web3Wrapper } from "@0x/web3-wrapper";
-import * as _ from "lodash";
-import * as React from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { ERC20TokenContract } from '@0x/contract-wrappers';
+import { BigNumber } from '@0x/utils';
+import { Web3Wrapper } from '@0x/web3-wrapper';
+import * as _ from 'lodash';
+import * as React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
-import { Text } from "../components/ui/text";
+import { Text } from '../components/ui/text';
 import {
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
   WEB_3_WRAPPER_TRANSACTION_FAILED_ERROR_MSG_PREFIX,
-} from "../constants";
-import { actions } from "../redux/actions";
+} from '../constants';
+import { actions } from '../redux/actions';
 import {
   getApproveState,
   getIsStepWithApprove,
   getSwapOrderState,
-} from "../redux/selectors";
-import { ColorOption } from "../style/theme";
+} from '../redux/selectors';
+import { ColorOption } from '../style/theme';
 import {
   AffiliateInfo,
   ApproveProcessState,
@@ -26,15 +26,15 @@ import {
   TokenBalance,
   TokenInfo,
   ZeroExInstantError,
-} from "../types";
-import { analytics } from "../util/analytics";
-import { errorReporter } from "../util/error_reporter";
-import { gasPriceEstimator } from "../util/gas_price_estimator";
+} from '../types';
+import { analytics } from '../util/analytics';
+import { errorReporter } from '../util/error_reporter';
+import { gasPriceEstimator } from '../util/gas_price_estimator';
 
-import { Button } from "./ui/button";
-import { Container } from "./ui/container";
-import { Flex } from "./ui/flex";
-import { Icon } from "./ui/icon";
+import { Button } from './ui/button';
+import { Container } from './ui/container';
+import { Flex } from './ui/flex';
+import { Icon } from './ui/icon';
 
 export interface SwapButtonProps {
   step: SwapStep;
@@ -48,28 +48,28 @@ export interface SwapButtonProps {
   onValidationPending: (swapQuote: SwapQuoteResponse) => void;
   onValidationFail: (
     swapQuote: SwapQuoteResponse,
-    errorMessage: ZeroExInstantError
+    errorMessage: ZeroExInstantError,
   ) => void;
   onSignatureDenied: (swapQuote: SwapQuoteResponse) => void;
   onSwapProcessing: (
     swapQuote: SwapQuoteResponse,
     txHash: string,
     startTimeUnix: number,
-    expectedEndTimeUnix: number
+    expectedEndTimeUnix: number,
   ) => void;
   onSwapSuccess: (swapQuote: SwapQuoteResponse, txHash: string) => void;
   onSwapFailure: (swapQuote: SwapQuoteResponse, txHash: string) => void;
   onApproveValidationPending: (token: TokenInfo) => void;
   onApproveValidationFail: (
     token: TokenInfo,
-    errorMessage: ZeroExInstantError
+    errorMessage: ZeroExInstantError,
   ) => void;
 
   onApproveTokenProcessing: (
     token: TokenInfo,
     txHash: string,
     startTimeUnix: number,
-    expectedEndTimeUnix: number
+    expectedEndTimeUnix: number,
   ) => void;
   onApproveTokenSuccess: (token: TokenInfo, txHash: string) => void;
   onApproveTokenFailure: (token: TokenInfo, txHash: string) => void;
@@ -103,7 +103,7 @@ export const SwapButton = (props: SwapButtonProps) => {
     const tokenToApproveAddress = tokenBalanceIn.token.address;
     const erc20Token = new ERC20TokenContract(
       tokenToApproveAddress,
-      web3Wrapper.getProvider()
+      web3Wrapper.getProvider(),
     );
 
     const gasInfo = await gasPriceEstimator.getGasInfoAsync();
@@ -118,7 +118,7 @@ export const SwapButton = (props: SwapButtonProps) => {
     } catch (e) {
       props.onApproveValidationFail(
         tokenToApprove,
-        ZeroExInstantError.CouldNotSubmitTransaction
+        ZeroExInstantError.CouldNotSubmitTransaction,
       );
       throw e;
     }
@@ -129,7 +129,7 @@ export const SwapButton = (props: SwapButtonProps) => {
       tokenToApprove,
       txHash,
       startTimeUnix,
-      expectedEndTimeUnix
+      expectedEndTimeUnix,
     );
     try {
       await web3Wrapper.awaitTransactionSuccessAsync(txHash);
@@ -166,7 +166,7 @@ export const SwapButton = (props: SwapButtonProps) => {
   const _renderButtonText = () => {
     const { step, tokenBalanceIn } = props;
     if (swapOrderState.processState === OrderProcessState.Processing) {
-      return "Confirming Trade";
+      return 'Confirming Trade';
     }
     if (approveState.processState === ApproveProcessState.Processing) {
       const tokenToApprove = tokenBalanceIn.token;
@@ -175,14 +175,14 @@ export const SwapButton = (props: SwapButtonProps) => {
 
     switch (step) {
       case SwapStep.Swap:
-        return "Preview Trade";
+        return 'Preview Trade';
       case SwapStep.Approve:
         const tokenToApprove = tokenBalanceIn.token;
         return `Approve ${tokenToApprove.symbol.toUpperCase()} usage`;
       case SwapStep.ReviewOrder:
-        return "Confirm Trade";
+        return 'Confirm Trade';
       default:
-        return "Preview Trade";
+        return 'Preview Trade';
     }
   };
 
@@ -210,7 +210,7 @@ export const SwapButton = (props: SwapButtonProps) => {
     try {
       analytics.trackSwapStarted(swapQuote);
       txHash = await web3Wrapper.sendTransactionAsync(
-        swapQuote as Required<SwapQuoteResponse>
+        swapQuote as Required<SwapQuoteResponse>,
       );
     } catch (e) {
       if (e instanceof Error) {
@@ -218,7 +218,7 @@ export const SwapButton = (props: SwapButtonProps) => {
         analytics.trackSwapUnknownError(swapQuote, e.message);
         props.onValidationFail(
           swapQuote,
-          ZeroExInstantError.CouldNotSubmitTransaction
+          ZeroExInstantError.CouldNotSubmitTransaction,
         );
         return;
       }
@@ -226,15 +226,15 @@ export const SwapButton = (props: SwapButtonProps) => {
       // like transaction deny
       if (
         e.message &&
-        e.message.includes("User denied transaction signature")
+        e.message.includes('User denied transaction signature')
       ) {
         analytics.trackSwapSignatureDenied(swapQuote);
         props.onSignatureDenied(swapQuote);
         return;
       }
       // Fortmatic specific error handling
-      if (e.message && e.message.includes("Fortmatic:")) {
-        if (e.message.includes("User denied transaction.")) {
+      if (e.message && e.message.includes('Fortmatic:')) {
+        if (e.message.includes('User denied transaction.')) {
           analytics.trackSwapSignatureDenied(swapQuote);
           props.onSignatureDenied(swapQuote);
           return;
@@ -249,14 +249,14 @@ export const SwapButton = (props: SwapButtonProps) => {
       swapQuote,
       txHash,
       startTimeUnix,
-      expectedEndTimeUnix
+      expectedEndTimeUnix,
     );
     try {
       analytics.trackSwapTxSubmitted(
         swapQuote,
         txHash,
         startTimeUnix,
-        expectedEndTimeUnix
+        expectedEndTimeUnix,
       );
       await web3Wrapper.awaitTransactionSuccessAsync(txHash);
     } catch (e) {
@@ -268,7 +268,7 @@ export const SwapButton = (props: SwapButtonProps) => {
           swapQuote,
           txHash,
           startTimeUnix,
-          expectedEndTimeUnix
+          expectedEndTimeUnix,
         );
         props.onSwapFailure(swapQuote, txHash);
         return;
@@ -279,7 +279,7 @@ export const SwapButton = (props: SwapButtonProps) => {
       swapQuote,
       txHash,
       startTimeUnix,
-      expectedEndTimeUnix
+      expectedEndTimeUnix,
     );
     props.onSwapSuccess(swapQuote, txHash);
     props.onClosePanelStep(props.step);

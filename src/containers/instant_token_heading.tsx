@@ -1,26 +1,26 @@
-import * as _ from "lodash";
-import * as React from "react";
-import { useDispatch, useSelector } from "react-redux";
+import * as _ from 'lodash';
+import * as React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
-import { AmountPlaceholder } from "../components/amount_placeholder";
-import { Container } from "../components/ui/container";
-import { Flex } from "../components/ui/flex";
-import { Text } from "../components/ui/text";
-import { useColor } from "../hooks/useColor";
-import { actions } from "../redux/actions";
+import { AmountPlaceholder } from '../components/amount_placeholder';
+import { Container } from '../components/ui/container';
+import { Flex } from '../components/ui/flex';
+import { Text } from '../components/ui/text';
+import { useColor } from '../hooks/useColor';
+import { actions } from '../redux/actions';
 import {
   getAccount,
   getSelectedTokenIn,
   getSelectedTokenInBalance,
   getSelectedTokenOut,
   getSelectedTokenOutBalance,
-} from "../redux/selectors";
-import { ColorOption } from "../style/theme";
-import { AccountState, TokenInfo } from "../types";
-import { format } from "../util/format";
-import { tokenUtils } from "../util/token";
+} from '../redux/selectors';
+import { ColorOption } from '../style/theme';
+import { AccountState, TokenInfo } from '../types';
+import { format } from '../util/format';
+import { tokenUtils } from '../util/token';
 
-import { SelectedERC20AmountInput } from "./selected_erc20_amount_input";
+import { SelectedERC20AmountInput } from './selected_erc20_amount_input';
 
 export interface InstantTokenHeadingProps {
   isIn: boolean;
@@ -30,7 +30,7 @@ export interface InstantTokenHeadingProps {
 const PLACEHOLDER_COLOR = ColorOption.white;
 
 export const InstantTokenHeadingContainer = (
-  props: InstantTokenHeadingProps
+  props: InstantTokenHeadingProps,
 ) => {
   const dispatch = useDispatch();
   const selectedTokenIn = useSelector(getSelectedTokenIn);
@@ -119,9 +119,9 @@ export const InstantTokenHeadingContainer = (
 
   const _renderTopText = () => {
     if (props.isIn) {
-      return "You send";
+      return 'You send';
     } else {
-      return "You receive";
+      return 'You receive';
     }
   };
 
@@ -136,7 +136,7 @@ export const InstantTokenHeadingContainer = (
       if (tokenUtils.isETH(selectedToken)) {
         if (account.state === AccountState.Ready && account.ethBalanceInWei) {
           const formattedETH = format.ethBaseUnitAmount(
-            account.ethBalanceInWei
+            account.ethBalanceInWei,
           );
           return `Balance: ${formattedETH}`;
         } else {
@@ -152,7 +152,7 @@ export const InstantTokenHeadingContainer = (
           token.symbol,
           token.decimals,
           balance,
-          4
+          4,
         );
         return `Balance: ${formattedBalance}`;
       } else {
