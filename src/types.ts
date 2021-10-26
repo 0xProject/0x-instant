@@ -1,5 +1,5 @@
 import { ChainId } from '@0x/contract-addresses';
-import { AssetProxyId, ObjectMap, SignedOrder } from '@0x/types';
+import { ObjectMap } from '@0x/types';
 import { BigNumber } from '@0x/utils';
 import { Web3Wrapper } from '@0x/web3-wrapper';
 import { SupportedProvider, ZeroExProvider } from 'ethereum-types';
@@ -89,39 +89,6 @@ export type ActionsUnion<A extends ActionCreatorsMapObject> = ReturnType<
     A[keyof A]
 >;
 
-export interface ERC20AssetMetaData {
-    assetProxyId: AssetProxyId.ERC20;
-    decimals: number;
-    primaryColor?: string;
-    symbol: string;
-    name: string;
-    iconUrl?: string;
-}
-
-export interface ERC721AssetMetaData {
-    assetProxyId: AssetProxyId.ERC721;
-    name: string;
-    imageUrl?: string;
-    primaryColor?: string;
-}
-
-export type AssetMetaData = ERC20AssetMetaData | ERC721AssetMetaData;
-
-export interface ERC20Asset {
-    assetData: string;
-    metaData: ERC20AssetMetaData;
-}
-
-export interface ERC721Asset {
-    assetData: string;
-    metaData: ERC721AssetMetaData;
-}
-
-export interface Asset {
-    assetData: string;
-    metaData: AssetMetaData;
-}
-
 export enum Network {
     Kovan = 42,
     Mainnet = 1,
@@ -166,8 +133,6 @@ export interface AccountNotReady {
 }
 
 export type Account = AccountReady | AccountNotReady;
-
-export type OrderSource = string | SignedOrder[];
 
 export interface AddressAndEthBalanceInWei {
     address: string;
@@ -247,7 +212,6 @@ export interface SwapQuoteResponse extends SwapQuoteResponsePartialTransaction, 
         gasPrice: BigNumber;
         protocolFee: BigNumber;
         minimumProtocolFee: BigNumber;
-        orders: SignedOrder[];
         buyAmount: BigNumber;
         sellAmount: BigNumber;
         buyTokenAddress: string;

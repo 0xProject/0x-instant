@@ -5,10 +5,8 @@ import { GIT_SHA, HEAP_ENABLED, INSTANT_DISCHARGE_TARGET, NODE_ENV, NPM_PACKAGE_
 import {
     AffiliateInfo,
     ApproveProcessState,
-    Asset,
     BaseCurrency,
     OrderProcessState,
-    OrderSource,
     ProviderState,
     QuoteFetchOrigin,
     SwapQuoteResponse,
@@ -150,16 +148,13 @@ export const analytics = {
     },
     generateEventProperties: (
         network: ChainId,
-        orderSource: OrderSource,
         providerState: ProviderState,
         window: Window,
-        selectedAsset?: Asset,
         affiliateInfo?: AffiliateInfo,
         baseCurrency?: BaseCurrency,
     ): AnalyticsEventOptions => {
         const affiliateAddress = affiliateInfo ? affiliateInfo.feeRecipient : 'none';
         const affiliateFeePercent = affiliateInfo ? parseFloat(affiliateInfo.feePercentage.toFixed(4)) : 0;
-        const orderSourceName = typeof orderSource === 'string' ? orderSource : 'provided';
         const eventOptions: AnalyticsEventOptions = {
             embeddedHost: window.location.host,
             embeddedUrl: window.location.href,
@@ -168,11 +163,8 @@ export const analytics = {
             providerDisplayName: providerState.displayName,
             gitSha: GIT_SHA,
             npmVersion: NPM_PACKAGE_VERSION,
-            orderSource: orderSourceName,
             affiliateAddress,
             affiliateFeePercent,
-            selectedAssetName: selectedAsset ? selectedAsset.metaData.name : 'none',
-            selectedAssetData: selectedAsset ? selectedAsset.assetData : 'none',
             instantEnvironment: INSTANT_DISCHARGE_TARGET || `Local ${NODE_ENV}`,
             baseCurrency,
         };

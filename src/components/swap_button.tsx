@@ -1,6 +1,6 @@
-import { ERC20TokenContract } from '@0x/contract-wrappers';
 import { BigNumber } from '@0x/utils';
 import { Web3Wrapper } from '@0x/web3-wrapper';
+import { ContractTransaction, ethers, providers } from 'ethers';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -10,6 +10,7 @@ import {
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
   WEB_3_WRAPPER_TRANSACTION_FAILED_ERROR_MSG_PREFIX,
 } from '../constants';
+import erc20abi from '../constants/ABI/erc20.json';
 import { actions } from '../redux/actions';
 import {
   getApproveState,
@@ -101,20 +102,15 @@ export const SwapButton = (props: SwapButtonProps) => {
 
     props.onApproveValidationPending(tokenToApprove);
     const tokenToApproveAddress = tokenBalanceIn.token.address;
-    const erc20Token = new ERC20TokenContract(
-      tokenToApproveAddress,
-      web3Wrapper.getProvider(),
-    );
+    const pr = new providers.Web3Provider(web3Wrapper.getProvider() as any).getSigner();
+    const erc20Token =  new ethers.Contract(tokenToApproveAddress, erc20abi, pr);
 
     const gasInfo = await gasPriceEstimator.getGasInfoAsync();
-    let txHash: string | undefined;
+    let tx: ContractTransaction | undefined;
     try {
-      txHash = await erc20Token
-        .approve(swapQuote.allowanceTarget, UNLIMITED_ALLOWANCE_IN_BASE_UNITS)
-        .sendTransactionAsync({
-          from: accountAddress,
-          gasPrice: gasInfo.gasPriceInWei,
-        });
+
+      tx =  (await erc20Token.approve(swapQuote.allowanceTarget, UNLIMITED_ALLOWANCE_IN_BASE_UNITS.toString(), { from: accountAddress, gasPrice: gasInfo.gasPriceInWei.toString() })) as ContractTransaction;
+
     } catch (e) {
       props.onApproveValidationFail(
         tokenToApprove,
@@ -127,24 +123,24 @@ export const SwapButton = (props: SwapButtonProps) => {
     const expectedEndTimeUnix = startTimeUnix + gasInfo.estimatedTimeMs;
     props.onApproveTokenProcessing(
       tokenToApprove,
-      txHash,
+      tx.hash,
       startTimeUnix,
       expectedEndTimeUnix,
     );
     try {
-      await web3Wrapper.awaitTransactionSuccessAsync(txHash);
+      await web3Wrapper.awaitTransactionSuccessAsync(tx.hash);
     } catch (e) {
       if (
         e instanceof Error &&
         e.message.startsWith(WEB_3_WRAPPER_TRANSACTION_FAILED_ERROR_MSG_PREFIX)
       ) {
-        props.onApproveTokenFailure(tokenToApprove, txHash);
+        props.onApproveTokenFailure(tokenToApprove, tx.hash);
         return;
       }
       throw e;
     }
 
-    props.onApproveTokenSuccess(tokenToApprove, txHash);
+    props.onApproveTokenSuccess(tokenToApprove, tx.hash);
     props.onClosePanelStep(props.step);
   };
   const swapCompleted =

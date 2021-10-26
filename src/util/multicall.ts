@@ -1,5 +1,4 @@
-import { ChainId } from '@0x/contract-addresses';
-import { ContractWrappers, ZeroExProvider } from '@0x/contract-wrappers';
+import { ChainId, getContractAddressesForChainOrThrow } from '@0x/contract-addresses';
 import { BigNumber } from '@0x/utils';
 import { MultiCall } from '@indexed-finance/multicall';
 import { providers } from 'ethers';
@@ -9,14 +8,14 @@ import { TokenBalance, TokenInfo } from '../types';
 
 export const MulticallUtils  = {
 
-    getMulticallContract: (zeroxProvider: ZeroExProvider) => {
+    getMulticallContract: (zeroxProvider: any) => {
         const provider = new providers.Web3Provider(zeroxProvider);
         return new MultiCall(provider);
     },
-    getTokensBalancesAndAllowances: async (zeroxProvider: ZeroExProvider, tokens: TokenInfo[], chainId: ChainId, ethAccount: string, ethBalance: BigNumber): Promise<TokenBalance[]> => {
-       const contractWrappers = new ContractWrappers(zeroxProvider, {chainId});
-       const allowanceTarget = contractWrappers.contractAddresses.exchangeProxy;
-       const tokenAddress = tokens.filter(t => t.address !== ETH_ADDRESS ).map(t => t.address);
+    getTokensBalancesAndAllowances: async (zeroxProvider: any, tokens: TokenInfo[], chainId: ChainId, ethAccount: string, ethBalance: BigNumber): Promise<TokenBalance[]> => {
+       const contractAddresses = getContractAddressesForChainOrThrow(chainId);
+       const allowanceTarget = contractAddresses.exchangeProxy;
+       const tokenAddress = tokens.filter(t => t.address.toLowerCase() !== ETH_ADDRESS.toLowerCase() ).map(t => t.address);
        const multicall = MulticallUtils.getMulticallContract(zeroxProvider);
        const [, tokenBalancesAllowances] = await multicall.getBalancesAndAllowances(tokenAddress, ethAccount, allowanceTarget);
        const tokenBalances = tokens.map((tk: TokenInfo, i: any) => {

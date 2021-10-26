@@ -47,8 +47,6 @@
     "dependencies": {
         "@0x/assert": "^3.0.9",
         "@0x/contract-addresses": "^6.4.0",
-        "@0x/contract-wrappers": "^13.8.0",
-        "@0x/json-schemas": "^5.1.0",
         "@0x/subproviders": "^6.1.1",
         "@0x/utils": "^5.5.1",
         "@0x/web3-wrapper": "^7.2.0",
@@ -78,7 +76,6 @@
     "devDependencies": {
         "@0x/tslint-config": "^4.1.0",
         "@0x/types": "^3.2.0",
-        "@0x/typescript-typings": "^5.1.1",
         "@babel/core": "^7.12.3",
         "@babel/plugin-transform-runtime": "^7.12.1",
         "@babel/preset-env": "^7.12.1",
