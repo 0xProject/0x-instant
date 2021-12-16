@@ -11,50 +11,56 @@ import { format } from '../util/format';
 import { Dropdown, DropdownItemConfig } from './ui/dropdown';
 
 export interface PaymentMethodDropdownProps {
-    accountAddress: string;
-    accountEthBalanceInWei?: BigNumber;
-    network: ChainId;
+  accountAddress: string;
+  accountEthBalanceInWei?: BigNumber;
+  network: ChainId;
 }
 
-export class PaymentMethodDropdown extends React.PureComponent<PaymentMethodDropdownProps> {
-    public render(): React.ReactNode {
-        const { accountAddress, accountEthBalanceInWei } = this.props;
-        const value = format.ethAddress(accountAddress);
-        const label = format.ethBaseUnitAmount(accountEthBalanceInWei, 4, '') as string;
-        return (
-            <Dropdown
-                value={value}
-                label={label}
-                items={this._getDropdownItemConfigs()}
-                onOpen={analytics.trackPaymentMethodDropdownOpened}
-            />
-        );
+export const PaymentMethodDropdown = (props: PaymentMethodDropdownProps) => {
+  const { accountAddress, network, accountEthBalanceInWei } = props;
+  const handleEtherscanClick = (): void => {
+    analytics.trackPaymentMethodOpenedEtherscan();
+
+    const etherscanUrl = etherscanUtil.getEtherScanEthAddressIfExists(
+      accountAddress,
+      network,
+    );
+    window.open(etherscanUrl, '_blank');
+  };
+  const handleCopyToClipboardClick = (): void => {
+    analytics.trackPaymentMethodCopiedAddress();
+
+    const { accountAddress } = props;
+    copy(accountAddress);
+  };
+
+  const getDropdownItemConfigs = (): DropdownItemConfig[] => {
+    if (envUtil.isMobileOperatingSystem()) {
+      return [];
     }
-    private readonly _getDropdownItemConfigs = (): DropdownItemConfig[] => {
-        if (envUtil.isMobileOperatingSystem()) {
-            return [];
-        }
-        const viewOnEtherscan = {
-            text: 'View on Etherscan',
-            onClick: this._handleEtherscanClick,
-        };
-        const copyAddressToClipboard = {
-            text: 'Copy address to clipboard',
-            onClick: this._handleCopyToClipboardClick,
-        };
-        return [viewOnEtherscan, copyAddressToClipboard];
+    const viewOnEtherscan = {
+      text: 'View on Etherscan',
+      onClick: handleEtherscanClick,
     };
-    private readonly _handleEtherscanClick = (): void => {
-        analytics.trackPaymentMethodOpenedEtherscan();
+    const copyAddressToClipboard = {
+      text: 'Copy address to clipboard',
+      onClick: handleCopyToClipboardClick,
+    };
+    return [viewOnEtherscan, copyAddressToClipboard];
+  };
 
-        const { accountAddress, network } = this.props;
-        const etherscanUrl = etherscanUtil.getEtherScanEthAddressIfExists(accountAddress, network);
-        window.open(etherscanUrl, '_blank');
-    };
-    private readonly _handleCopyToClipboardClick = (): void => {
-        analytics.trackPaymentMethodCopiedAddress();
-
-        const { accountAddress } = this.props;
-        copy(accountAddress);
-    };
-}
+  const value = format.ethAddress(accountAddress);
+  const label = format.ethBaseUnitAmount(
+    accountEthBalanceInWei,
+    4,
+    '',
+  ) as string;
+  return (
+    <Dropdown
+      value={value}
+      label={label}
+      items={getDropdownItemConfigs()}
+      onOpen={analytics.trackPaymentMethodDropdownOpened}
+    />
+  );
+};

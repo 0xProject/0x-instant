@@ -3,6 +3,7 @@ const ip = require('ip');
 const path = require('path');
 const RollbarSourceMapPlugin = require('rollbar-sourcemap-webpack-plugin');
 const webpack = require('webpack');
+require("regenerator-runtime/runtime");
 
 const GIT_SHA = childProcess.execSync('git rev-parse HEAD').toString().trim();
 
@@ -59,7 +60,7 @@ const getRollbarTokens = (dischargeTarget, rollbarRequired) => {
 };
 
 const generateConfig = (dischargeTarget, heapConfigOptions, rollbarConfigOptions, nodeEnv) => {
-    const outputPath = process.env.WEBPACK_OUTPUT_PATH || 'umd/v3';
+    const outputPath = process.env.WEBPACK_OUTPUT_PATH || 'umd/v4';
 
     const { heapAnalyticsIdEnvName, heapAnalyticsIdRequired } = heapConfigOptions;
     const heapAnalyticsId = process.env[heapAnalyticsIdEnvName];

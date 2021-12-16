@@ -1,6 +1,6 @@
-import { BigNumber, SwapQuoteConsumer, SwapQuoter } from '@0x/asset-swapper';
 import { ChainId } from '@0x/contract-addresses';
-import { AssetProxyId, ObjectMap, SignedOrder } from '@0x/types';
+import { ObjectMap } from '@0x/types';
+import { BigNumber } from '@0x/utils';
 import { Web3Wrapper } from '@0x/web3-wrapper';
 import { SupportedProvider, ZeroExProvider } from 'ethereum-types';
 
@@ -22,6 +22,14 @@ export enum OrderProcessState {
     Failure = 'FAILURE',
 }
 
+export enum ApproveProcessState {
+    None = 'NONE',
+    Validating = 'VALIDATING',
+    Processing = 'PROCESSING',
+    Success = 'SUCCESS',
+    Failure = 'FAILURE',
+}
+
 export enum QuoteFetchOrigin {
     Manual = 'Manual',
     Heartbeat = 'Heartbeat',
@@ -30,6 +38,12 @@ export enum QuoteFetchOrigin {
 export enum BaseCurrency {
     USD = 'USD', // tslint:disable-line:enum-naming
     ETH = 'ETH', // tslint:disable-line:enum-naming
+}
+
+export enum SwapStep {
+    ReviewOrder = 'ReviewOrder',
+    Approve = 'Approve',
+    Swap = 'Swap',
 }
 
 export interface SimulatedProgress {
@@ -48,7 +62,21 @@ interface OrderStatePostTx {
     txHash: string;
     progress: SimulatedProgress;
 }
+
+interface ApproveStatePreTx {
+    processState: ApproveProcessState.None | ApproveProcessState.Validating;
+}
+interface ApproveStatePostTx {
+    processState:
+        | ApproveProcessState.Processing
+        | ApproveProcessState.Success
+        | ApproveProcessState.Failure;
+    txHash: string;
+    progress: SimulatedProgress;
+}
 export type OrderState = OrderStatePreTx | OrderStatePostTx;
+
+export type ApproveState = ApproveStatePreTx | ApproveStatePostTx;
 
 export enum DisplayStatus {
     Present,
@@ -60,39 +88,6 @@ export type ActionCreatorsMapObject = ObjectMap<FunctionType>;
 export type ActionsUnion<A extends ActionCreatorsMapObject> = ReturnType<
     A[keyof A]
 >;
-
-export interface ERC20AssetMetaData {
-    assetProxyId: AssetProxyId.ERC20;
-    decimals: number;
-    primaryColor?: string;
-    symbol: string;
-    name: string;
-    iconUrl?: string;
-}
-
-export interface ERC721AssetMetaData {
-    assetProxyId: AssetProxyId.ERC721;
-    name: string;
-    imageUrl?: string;
-    primaryColor?: string;
-}
-
-export type AssetMetaData = ERC20AssetMetaData | ERC721AssetMetaData;
-
-export interface ERC20Asset {
-    assetData: string;
-    metaData: ERC20AssetMetaData;
-}
-
-export interface ERC721Asset {
-    assetData: string;
-    metaData: ERC721AssetMetaData;
-}
-
-export interface Asset {
-    assetData: string;
-    metaData: AssetMetaData;
-}
 
 export enum Network {
     Kovan = 42,
@@ -116,11 +111,8 @@ export interface ProviderState {
     name: string;
     displayName: string;
     provider: ZeroExProvider;
-    swapQuoter: SwapQuoter;
-    swapQuoteConsumer: SwapQuoteConsumer;
     web3Wrapper: Web3Wrapper;
     account: Account;
-    orderSource: OrderSource;
     isProviderInjected: boolean;
 }
 
@@ -141,8 +133,6 @@ export interface AccountNotReady {
 }
 
 export type Account = AccountReady | AccountNotReady;
-
-export type OrderSource = string | SignedOrder[];
 
 export interface AddressAndEthBalanceInWei {
     address: string;
@@ -197,10 +187,6 @@ export enum ProviderType {
     Fallback = 'FALLBACK',
 }
 
-export interface ZeroExInstantRequiredBaseConfig {
-    orderSource: OrderSource;
-}
-
 export interface AffiliateInfo {
     feeRecipient: string;
     feePercentage: number;
@@ -209,15 +195,89 @@ export interface AffiliateInfo {
 export interface ZeroExInstantOptionalBaseConfig {
     provider: SupportedProvider;
     walletDisplayName: string;
-    availableAssetDatas: string[];
-    defaultAssetBuyAmount: number;
-    defaultSelectedAssetData: string;
-    additionalAssetMetaDataMap: ObjectMap<AssetMetaData>;
-    networkId: ChainId;
+    defaultSelectedTokenIn: TokenInfo;
+    defaultSelectedTokenOut: TokenInfo;
+    defaultAmountTokenIn: number;
+    defaultAmountTokenOut: number;
+    chainId: ChainId;
     affiliateInfo: AffiliateInfo;
+    tokenList: string | TokenList;
     shouldDisableAnalyticsTracking: boolean;
     onSuccess?: (txHash: string) => void;
 }
 
-export type ZeroExInstantBaseConfig = ZeroExInstantRequiredBaseConfig &
-    Partial<ZeroExInstantOptionalBaseConfig>;
+export type ZeroExInstantBaseConfig = Partial<ZeroExInstantOptionalBaseConfig>;
+
+export interface SwapQuoteResponse extends SwapQuoteResponsePartialTransaction, SwapQuoteResponsePrice {
+        gasPrice: BigNumber;
+        protocolFee: BigNumber;
+        minimumProtocolFee: BigNumber;
+        buyAmount: BigNumber;
+        sellAmount: BigNumber;
+        buyTokenAddress: string;
+        sellTokenAddress: string;
+        sources: GetSwapQuoteResponseLiquiditySource[];
+        from?: string;
+        gas: BigNumber;
+        estimatedGas: BigNumber;
+        estimatedGasTokenRefund: BigNumber;
+        allowanceTarget?: string;
+       // quoteReport?: QuoteReport;
+    }
+
+export interface SwapQuoteResponsePartialTransaction {
+        to: string;
+        data: string;
+        value: BigNumber;
+        decodedUniqueId: string;
+}
+
+export interface SwapQuoteResponsePrice {
+        price: BigNumber;
+        guaranteedPrice: BigNumber;
+}
+
+export interface GetSwapQuoteResponseLiquiditySource {
+        name: string;
+        proportion: BigNumber;
+        intermediateToken?: string;
+        hops?: string[];
+}
+
+export interface TokenInfo {
+    readonly chainId: number;
+    readonly address: string;
+    readonly name: string;
+    readonly decimals: number;
+    readonly symbol: string;
+    readonly logoURI?: string;
+    readonly tags?: string[];
+  }
+export interface TokenBalance {
+    token: TokenInfo;
+    balance: BigNumber;
+    isUnlocked: boolean;
+}
+
+export interface Version {
+    readonly major: number;
+    readonly minor: number;
+    readonly patch: number;
+  }
+
+export interface Tags {
+    readonly [tagId: string]: {
+      readonly name: string;
+      readonly description: string;
+    };
+  }
+
+export interface TokenList {
+    readonly name: string;
+    readonly timestamp: string;
+    readonly version: Version;
+    readonly tokens: TokenInfo[];
+    readonly keywords?: string[];
+    readonly tags?: Tags;
+    readonly logoURI?: string;
+  }

@@ -6,7 +6,6 @@ import { SlideAnimationState } from '../types';
 
 import { PositionAnimationSettings } from './animations/position_animation';
 import { SlideAnimation } from './animations/slide_animation';
-
 import { Container } from './ui/container';
 import { Flex } from './ui/flex';
 import { Icon } from './ui/icon';

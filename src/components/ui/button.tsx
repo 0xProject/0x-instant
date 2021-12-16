@@ -7,27 +7,28 @@ import { util } from '../../util/util';
 export type ButtonOnClickHandler = (event: React.MouseEvent<HTMLElement>) => void;
 
 export interface ButtonProps {
+    children: React.ReactNode ;
     backgroundColor?: ColorOption;
     borderColor?: ColorOption;
     fontColor?: ColorOption;
     fontSize?: string;
     width?: string;
     padding?: string;
-    type?: string;
+    type?: 'button' | 'submit' | 'reset';
     isDisabled?: boolean;
     href?: string;
     onClick?: ButtonOnClickHandler;
     className?: string;
 }
 
-const PlainButton: React.StatelessComponent<ButtonProps> = ({
+const PlainButton = ({
     children,
     isDisabled,
     onClick,
     href,
     type,
     className,
-}) => {
+}: ButtonProps) => {
     const computedOnClick = isDisabled ? undefined : href ? util.createOpenUrlInNewWindow(href) : onClick;
     return (
         <button type={type} className={className} onClick={computedOnClick} disabled={isDisabled}>

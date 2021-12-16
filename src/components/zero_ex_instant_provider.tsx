@@ -1,4 +1,3 @@
-import { AssetProxyId } from '@0x/types';
 import { BigNumber } from '@0x/utils';
 import * as _ from 'lodash';
 import * as React from 'react';
@@ -20,7 +19,6 @@ import {
     ZeroExInstantBaseConfig,
 } from '../types';
 import { analytics, disableAnalytics } from '../util/analytics';
-import { assetUtils } from '../util/asset';
 import { errorFlasher } from '../util/error_flasher';
 import { setupRollbar } from '../util/error_reporter';
 import { gasPriceEstimator } from '../util/gas_price_estimator';
@@ -46,63 +44,30 @@ export class ZeroExInstantProvider extends React.PureComponent<
         defaultState: DefaultState = DEFAULT_STATE,
     ): State {
         // use the networkId passed in with the props, otherwise default to that of the default state (1, mainnet)
-        const networkId = props.networkId || defaultState.network;
+        const networkId = props.chainId || defaultState.network;
         // construct the ProviderState
         const providerState = providerStateFactory.getInitialProviderState(
-            props.orderSource,
             networkId,
             props.provider,
             props.walletDisplayName,
         );
-        // merge the additional additionalAssetMetaDataMap with our default map
-        const completeAssetMetaDataMap = {
-            // Make sure the passed in assetDatas are lower case
-            ..._.mapKeys(props.additionalAssetMetaDataMap || {}, (value, key) =>
-                key.toLowerCase(),
-            ),
-            ...defaultState.assetMetaDataMap,
-        };
-
-        const selectedAsset =
-            props.defaultSelectedAssetData === undefined
-                ? undefined
-                : assetUtils.createAssetFromAssetDataOrThrow(
-                      props.defaultSelectedAssetData,
-                      completeAssetMetaDataMap,
-                      networkId,
-                  );
-
-        let selectedAssetUnitAmount: BigNumber | undefined;
-        if (selectedAsset !== undefined) {
-            if (selectedAsset.metaData.assetProxyId === AssetProxyId.ERC20) {
-                selectedAssetUnitAmount =
-                    props.defaultAssetBuyAmount === undefined
-                        ? undefined
-                        : new BigNumber(props.defaultAssetBuyAmount);
-            } else if (
-                selectedAsset.metaData.assetProxyId === AssetProxyId.ERC721
-            ) {
-                selectedAssetUnitAmount = new BigNumber(1);
-            }
-        }
+        const selectedTokenIn = props.defaultSelectedTokenIn === undefined ? undefined : props.defaultSelectedTokenIn;
+        const selectedTokenOut = props.defaultSelectedTokenOut === undefined ? undefined : props.defaultSelectedTokenOut;
+        const selectedTokenAmountIn = props.defaultAmountTokenIn === undefined ? undefined : new BigNumber(props.defaultAmountTokenIn);
+        const selectedTokenAmountOut = props.defaultAmountTokenOut === undefined ? undefined : new BigNumber(props.defaultAmountTokenOut);
+        const tokenList = props.tokenList === undefined ? undefined : props.tokenList;
 
         // construct the final state
         const storeStateFromProps: State = {
             ...defaultState,
+            selectedTokenIn,
+            selectedTokenOut,
+            tokenList,
+            selectedTokenAmountIn,
+            selectedTokenAmountOut,
             providerState,
             network: networkId,
             walletDisplayName: props.walletDisplayName,
-            selectedAsset,
-            selectedAssetUnitAmount,
-            availableAssets:
-                props.availableAssetDatas === undefined
-                    ? undefined
-                    : assetUtils.createAssetsFromAssetDatas(
-                          props.availableAssetDatas,
-                          completeAssetMetaDataMap,
-                          networkId,
-                      ),
-            assetMetaDataMap: completeAssetMetaDataMap,
             onSuccess: props.onSuccess,
             affiliateInfo: props.affiliateInfo,
         };
@@ -123,13 +88,15 @@ export class ZeroExInstantProvider extends React.PureComponent<
         // tslint:disable-next-line:no-floating-promises
         asyncData.fetchEthPriceAndDispatchToStore(dispatch);
         // fetch available assets if none are specified
-        if (state.availableAssets === undefined) {
+
+        if (state.availableTokens === undefined) {
             // tslint:disable-next-line:no-floating-promises
-            asyncData.fetchAvailableAssetDatasAndDispatchToStore(
+            asyncData.fetchTokenListAndDispatchToStore(
                 state,
                 dispatch,
             );
         }
+
         if (state.providerState.account.state !== AccountState.None) {
             this._accountUpdateHeartbeat = generateAccountHeartbeater({
                 store: this._store,
@@ -145,7 +112,7 @@ export class ZeroExInstantProvider extends React.PureComponent<
         this._swapQuoteHeartbeat.start(SWAP_QUOTE_UPDATE_INTERVAL_TIME_MS);
         // Trigger first buyquote fetch
         // tslint:disable-next-line:no-floating-promises
-        asyncData.fetchCurrentSwapQuoteAndDispatchToStore(
+        asyncData.fetchCurrentApiSwapQuoteAndDispatchToStore(
             state,
             dispatch,
             QuoteFetchOrigin.Manual,
@@ -162,7 +129,7 @@ export class ZeroExInstantProvider extends React.PureComponent<
 
         // Analytics
         disableAnalytics(this.props.shouldDisableAnalyticsTracking || false);
-        analytics.addEventProperties(
+        /*analytics.addEventProperties(
             analytics.generateEventProperties(
                 state.network,
                 this.props.orderSource,
@@ -172,7 +139,7 @@ export class ZeroExInstantProvider extends React.PureComponent<
                 this.props.affiliateInfo,
                 state.baseCurrency,
             ),
-        );
+        );*/
         analytics.trackInstantOpened();
     }
     public componentWillUnmount(): void {
@@ -182,15 +149,12 @@ export class ZeroExInstantProvider extends React.PureComponent<
         if (this._swapQuoteHeartbeat) {
             this._swapQuoteHeartbeat.stop();
         }
-        const state = this._store.getState();
-        // tslint:disable-next-line: no-floating-promises
-        state.providerState.swapQuoter.destroyAsync();
     }
     public render(): React.ReactNode {
         return (
             <ReduxProvider store={this._store}>
                 <SelectedAssetThemeProvider>
-                    {this.props.children}
+                    {this.props.children as React.ReactChild}
                 </SelectedAssetThemeProvider>
             </ReduxProvider>
         );

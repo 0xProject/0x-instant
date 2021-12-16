@@ -5,7 +5,7 @@ export interface MetaMaskLogoProps {
     height?: number;
 }
 
-export const MetaMaskLogo: React.StatelessComponent<MetaMaskLogoProps> = ({ width, height }) => (
+export const MetaMaskLogo = ({ width = 85, height = 80 }: MetaMaskLogoProps) => (
     <svg width={width} height={height} viewBox="0 0 85 80" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M80.578 0L47.7107 24.8648L53.542 10.2702L80.578 0Z" fill="#E2761B" />
         <path d="M4.24075 0L37.1081 25.4053L31.2768 10.2702L4.24075 0Z" fill="#E4761B" />
@@ -73,8 +73,3 @@ export const MetaMaskLogo: React.StatelessComponent<MetaMaskLogoProps> = ({ widt
 );
 
 MetaMaskLogo.displayName = 'MetaMaskLogo';
-
-MetaMaskLogo.defaultProps = {
-    width: 85,
-    height: 80,
-};

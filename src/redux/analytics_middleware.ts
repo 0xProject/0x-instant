@@ -1,14 +1,12 @@
-import { AssetProxyId } from '@0x/types';
 import { Web3Wrapper } from '@0x/web3-wrapper';
 import * as _ from 'lodash';
 import { Middleware } from 'redux';
 
 import { ETH_DECIMALS } from '../constants';
 import { AccountState, StandardSlidingPanelContent } from '../types';
-import { analytics, AnalyticsEventOptions } from '../util/analytics';
+import { analytics } from '../util/analytics';
 
 import { Action, ActionTypes } from './actions';
-
 import { State } from './reducer';
 
 export const analyticsMiddleware: Middleware = store => next => middlewareAction => {
@@ -56,35 +54,6 @@ export const analyticsMiddleware: Middleware = store => next => middlewareAction
                 ).toString();
                 analytics.addUserProperties({ lastEthBalanceInUnitAmount: ethBalanceInUnitAmount });
                 analytics.addEventProperties({ ethBalanceInUnitAmount });
-            }
-            break;
-        case ActionTypes.UpdateSelectedAsset:
-            const selectedAsset = curState.selectedAsset;
-            if (selectedAsset) {
-                const assetName = selectedAsset.metaData.name;
-                const assetData = selectedAsset.assetData;
-                analytics.trackTokenSelectorChose({
-                    assetName,
-                    assetData,
-                });
-
-                const selectedAssetEventProperties: AnalyticsEventOptions = {
-                    selectedAssetName: assetName,
-                    selectedAssetData: assetData,
-                };
-                if (selectedAsset.metaData.assetProxyId === AssetProxyId.ERC20) {
-                    selectedAssetEventProperties.selectedAssetDecimals = selectedAsset.metaData.decimals;
-                    selectedAssetEventProperties.selectedAssetSymbol = selectedAsset.metaData.symbol;
-                }
-                analytics.addEventProperties(selectedAssetEventProperties);
-            }
-            break;
-        case ActionTypes.SetAvailableAssets:
-            const availableAssets = curState.availableAssets;
-            if (availableAssets) {
-                analytics.addEventProperties({
-                    numberAvailableAssets: availableAssets.length,
-                });
             }
             break;
         case ActionTypes.OpenStandardSlidingPanel:

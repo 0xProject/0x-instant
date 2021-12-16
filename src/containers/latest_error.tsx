@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 
@@ -11,11 +10,11 @@ import { State } from '../redux/reducer';
 import { ScreenWidths } from '../style/media';
 import { generateOverlayBlack } from '../style/theme';
 import { zIndex } from '../style/z_index';
-import { Asset, DisplayStatus, Omit, SlideAnimationState } from '../types';
+import {  DisplayStatus, Omit, SlideAnimationState, TokenInfo } from '../types';
 import { errorFlasher } from '../util/error_flasher';
 
 interface LatestErrorComponentProps {
-    asset?: Asset;
+    tokenIn?: TokenInfo;
     latestErrorMessage?: string;
     animationState: SlideAnimationState;
     shouldRenderOverlay: boolean;
@@ -49,7 +48,7 @@ const LatestErrorComponent: React.StatelessComponent<LatestErrorComponentProps> 
 export interface LatestErrorProps {}
 interface ConnectedState extends Omit<LatestErrorComponentProps, 'onOverlayClick'> {}
 const mapStateToProps = (state: State, _ownProps: LatestErrorProps): ConnectedState => ({
-    asset: state.selectedAsset,
+    tokenIn: state.selectedTokenIn,
     latestErrorMessage: state.latestErrorMessage,
     animationState: state.latestErrorDisplayStatus === DisplayStatus.Present ? 'slidIn' : 'slidOut',
     shouldRenderOverlay: state.latestErrorDisplayStatus === DisplayStatus.Present,

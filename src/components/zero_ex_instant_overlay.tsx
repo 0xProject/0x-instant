@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { ZeroExInstantContainer } from '../components/zero_ex_instant_container';
 import { MAIN_CONTAINER_DIV_CLASS, OVERLAY_CLOSE_BUTTON_DIV_CLASS, OVERLAY_DIV_CLASS } from '../constants';
+import { ZeroExInstantContainer } from '../containers/zero_ex_instant_container';
 import { ColorOption } from '../style/theme';
 
 import { Container } from './ui/container';
@@ -15,7 +15,7 @@ export interface ZeroExInstantOverlayProps extends ZeroExInstantProviderProps {
     zIndex?: number;
 }
 
-export const ZeroExInstantOverlay: React.StatelessComponent<ZeroExInstantOverlayProps> = props => {
+export const ZeroExInstantOverlay = (props: ZeroExInstantOverlayProps) => {
     const { onClose, zIndex, ...rest } = props;
     return (
         <ZeroExInstantProvider {...rest}>

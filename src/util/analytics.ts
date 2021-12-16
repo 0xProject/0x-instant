@@ -1,16 +1,15 @@
-import { MarketBuySwapQuote } from '@0x/asset-swapper';
 import { ChainId } from '@0x/contract-addresses';
 import { BigNumber } from '@0x/utils';
 
 import { GIT_SHA, HEAP_ENABLED, INSTANT_DISCHARGE_TARGET, NODE_ENV, NPM_PACKAGE_VERSION } from '../constants';
 import {
     AffiliateInfo,
-    Asset,
+    ApproveProcessState,
     BaseCurrency,
     OrderProcessState,
-    OrderSource,
     ProviderState,
     QuoteFetchOrigin,
+    SwapQuoteResponse,
     WalletSuggestion,
 } from '../types';
 
@@ -42,13 +41,14 @@ enum EventNames {
     PaymentMethodOpenedEtherscan = 'Payment Method - Opened Etherscan',
     PaymentMethodCopiedAddress = 'Payment Method - Copied Address',
     BuyNotEnoughEth = 'Buy - Not Enough Eth',
-    BuyStarted = 'Buy - Started',
-    BuySignatureDenied = 'Buy - Signature Denied',
-    BuySimulationFailed = 'Buy - Simulation Failed',
-    BuyUnknownError = 'Buy - Unknown Error',
-    BuyTxSubmitted = 'Buy - Tx Submitted',
-    BuyTxSucceeded = 'Buy - Tx Succeeded',
-    BuyTxFailed = 'Buy - Tx Failed',
+    SwapNotEnoughEth = 'Swap - Not Enough Eth',
+    SwapStarted = 'Swap - Started',
+    SwapSignatureDenied = 'Swap - Signature Denied',
+    SwapSimulationFailed = 'Swap - Simulation Failed',
+    SwapUnknownError = 'Swap - Unknown Error',
+    SwapTxSubmitted = 'Swap - Tx Submitted',
+    SwapTxSucceeded = 'Swap - Tx Succeeded',
+    SwapTxFailed = 'Swap - Tx Failed',
     UsdPriceFetchFailed = 'USD Price - Fetch Failed',
     InstallWalletClicked = 'Install Wallet - Clicked',
     InstallWalletModalOpened = 'Install Wallet - Modal - Opened',
@@ -60,6 +60,7 @@ enum EventNames {
     TokenSelectorChose = 'Token Selector - Chose',
     TokenSelectorSearched = 'Token Selector - Searched',
     TransactionViewed = 'Transaction - Viewed',
+    ApproveTransactionViewed = 'Approve Transaction - Viewed',
     QuoteFetched = 'Quote - Fetched',
     QuoteError = 'Quote - Error',
 }
@@ -81,14 +82,13 @@ function trackingEventFnWithPayload(eventName: EventNames): (eventProperties: Ev
     };
 }
 
-const swapQuoteEventProperties = (swapQuote: MarketBuySwapQuote) => {
-    const makerAssetFillAmount = swapQuote.makerAssetFillAmount.toString();
-    const assetEthAmount = swapQuote.worstCaseQuoteInfo.takerAssetAmount.toString();
-    const feeEthAmount = swapQuote.worstCaseQuoteInfo.protocolFeeInWeiAmount
-        .plus(swapQuote.worstCaseQuoteInfo.feeTakerAssetAmount)
-        .toString();
-    const totalEthAmount = swapQuote.worstCaseQuoteInfo.totalTakerAssetAmount
-        .plus(swapQuote.worstCaseQuoteInfo.protocolFeeInWeiAmount)
+const swapApiQuoteEventProperties = (swapQuote: SwapQuoteResponse) => {
+    const makerAssetFillAmount = swapQuote.sellAmount.toString();
+    const assetEthAmount = swapQuote.buyAmount.toString();
+    const feeEthAmount = swapQuote.estimatedGas.toString();
+
+    const totalEthAmount = new BigNumber(swapQuote.sellAmount)
+        .plus(swapQuote.protocolFee)
         .toString();
     return {
         makerAssetFillAmount,
@@ -128,6 +128,13 @@ export enum TokenSelectorClosedVia {
     ClickedX = 'Clicked X', // tslint:disable-line:enum-naming
     TokenChose = 'Token Chose',
 }
+
+export enum StepSelectorClosedVia {
+    ClickedX = 'Clicked X', // tslint:disable-line:enum-naming
+    ApproveChoose = 'Approve Choose',
+    ReviewChoose = 'Review Choose',
+}
+
 export const analytics = {
     addUserProperties: (properties: AnalyticsUserOptions): void => {
         evaluateIfEnabled(() => {
@@ -141,16 +148,13 @@ export const analytics = {
     },
     generateEventProperties: (
         network: ChainId,
-        orderSource: OrderSource,
         providerState: ProviderState,
         window: Window,
-        selectedAsset?: Asset,
         affiliateInfo?: AffiliateInfo,
         baseCurrency?: BaseCurrency,
     ): AnalyticsEventOptions => {
         const affiliateAddress = affiliateInfo ? affiliateInfo.feeRecipient : 'none';
         const affiliateFeePercent = affiliateInfo ? parseFloat(affiliateInfo.feePercentage.toFixed(4)) : 0;
-        const orderSourceName = typeof orderSource === 'string' ? orderSource : 'provided';
         const eventOptions: AnalyticsEventOptions = {
             embeddedHost: window.location.host,
             embeddedUrl: window.location.href,
@@ -159,11 +163,8 @@ export const analytics = {
             providerDisplayName: providerState.displayName,
             gitSha: GIT_SHA,
             npmVersion: NPM_PACKAGE_VERSION,
-            orderSource: orderSourceName,
             affiliateAddress,
             affiliateFeePercent,
-            selectedAssetName: selectedAsset ? selectedAsset.metaData.name : 'none',
-            selectedAssetData: selectedAsset ? selectedAsset.assetData : 'none',
             instantEnvironment: INSTANT_DISCHARGE_TARGET || `Local ${NODE_ENV}`,
             baseCurrency,
         };
@@ -182,54 +183,57 @@ export const analytics = {
     trackPaymentMethodDropdownOpened: trackingEventFnWithoutPayload(EventNames.PaymentMethodDropdownOpened),
     trackPaymentMethodOpenedEtherscan: trackingEventFnWithoutPayload(EventNames.PaymentMethodOpenedEtherscan),
     trackPaymentMethodCopiedAddress: trackingEventFnWithoutPayload(EventNames.PaymentMethodCopiedAddress),
-    trackBuyNotEnoughEth: (swapQuote: MarketBuySwapQuote) =>
-        trackingEventFnWithPayload(EventNames.BuyNotEnoughEth)(swapQuoteEventProperties(swapQuote)),
-    trackBuyStarted: (swapQuote: MarketBuySwapQuote) =>
-        trackingEventFnWithPayload(EventNames.BuyStarted)(swapQuoteEventProperties(swapQuote)),
-    trackBuySignatureDenied: (swapQuote: MarketBuySwapQuote) =>
-        trackingEventFnWithPayload(EventNames.BuySignatureDenied)(swapQuoteEventProperties(swapQuote)),
-    trackBuySimulationFailed: (swapQuote: MarketBuySwapQuote) =>
-        trackingEventFnWithPayload(EventNames.BuySimulationFailed)(swapQuoteEventProperties(swapQuote)),
-    trackBuyUnknownError: (swapQuote: MarketBuySwapQuote, errorMessage: string) =>
-        trackingEventFnWithPayload(EventNames.BuyUnknownError)({
-            ...swapQuoteEventProperties(swapQuote),
+    trackSwapNotEnoughEth: (swapQuote: SwapQuoteResponse) =>
+        trackingEventFnWithPayload(EventNames.SwapNotEnoughEth)(swapApiQuoteEventProperties(swapQuote)),
+    trackSwapStarted: (swapQuote: SwapQuoteResponse) =>
+        trackingEventFnWithPayload(EventNames.SwapStarted)(swapApiQuoteEventProperties(swapQuote)),
+    trackSwapSignatureDenied: (swapQuote: SwapQuoteResponse) =>
+        trackingEventFnWithPayload(EventNames.SwapSignatureDenied)(swapApiQuoteEventProperties(swapQuote)),
+
+    trackSwapSimulationFailed: (swapQuote: SwapQuoteResponse) =>
+        trackingEventFnWithPayload(EventNames.SwapSimulationFailed)(swapApiQuoteEventProperties(swapQuote)),
+
+    trackSwapUnknownError: (swapQuote: SwapQuoteResponse, errorMessage: string) =>
+        trackingEventFnWithPayload(EventNames.SwapUnknownError)({
+            ...swapApiQuoteEventProperties(swapQuote),
             errorMessage,
         }),
-    trackBuyTxSubmitted: (
-        swapQuote: MarketBuySwapQuote,
-        txHash: string,
-        startTimeUnix: number,
-        expectedEndTimeUnix: number,
-    ) =>
-        trackingEventFnWithPayload(EventNames.BuyTxSubmitted)({
-            ...swapQuoteEventProperties(swapQuote),
-            txHash,
-            expectedTxTimeMs: expectedEndTimeUnix - startTimeUnix,
-        }),
-    trackBuyTxSucceeded: (
-        swapQuote: MarketBuySwapQuote,
-        txHash: string,
-        startTimeUnix: number,
-        expectedEndTimeUnix: number,
-    ) =>
-        trackingEventFnWithPayload(EventNames.BuyTxSucceeded)({
-            ...swapQuoteEventProperties(swapQuote),
-            txHash,
-            expectedTxTimeMs: expectedEndTimeUnix - startTimeUnix,
-            actualTxTimeMs: new Date().getTime() - startTimeUnix,
-        }),
-    trackBuyTxFailed: (
-        swapQuote: MarketBuySwapQuote,
-        txHash: string,
-        startTimeUnix: number,
-        expectedEndTimeUnix: number,
-    ) =>
-        trackingEventFnWithPayload(EventNames.BuyTxFailed)({
-            ...swapQuoteEventProperties(swapQuote),
-            txHash,
-            expectedTxTimeMs: expectedEndTimeUnix - startTimeUnix,
-            actualTxTimeMs: new Date().getTime() - startTimeUnix,
-        }),
+    trackSwapTxSubmitted: (
+            swapQuote: SwapQuoteResponse,
+            txHash: string,
+            startTimeUnix: number,
+            expectedEndTimeUnix: number,
+        ) =>
+            trackingEventFnWithPayload(EventNames.SwapTxSubmitted)({
+                ...swapApiQuoteEventProperties(swapQuote),
+                txHash,
+                expectedTxTimeMs: expectedEndTimeUnix - startTimeUnix,
+            }),
+
+    trackSwapTxSucceeded: (
+            swapQuote: SwapQuoteResponse,
+            txHash: string,
+            startTimeUnix: number,
+            expectedEndTimeUnix: number,
+        ) =>
+            trackingEventFnWithPayload(EventNames.SwapTxSucceeded)({
+                ...swapApiQuoteEventProperties(swapQuote),
+                txHash,
+                expectedTxTimeMs: expectedEndTimeUnix - startTimeUnix,
+                actualTxTimeMs: new Date().getTime() - startTimeUnix,
+            }),
+    trackSwapTxFailed: (
+            swapQuote: SwapQuoteResponse,
+            txHash: string,
+            startTimeUnix: number,
+            expectedEndTimeUnix: number,
+        ) =>
+            trackingEventFnWithPayload(EventNames.SwapTxFailed)({
+                ...swapApiQuoteEventProperties(swapQuote),
+                txHash,
+                expectedTxTimeMs: expectedEndTimeUnix - startTimeUnix,
+                actualTxTimeMs: new Date().getTime() - startTimeUnix,
+            }),
     trackInstallWalletClicked: (walletSuggestion: WalletSuggestion) =>
         trackingEventFnWithPayload(EventNames.InstallWalletClicked)({ walletSuggestion }),
     trackInstallWalletModalClickedExplanation: trackingEventFnWithoutPayload(
@@ -247,9 +251,11 @@ export const analytics = {
         trackingEventFnWithPayload(EventNames.TokenSelectorSearched)({ searchText }),
     trackTransactionViewed: (orderProcesState: OrderProcessState) =>
         trackingEventFnWithPayload(EventNames.TransactionViewed)({ orderState: orderProcesState }),
-    trackQuoteFetched: (swapQuote: MarketBuySwapQuote, fetchOrigin: QuoteFetchOrigin) =>
+    trackApproveTransactionViewed: (approveProcessState: ApproveProcessState) =>
+        trackingEventFnWithPayload(EventNames.ApproveTransactionViewed)({approveState: approveProcessState }),
+    trackApiQuoteFetched: (swapQuote: SwapQuoteResponse, fetchOrigin: QuoteFetchOrigin) =>
         trackingEventFnWithPayload(EventNames.QuoteFetched)({
-            ...swapQuoteEventProperties(swapQuote),
+            ...swapApiQuoteEventProperties(swapQuote),
             fetchOrigin,
         }),
     trackQuoteError: (errorMessage: string, makerAssetFillAmount: BigNumber, fetchOrigin: QuoteFetchOrigin) => {

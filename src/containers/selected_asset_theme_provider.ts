@@ -1,10 +1,8 @@
 import * as _ from 'lodash';
-import * as React from 'react';
 import { connect } from 'react-redux';
 
 import { State } from '../redux/reducer';
 import { Theme, theme as defaultTheme, ThemeProvider } from '../style/theme';
-import { Asset } from '../types';
 
 export interface SelectedAssetThemeProviderProps {}
 
@@ -12,21 +10,16 @@ interface ConnectedState {
     theme: Theme;
 }
 
-const getTheme = (asset?: Asset): Theme => {
-    if (asset !== undefined && asset.metaData.primaryColor !== undefined) {
-        return {
-            ...defaultTheme,
-            primaryColor: asset.metaData.primaryColor,
-        };
-    }
+const getTheme = (): Theme => {
+
     return defaultTheme;
 };
 
 const mapStateToProps = (state: State, _ownProps: SelectedAssetThemeProviderProps): ConnectedState => {
-    const theme = getTheme(state.selectedAsset);
+    const theme = getTheme();
     return { theme };
 };
 
-export const SelectedAssetThemeProvider: React.ComponentClass<SelectedAssetThemeProviderProps> = connect(
+export const SelectedAssetThemeProvider = connect(
     mapStateToProps,
 )(ThemeProvider);

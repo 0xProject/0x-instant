@@ -5,15 +5,13 @@ import { SupportedProvider, ZeroExProvider } from 'ethereum-types';
 import * as Fortmatic from 'fortmatic';
 
 import { FORTMATIC_API_KEY, LOCKED_ACCOUNT, NO_ACCOUNT } from '../constants';
-import { Maybe, OrderSource, ProviderState, ProviderType } from '../types';
+import { Maybe, ProviderState, ProviderType } from '../types';
 import { envUtil } from '../util/env';
 
-import { assetSwapperFactory } from './asset_swapper_factory';
 import { providerFactory } from './provider_factory';
 
 export const providerStateFactory = {
     getInitialProviderState: (
-        orderSource: OrderSource,
         network: ChainId,
         supportedProvider?: SupportedProvider,
         walletDisplayName?: string,
@@ -23,30 +21,23 @@ export const providerStateFactory = {
                 supportedProvider,
             );
             return providerStateFactory.getInitialProviderStateFromProvider(
-                orderSource,
-                network,
                 provider,
                 walletDisplayName,
             );
         }
         const providerStateFromWindowIfExits = providerStateFactory.getInitialProviderStateFromWindowIfExists(
-            orderSource,
-            network,
             walletDisplayName,
         );
         if (providerStateFromWindowIfExits) {
             return providerStateFromWindowIfExits;
         } else {
             return providerStateFactory.getInitialProviderStateFallback(
-                orderSource,
                 network,
                 walletDisplayName,
             );
         }
     },
     getInitialProviderStateFromProvider: (
-        orderSource: OrderSource,
-        chainId: ChainId,
         provider: ZeroExProvider,
         walletDisplayName?: string,
     ): ProviderState => {
@@ -56,24 +47,12 @@ export const providerStateFactory = {
                 walletDisplayName || envUtil.getProviderDisplayName(provider),
             provider,
             web3Wrapper: new Web3Wrapper(provider),
-            swapQuoter: assetSwapperFactory.getSwapQuoter(
-                provider,
-                orderSource,
-                chainId,
-            ),
-            swapQuoteConsumer: assetSwapperFactory.getSwapQuoteConsumer(
-                provider,
-                chainId,
-            ),
             account: LOCKED_ACCOUNT,
-            orderSource,
             isProviderInjected: false,
         };
         return providerState;
     },
     getInitialProviderStateFromWindowIfExists: (
-        orderSource: OrderSource,
-        chainId: ChainId,
         walletDisplayName?: string,
     ): Maybe<ProviderState> => {
         const injectedProviderIfExists = providerFactory.getInjectedProviderIfExists();
@@ -85,17 +64,7 @@ export const providerStateFactory = {
                     envUtil.getProviderDisplayName(injectedProviderIfExists),
                 provider: injectedProviderIfExists,
                 web3Wrapper: new Web3Wrapper(injectedProviderIfExists),
-                swapQuoter: assetSwapperFactory.getSwapQuoter(
-                    injectedProviderIfExists,
-                    orderSource,
-                    chainId,
-                ),
-                swapQuoteConsumer: assetSwapperFactory.getSwapQuoteConsumer(
-                    injectedProviderIfExists,
-                    chainId,
-                ),
                 account: LOCKED_ACCOUNT,
-                orderSource,
                 isProviderInjected: true,
             };
             return providerState;
@@ -104,7 +73,6 @@ export const providerStateFactory = {
         }
     },
     getInitialProviderStateFallback: (
-        orderSource: OrderSource,
         network: ChainId,
         walletDisplayName?: string,
     ): ProviderState => {
@@ -115,17 +83,7 @@ export const providerStateFactory = {
                 walletDisplayName || envUtil.getProviderDisplayName(provider),
             provider,
             web3Wrapper: new Web3Wrapper(provider),
-            swapQuoter: assetSwapperFactory.getSwapQuoter(
-                provider,
-                orderSource,
-                network,
-            ),
-            swapQuoteConsumer: assetSwapperFactory.getSwapQuoteConsumer(
-                provider,
-                network,
-            ),
             account: NO_ACCOUNT,
-            orderSource,
             isProviderInjected: true,
         };
         return providerState;
@@ -133,31 +91,27 @@ export const providerStateFactory = {
     // function to call getInitialProviderState with parameters retreived from a provided ProviderState
     getInitialProviderStateWithCurrentProviderState: (
         currentProviderState: ProviderState,
+        chainId: ChainId,
     ): ProviderState => {
-        const orderSource = currentProviderState.orderSource;
-        const chainId = currentProviderState.swapQuoter.chainId;
         // If provider is provided to instant, use that and the displayName
         if (!currentProviderState.isProviderInjected) {
             return providerStateFactory.getInitialProviderState(
-                orderSource,
                 chainId,
                 currentProviderState.provider,
                 currentProviderState.displayName,
             );
         }
         const newProviderState = providerStateFactory.getInitialProviderState(
-            orderSource,
             chainId,
         );
         newProviderState.account = LOCKED_ACCOUNT;
         return newProviderState;
     },
     getProviderStateBasedOnProviderType: (
-        currentProviderState: ProviderState,
         providerType: ProviderType,
+        chainId: ChainId,
     ): ProviderState => {
-        const chainId = currentProviderState.swapQuoter.chainId;
-        const orderSource = currentProviderState.orderSource;
+
         // Returns current provider if the provider type selected is not found
         if (providerType === ProviderType.MetaMask) {
             const provider = providerFactory.getInjectedProviderIfExists();
@@ -167,17 +121,7 @@ export const providerStateFactory = {
                     name: envUtil.getProviderName(provider),
                     provider,
                     web3Wrapper: new Web3Wrapper(provider),
-                    swapQuoter: assetSwapperFactory.getSwapQuoter(
-                        provider,
-                        orderSource,
-                        chainId,
-                    ),
-                    swapQuoteConsumer: assetSwapperFactory.getSwapQuoteConsumer(
-                        provider,
-                        chainId,
-                    ),
                     account: LOCKED_ACCOUNT,
-                    orderSource,
                     isProviderInjected: true,
                 };
             }
@@ -190,22 +134,11 @@ export const providerStateFactory = {
                 name: envUtil.getProviderName(fmProvider),
                 provider: fmProvider,
                 web3Wrapper: new Web3Wrapper(fmProvider),
-                swapQuoter: assetSwapperFactory.getSwapQuoter(
-                    fmProvider,
-                    orderSource,
-                    chainId,
-                ),
-                swapQuoteConsumer: assetSwapperFactory.getSwapQuoteConsumer(
-                    fmProvider,
-                    chainId,
-                ),
                 account: LOCKED_ACCOUNT,
-                orderSource,
                 isProviderInjected: true,
             };
         }
         return providerStateFactory.getInitialProviderState(
-            orderSource,
             chainId,
         );
     },

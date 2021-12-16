@@ -6,7 +6,7 @@ import { Button } from './ui/button';
 import { Container } from './ui/container';
 import { Spinner } from './ui/spinner';
 
-export const PlacingOrderButton: React.StatelessComponent<{}> = props => (
+export const PlacingOrderButton = () => (
     <Button isDisabled={true} width="100%" fontColor={ColorOption.white}>
         <Container display="inline-block" position="relative" top="3px" marginRight="8px">
             <Spinner widthPx={16} heightPx={16} />

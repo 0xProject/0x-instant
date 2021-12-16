@@ -2,7 +2,7 @@
 
 ## Integration
 
-Looking to integrate 0x Instant into your web application or site? Check out the dedicated [instant documentation](https://0x.org/docs/guides/integrate-instant#ui-integration) to get started. The documentation covers instant and related topics in depth. For a more "drag and drop" experience, check out our [configurator tool](https://0x.org/instant#configure). For on demand developer support, join our [Discord](https://discordapp.com/invite/d3FTX3M).
+Looking to integrate 0x Instant into your web application or site? Check out the dedicated [instant documentation](docs/integrate-instant.mdx) to get started. The documentation covers instant and related topics in depth. For a more "drag and drop" experience, check out our [configurator tool](https://0x.org/instant#configure). For on demand developer support, join our [Discord](https://discordapp.com/invite/d3FTX3M).
 
 Check out a live sample integration [here](https://www.rexrelay.com/instant).
 
@@ -65,13 +65,8 @@ Please read our [contribution guidelines](../../CONTRIBUTING.md) before getting 
 
 ### Install dependencies
 
-If you don't have yarn workspaces enabled (Yarn < v1.0) - enable them:
 
-```bash
-yarn config set workspaces-experimental true
-```
-
-Then install dependencies
+Install dependencies
 
 ```bash
 yarn install
@@ -79,16 +74,16 @@ yarn install
 
 ### Build
 
-To build this package and all other monorepo packages that it depends on, run the following from the monorepo root directory:
+To build this package:
 
 ```bash
-PKG=@0x/instant yarn build
+yarn build
 ```
 
 Or continuously rebuild on change:
 
 ```bash
-PKG=@0x/instant yarn watch
+yarn watch
 ```
 
 ### Clean

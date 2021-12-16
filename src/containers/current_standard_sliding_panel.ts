@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 
@@ -25,7 +24,7 @@ const mapDispatchToProps = (
     onClose: () => dispatch(actions.closeStandardSlidingPanel()),
 });
 
-export const CurrentStandardSlidingPanel: React.ComponentClass<CurrentStandardSlidingPanelProps> = connect(
+export const CurrentStandardSlidingPanel = connect(
     mapStateToProps,
     mapDispatchToProps,
 )(StandardSlidingPanel);

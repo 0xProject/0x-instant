@@ -2,10 +2,9 @@ import { BigNumber } from '@0x/utils';
 import * as _ from 'lodash';
 import * as React from 'react';
 
-import { Maybe } from '../types';
-
 import { GIT_SHA, MAGIC_TRIGGER_ERROR_INPUT, MAGIC_TRIGGER_ERROR_MESSAGE, NPM_PACKAGE_VERSION } from '../constants';
 import { ColorOption } from '../style/theme';
+import { Maybe } from '../types';
 import { maybeBigNumberUtil } from '../util/maybe_big_number';
 import { util } from '../util/util';
 
@@ -42,7 +41,6 @@ export class ScalingAmountInput extends React.PureComponent<ScalingAmountInputPr
     public componentDidUpdate(): void {
         const parsedStateValue = stringToMaybeBigNumber(this.state.stringValue);
         const currentValue = this.props.value;
-
         if (!areMaybeBigNumbersEqual(parsedStateValue, currentValue)) {
             // we somehow got into the state in which the value passed in and the string value
             // in state have differed, reset state

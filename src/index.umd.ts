@@ -1,11 +1,9 @@
-import { BigNumber, SwapQuoter } from '@0x/asset-swapper';
-import { ChainId } from '@0x/contract-addresses';
-import { AssetProxyId } from '@0x/types';
+
 import { providerUtils } from '@0x/utils';
-import { SupportedProvider } from 'ethereum-types';
 import * as _ from 'lodash';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import 'regenerator-runtime/runtime.js';
 
 import {
     DEFAULT_ZERO_EX_CONTAINER_SELECTOR,
@@ -14,14 +12,9 @@ import {
     INJECTED_DIV_ID,
     NPM_PACKAGE_VERSION,
 } from './constants';
-import { assetMetaDataMap } from './data/asset_meta_data_map';
 import { ZeroExInstantOverlay, ZeroExInstantOverlayProps } from './index';
-import { OrderSource } from './types';
 import { analytics } from './util/analytics';
 import { assert } from './util/assert';
-import { assetDataEncoder } from './util/asset_data_encoder';
-import { orderCoercionUtil } from './util/order_coercion';
-import { providerFactory } from './util/provider_factory';
 import { util } from './util/util';
 
 const isInstantRendered = (): boolean =>
@@ -31,31 +24,33 @@ const validateInstantRenderConfig = (
     config: ZeroExInstantConfig,
     selector: string,
 ) => {
-    assert.isValidOrderSource('orderSource', config.orderSource);
-    if (config.defaultSelectedAssetData !== undefined) {
-        assert.isHexString(
-            'defaultSelectedAssetData',
-            config.defaultSelectedAssetData,
+
+    if (config.defaultSelectedTokenIn !== undefined) {
+        assert.isTokenInfo(
+            'defaultSelectedTokenIn',
+            config.defaultSelectedTokenIn,
         );
     }
-    if (config.additionalAssetMetaDataMap !== undefined) {
-        assert.isValidAssetMetaDataMap(
-            'additionalAssetMetaDataMap',
-            config.additionalAssetMetaDataMap,
+
+    if (config.defaultSelectedTokenOut !== undefined) {
+        assert.isTokenInfo(
+            'defaultSelectedTokenOut',
+            config.defaultSelectedTokenOut,
         );
     }
-    if (config.defaultAssetBuyAmount !== undefined) {
-        assert.isNumber('defaultAssetBuyAmount', config.defaultAssetBuyAmount);
+
+    if (config.defaultAmountTokenIn !== undefined) {
+        assert.isNumber('defaultAmountTokenIn', config.defaultAmountTokenIn);
     }
-    if (config.networkId !== undefined) {
-        assert.isNumber('networkId', config.networkId);
+
+    if (config.defaultAmountTokenOut !== undefined) {
+        assert.isNumber('defaultAmountTokenOut', config.defaultAmountTokenOut);
     }
-    if (config.availableAssetDatas !== undefined) {
-        assert.areValidAssetDatas(
-            'availableAssetDatas',
-            config.availableAssetDatas,
-        );
+
+    if (config.chainId !== undefined) {
+        assert.isNumber('chainId', config.chainId);
     }
+
     if (config.onClose !== undefined) {
         assert.isFunction('onClose', config.onClose);
     }
@@ -71,6 +66,11 @@ const validateInstantRenderConfig = (
     if (config.walletDisplayName !== undefined) {
         assert.isString('walletDisplayName', config.walletDisplayName);
     }
+
+    if (config.tokenList !== undefined) {
+        assert.isWebUri('tokenList', config.tokenList);
+    }
+
     if (config.shouldDisablePushToHistory !== undefined) {
         assert.isBoolean(
             'shouldDisablePushToHistory',
@@ -106,7 +106,7 @@ const renderInstant = (config: ZeroExInstantConfig, selector: string) => {
         appendToIfExists !== null,
         `Could not find div with selector: ${selector}`,
     );
-    parentElement = appendToIfExists as Element;
+    parentElement = appendToIfExists;
     injectedDiv = document.createElement('div');
     injectedDiv.setAttribute('id', INJECTED_DIV_ID);
     injectedDiv.setAttribute('class', INJECTED_DIV_CLASS);
@@ -142,13 +142,7 @@ export const render = (
     selector: string = DEFAULT_ZERO_EX_CONTAINER_SELECTOR,
 ) => {
     // Coerces BigNumber provided in config to version utilized by 0x packages
-    const coercedConfig = _.assign({}, config, {
-        orderSource: _.isArray(config.orderSource)
-            ? orderCoercionUtil.coerceOrderArrayFieldsToBigNumber(
-                  config.orderSource,
-              )
-            : config.orderSource,
-    });
+    const coercedConfig = config;
 
     validateInstantRenderConfig(coercedConfig, selector);
 
@@ -186,77 +180,6 @@ export const render = (
         }
     };
     window.onpopstate = onPopStateHandler;
-};
-
-export const ERC721_PROXY_ID = AssetProxyId.ERC721;
-
-export const ERC20_PROXY_ID = AssetProxyId.ERC20;
-
-export const assetDataForERC20TokenAddress = (tokenAddress: string): string => {
-    assert.isETHAddressHex('tokenAddress', tokenAddress);
-    return assetDataEncoder
-        .ERC20Token(tokenAddress)
-        .getABIEncodedTransactionData();
-};
-
-export const assetDataForERC721TokenAddress = (
-    tokenAddress: string,
-    tokenId: string | number,
-): string => {
-    assert.isETHAddressHex('tokenAddress', tokenAddress);
-    return assetDataEncoder
-        .ERC721Token(tokenAddress, new BigNumber(tokenId))
-        .getABIEncodedTransactionData();
-};
-
-export const hasMetaDataForAssetData = (assetData: string): boolean => {
-    assert.isHexString('assetData', assetData);
-    return assetMetaDataMap[assetData] !== undefined;
-};
-
-export const hasLiquidityForAssetDataAsync = async (
-    takerAssetData: string,
-    orderSource: OrderSource,
-    chainId: ChainId = ChainId.Mainnet,
-    supportedProvider?: SupportedProvider,
-): Promise<boolean> => {
-    assert.isHexString('takerAssetData', takerAssetData);
-    assert.isValidOrderSource('orderSource', orderSource);
-    assert.isNumber('chainId', chainId);
-
-    let provider = supportedProvider;
-    if (provider !== undefined) {
-        provider = providerUtils.standardizeOrThrow(provider);
-    }
-
-    const bestProvider: SupportedProvider =
-        provider ||
-        providerUtils.standardizeOrThrow(
-            providerFactory.getFallbackNoSigningProvider(
-                chainId,
-            ) as SupportedProvider,
-        );
-
-    const swapQuoterOptions = { chainId };
-
-    const swapQuoter = _.isString(orderSource)
-        ? SwapQuoter.getSwapQuoterForStandardRelayerAPIUrl(
-              bestProvider,
-              orderSource,
-              swapQuoterOptions,
-          )
-        : SwapQuoter.getSwapQuoterForProvidedOrders(
-              bestProvider,
-              orderSource,
-              swapQuoterOptions,
-          );
-
-    const wethAssetData = await swapQuoter.getEtherTokenAssetDataOrThrowAsync();
-    const liquidity = await swapQuoter.getLiquidityForMakerTakerAssetDataPairAsync(
-        wethAssetData,
-        takerAssetData,
-    );
-    return liquidity.makerAssetAvailableInBaseUnits.gt(new BigNumber(0));
 };
 
 // Write version info to the exported object for debugging
