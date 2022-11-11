@@ -30,7 +30,11 @@ The package is available as a UMD module named zeroExInstant at https://instant.
 
 ## Deploying
 
-To run any of the following commands you need to configure your `.env` file. There is an example `.env_example` file to show you what values are required.
+You can deploy this [instance built by DexKit](https://github.com/DexKit/0x-instant-instance) following this link
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FDexKit%2F0x-instant-instance)
+
+Alternatively, you can run any of the following commands you need to configure your `.env` file. There is an example `.env_example` file to show you what values are required.
 
 You can deploy a work-in-progress version of 0x Instant at http://0x-instant-dogfood.s3-website-us-east-1.amazonaws.com/instant.js for easy sharing.
 
