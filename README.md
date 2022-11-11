@@ -2,29 +2,30 @@
 
 ## Integration
 
-Looking to integrate 0x Instant into your web application or site? Check out the dedicated [instant documentation](docs/integrate-instant.mdx) to get started. The documentation covers instant and related topics in depth. For a more "drag and drop" experience, check out our [configurator tool](https://0x.org/instant#configure). For on demand developer support, join our [Discord](https://discordapp.com/invite/d3FTX3M).
+Looking to integrate 0x Instant into your web application or site? Check out the dedicated [instant documentation](docs/integrate-instant.mdx) to get started. The documentation covers instant and related topics in depth. For on demand developer support, join our [Discord](https://discordapp.com/invite/d3FTX3M).
 
-Check out a live sample integration [here](https://www.rexrelay.com/instant).
+Check out a live sample integration [here](https://0x-instant-instance.vercel.app/).
 
 ## Installation
 
-The package is available as a UMD module named `zeroExInstant` at https://instant.0x.org/instant.js.
+The package is available as a UMD module named zeroExInstant at https://instant.0x.org/v4/instant.js or https://dexkit-storage.nyc3.digitaloceanspaces.com/zrx/v4/instant.js.
 
 ```html
-<head>
-    <script type="text/javascript" src="https://instant.0x.org/instant.js" charset="utf-8"></script>
-</head>
-<body>
-    <div id="zeroExInstantContainer"></div>
-    <script>
-        zeroExInstant.render(
-            {
-                // Initialization options
-            },
-            '#zeroExInstantContainer',
-        );
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <script src="https://dexkit-storage.nyc3.digitaloceanspaces.com/zrx/v4/instant.js"></script>
+  </head>
+  <body>
+    <script type="text/javascript">
+      function renderZeroExInstant() {
+        zeroExInstant.render({}, "body");
+      }
     </script>
-</body>
+    <button onClick="renderZeroExInstant()">Hello World</button>
+  </body>
+</html>
 ```
 
 ## Deploying
